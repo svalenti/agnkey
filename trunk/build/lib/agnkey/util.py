@@ -3,37 +3,31 @@
 #
 import socket
 host = socket.gethostname()
-if host not in ['svalenti-lcogt.att.net']:
+if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
+   realpass='configure'
 else:
-   workingdirectory='/AGNECHO/AGNKEY/'
-   execdirectory='/home/cv21/bin/'
+   workingdirectory='/Users/svalenti/redu2/AGNKEY/'
+   execdirectory='/Users/svalenti/bin/'
    rawdata='/archive/engineering/'
+   realpass='configure'
 
-#  rawdata not needed for agnkey since we will download from ipac
-#proposal=['LCOELP-001','DDTLCO-009','STANET-001']            #   proposals
-#users=['stefano_valenti','stefano_valenti','stefano_valenti']     #   passwd for trigger
+####################################################
+def readpasswd(directory,_file):
+    from numpy import genfromtxt
+    data=genfromtxt(directory+_file,str)
+    gg={}
+    for i in data:
+        try:
+            gg[i[0]]=eval(i[1])
+        except:
+            gg[i[0]]=i[1]
+    return gg
 
-##################EDITED CV####################################
-proposal=['KEY2014A-002','CON2014A-007','STANET-001'] #,'LCOELP-001']            #   proposals
-#users=['cvillforth','cvillforth'] #,'stefano_valenti']     #   passwd for trigger
-users=['stefano_valenti','stefano_valenti','stefano_valenti'] #,'stefano_valenti']     #   passwd for trigger
+readpass=readpasswd(workingdirectory,realpass)
 
-##
-superusers=['SV','KH','CV','dsand','agnkey']
-# 
-# IPAC user and passwd
-ipacuser='cv21@st-andrews.ac.uk'
-ipacpasswd='ngc5548'
-odinpasswd='eIgheeK_'
-
-# 
-#
-#
-#  one more change should be done in agnsqldef.py 
-#  to point to the mysql database
 #################################################################
 try:     
    import agnkey
@@ -860,7 +854,6 @@ def sendtrigger(_name,_ra,_dec,_site,_exp,_nexp,_filters,_airmass,_utstart,_uten
     req.add_window(window1)
     
     fildic={'1m0':{'U':'U','B':'B','V':'V','R':'R','I':'I','u':'up','g':'gp','r':'rp','i':'ip','z':'zs','up':'up','gp':'gp','rp':'rp','ip':'ip','zs':'zs'}}
-
     n  = len(_filters)
     for f in range(n):
        if _filters[f] in fildic['1m0'].keys():

@@ -19,7 +19,7 @@ import agnkey
 
 ####################################################################################
 #    sss='<form style="background-color:orange" action="http://secure.lcogt.net/user/supernova/dev/cgi-bin/updatetable.py" enctype="multipart/form-data" method="post">'+\
-def trigger(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.proposal):
+def trigger(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
     sss='<form style="background-color:orange" action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
         '<p> <h3 style="background-color:orange"> TRIGER NEW OBSERVATION (use carefully)  <input type="submit" value="Send"> </h3></p>'+\
         '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\
@@ -99,7 +99,7 @@ def trigger(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.
     return sss
 
 ######################################################################################################
-def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnkey.util.proposal):
+def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
     sss='<form style="background-color:#D8D8D8 " action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
         '<p> <h3 style="background-color:#D8D8D8 "> TRIGER NEW OBSERVATION WITH FLOYDS(use carefully)  <input type="submit" value="Send"> </h3></p>'+\
         '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\

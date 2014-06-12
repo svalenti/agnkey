@@ -1,22 +1,15 @@
 import numpy as np
 #import socket
 #host = socket.gethostname()
-#################################################################
-
-def getconnection(site):
-#   import socket
-#   host = socket.gethostname()
-#   if host not in ['svalenti-lcogt.att.net']:
-#      hostname='localhost'
-#   else:
-#      hostname='deneb.st-and.ac.uk'
-   hostname='localhost'
-   connection={'lcogt':{'passwd':'ngc5548','username':'cvillforth','hostname':'db01sba.lco.gtn','database':'xxx'},\
-                  #                           CHANGE THIS LINE WITH THE INFO ON THE NEW DATABASE
-               'agnkey':{'passwd':'}Boreray{','username':'cv21','hostname':hostname,'database':'lcogt'}}
-   return  connection[site]['hostname'],connection[site]['username'],connection[site]['passwd'],connection[site]['database']
 
 ####################################################
+
+def getconnection(site):
+   connection={#        CHANGE THIS LINE WITH THE INFO ON THE NEW DATABASE
+               'agnkey':{'username':'cv21','hostname':'localhost','database':'lcogt'}}
+   connection[site]['passwd']=agnkey.util.readpass['mysqlpasswd']
+   return  connection[site]['hostname'],connection[site]['username'],connection[site]['passwd'],connection[site]['database']
+
 
 def dbConnect(lhost, luser, lpasswd, ldb):
    import sys

@@ -4,6 +4,13 @@ import numpy as np
 
 ####################################################
 
+def getconnection(site):
+   connection={#        CHANGE THIS LINE WITH THE INFO ON THE NEW DATABASE
+               'agnkey':{'username':'cv21','hostname':'localhost','database':'lcogt'}}
+   connection[site]['passwd']=agnkey.util.readpass['mysqlpasswd']
+   return  connection[site]['hostname'],connection[site]['username'],connection[site]['passwd'],connection[site]['database']
+
+
 def dbConnect(lhost, luser, lpasswd, ldb):
    import sys
    import MySQLdb,os,string

@@ -3,14 +3,44 @@
 #
 import socket
 host = socket.gethostname()
-if host not in ['svalenti-lcogt.att.net']:
+if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
+   realpass='configure'
 else:
-   workingdirectory='/AGNECHO/AGNKEY/'
-   execdirectory='/home/cv21/bin/'
+   workingdirectory='/Users/svalenti/redu2/AGNKEY/'
+   execdirectory='/Users/svalenti/bin/'
    rawdata='/archive/engineering/'
+   realpass='configure'
+
+###################################################
+#
+#  configure is the file where all the passwd are stored locally:
+#  
+#  users        ['xxx','xxxx','xxx']
+#  proposal     ['xxx','xxxx','xxx']
+#  superusers   ['xx','xx','xx','xxx','xx']
+#  ipacuser     xxxx
+#  ipacpasswd   xxxx
+#  odinpasswd   xxxx
+#  mysqlpasswd  xxxx
+#
+#
+#
+####################################################
+def readpasswd(directory,_file):
+    from numpy import genfromtxt
+    data=genfromtxt(directory+_file,str)
+    gg={}
+    for i in data:
+        try:
+            gg[i[0]]=eval(i[1])
+        except:
+            gg[i[0]]=i[1]
+    return gg
+
+readpass=readpasswd(workingdirectory,realpass)
 
 #################################################################
 try:     
