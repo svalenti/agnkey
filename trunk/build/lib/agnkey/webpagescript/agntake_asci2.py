@@ -1,39 +1,34 @@
-#!/usr/bin/env python    
+#!/usr/bin/env python
+
 import sys,os,cgi,string,glob
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
-from numpy import array
+from scipy import array
 import scipy
 import pyfits,os,glob
-os.environ['HOME']='../tmp/'
-import matplotlib
-#matplotlib.use('Agg')
-import numpy as np
-from pylab import *
 
 form = cgi.FieldStorage()
 SN = form.getlist('SN')
+spettro = form.getlist('nomespettro')
 directory = form.getlist('directory')
-
-if not SN:
-    SN=['nttPSN013615_fts_20130808_merge_2.0_56513_1_e.fits']
-    directory=['../data/WEB/floyds/20130808_fts/']
-
-print "Content-Type: text/html\n"
-print '<html><body>'
+#asa = '../QUBA/spectra/'
+#fi=str(asa[0])+str(SN[0])+'/'+str(spettro[0])
 
 fi=str(directory[0])+str(SN[0])
 
+#jd = fi[fi.rindex(SN[0]):]
 spec = pyfits.open(fi)
 head = spec[0].header
+
+
 graf=1
       
 if spec[0].data.ndim == 1: fl = spec[0].data
@@ -59,22 +54,21 @@ except:
     except:
         graf=0
 
+spettro2=string.split(spettro[0],'.fits')[0]
 
-if graf:
-   massimo=np.sort(fl)[len(fl)-len(fl)/10]
-   minimo=np.sort(fl)[len(fl)/10]
-   delta=(massimo-minimo)/10   
-   fileoutput='../tmp/pippo.png'
-   titlin=SN[0]
-   xlabel('Angstrom')
-   ylabel('Flux')
-   title(' '+str(titlin)+'')
-   plot(lam,fl)
-   ylim(minimo-4*delta,massimo+5*delta)
-   savefig(fileoutput, format='png')
+os.system('rm -rf ../tmp/*.asci')
+ff = file('../tmp/'+spettro2+'.asci','w')
+for i in range(len(lam)):
+    ff.write('%10.10g\t%10.10g\n' % (lam[i],fl[i]))
+ff.close()
+os.system('chmod 777 ../tmp/'+spettro2+'.asci')
 
-if graf:
-   print '<img src="'+fileoutput+'" alt="" height="500" width="800">'
+
+print "Content-Type: text/html\n"
+print '<html><body>'
+if graf==1:
+      print '<h4> The asci file has been created correctly <h4>'
+      print '<h4> <a href="../tmp/'+spettro2+'.asci"><b>&bull;</b> asci file</a></h4>'
 else:
-    print '<h2> ERROR: problem to read the fits </h2>'
+         print '<h4> Problem with the lambda calibration header <h4>'
 print '</body></html>'

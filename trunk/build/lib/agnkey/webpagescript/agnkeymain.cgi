@@ -1,25 +1,27 @@
-#!/usr/bin/python                                                                                                                                                                                           
+#!/usr/bin/env python                                                                                                                                                                                           
 import sys,os,cgi,string,glob
+from socket import gethostname, gethostbyname,gethostname
+
+ip = gethostbyname(gethostname())
+import urllib,urllib2
+hostname=gethostname()
+
+#print "Content-Type: text/html\n"
+#print '<html><body>'
+#print hostname
+#print '</html></body>'
+
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
 
 os.environ['HOME']='../tmp/'
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-
 import agnkey
-#os.environ['HOME']=agnkey.util.workingdirectory+'tmp/'                                                                                                                                                     
-from socket import gethostname, gethostbyname,gethostname
-ip = gethostbyname(gethostname())
-import urllib,urllib2
 from numpy import argsort,take,abs
 import datetime,pyfits,re
 
-#import agndefin
-
-hostname=gethostname()
-#if hostname=='engs-MacBook-Pro-4.local':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#else:
-#    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"  
 base_url=hostname
 
 def searchobj1():
@@ -69,8 +71,6 @@ def expandpermissions2(groupid):
 _user=os.getenv("REMOTE_USER")
 #if not _user:  _user='agnkey'
 
-#body='''<div align="left"><span style="color: #1030aa; font-size: x-large;"> AGN KEY PROJECT <p> Search for archive information</span></div><br></br><form action="agnkeyview.cgi" method="post"> </br></br><table border="0"><tr> <td> AGN name  </td>  </tr><tr> <td colspan=2><input name="sn_name" size="30" maxlength="30" type="text" /></td><td></td><td></td><td><input value="search" type="submit" /></td></tr><tr><td> R.A. </td> <td>DEC </td> <td> </td></tr>'''
-#body=body+'''<tr><td><input name="SN_RA" size="12" maxlength="12" type="text"  placeholder="00:00:00.000"/></td><td><input name="SN_DEC" size="13" maxlength="13" type="text" placeholder="+00:00:00.000"/></td></tr>'''
 #print "Content-Type: text/html\n"
 #print '<html><body>'
 #print hostname

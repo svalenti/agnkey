@@ -1,9 +1,18 @@
-#!/usr/bin/python                                                                                                                                                                                                                    
+#!/usr/bin/env python                                                                                                                                                                                                                    
 import sys,os,cgi,string,glob
-os.environ['HOME']='../tmp/'
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-import agnkey
+from socket import gethostname, gethostbyname,gethostname
 
+ip = gethostbyname(gethostname())
+import urllib,urllib2
+hostname=gethostname()
+
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
+
+os.environ['HOME']='../tmp/'
+import agnkey
 form = cgi.FieldStorage()
 name= cgi
 _targid = form.getlist('targid')
