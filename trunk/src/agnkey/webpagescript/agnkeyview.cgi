@@ -1,15 +1,21 @@
-#!/usr/bin/python                                                                                                                                                                                          
+#!/usr/bin/env python                      
+
 import sys,os,cgi,string,glob
 os.environ['HOME']='../tmp/'
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-import agnkey
 
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
+hostname=gethostname()
+
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
+
+import agnkey
 from numpy import argsort,take,abs
 import datetime,pyfits,re
-import agnkey
 from numpy import sort,asarray,array,genfromtxt
 import StringIO
 import base64
@@ -298,7 +304,7 @@ def run_getmag(imglist,_field,_output='',_bin=1e-10,magtype='mag',_ft=1,logs='')
 ########################################################################################
 
 def ascifile(snfile,supernova,directory):
-    pippo="""<form method="post" action="take_asci2.py" >
+    pippo="""<form method="post" action="agntake_asci2.py" >
     <input type="hidden" name='nomespettro' value='"""+snfile+"""'><font color="#000000" size="1"></font>
     <input type="hidden" name='SN' value='"""+supernova+"""'><font color="#000000" size="1"></font>
     <input type="hidden" name='directory' value='"""+directory+"""'><font color="#000000" size="1"></font>
@@ -306,7 +312,7 @@ def ascifile(snfile,supernova,directory):
     return pippo
 
 def fastspec(snfile,supernova,directory):
-    pippo="""<form method="post" action="fast_plot2.py" >
+    pippo="""<form method="post" action="agnfast_plot2.py" >
     <input type="hidden" name='nomespettro' value='"""+snfile+"""'><font color="#000000" size="1"></font>	
     <input type="hidden" name='SN' value='"""+supernova+"""'><font color="#000000" size="1"></font>
     <input type="hidden" name='directory' value='"""+directory+"""'><font color="#000000" size="1"></font>
@@ -377,7 +383,7 @@ if len(SN)==0 and len(SN_RA)==0 and len(SN_DEC)==0:
 #####################################################
 if not SN_RA and not SN_DEC:     #  try to get coordinate from name
     if SN0:
-        listac=agnkey.agnsqldef.getlike(agnkey.util.conn, 'recobjects', 'name',SN0,'targid,name')
+        listac=agnkey.agnsqldef.getlike(agnkey.agnsqldef.conn, 'recobjects', 'name',SN0,'targid,name')
         allobj=''
         alltarg=[]
         for i in listac: 
@@ -390,7 +396,7 @@ if not SN_RA and not SN_DEC:     #  try to get coordinate from name
             page='<h3> warning too many objects with these name </h3>'
             _targid=''
         else:
-           lista2=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,'lsc_sn_pos','targid',str(int(listac[0]['targid'])),'ra_sn,dec_sn,targid,name')
+           lista2=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,'lsc_sn_pos','targid',str(int(listac[0]['targid'])),'ra_sn,dec_sn,targid,name')
            _targid=listac[0]['targid']
            SN_RA=lista2[0]['ra_sn']
            SN_DEC=lista2[0]['dec_sn']
@@ -429,7 +435,7 @@ if (SN_RA and SN_DEC) and not _targid:     #  try to get name from coordinate
             if '-' in d0:   SN_DEC=float(abs(float(d0)))+(float(d1)/60.)+(float(d2)/3600.)*(-1)
             else:           SN_DEC=float(abs(float(d0)))+(float(d1)/60.)+(float(d2)/3600.)
         else: SN_DEC=float(SN_DEC)
-    aa=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, 'lsc_sn_pos', SN_RA, SN_DEC,.01)
+    aa=agnkey.agnsqldef.getfromcoordinate(agnkey.agnsqldef.conn, 'lsc_sn_pos', SN_RA, SN_DEC,.01)
     if len(aa)>=1:
         SN0,_targid=aa[0]['name'],aa[0]['targid']
     else:
@@ -705,7 +711,7 @@ if ll22e:
       fspec=fastspec(name,name,directory)
       fitsfile='<a href="'+directory2+ll22e['namefile'][i]+'"> fitsfile</a>'
       ascifil=ascifile(name,name,directory)
-      if _user in agnkey.util.superusers:
+      if _user in agnkey.util.readpass['superusers']:
          deletespectrum=agnkey.agndefin.delspectrum(SN0,SN_RA,SN_DEC,_targid,ll22e['id'][i],ll22e['namefile'][i],_user,'agnkeyview.cgi')
       else:
          deletespectrum=''
@@ -781,7 +787,7 @@ log1=[]
 ss,dd=[],[]
 bb=''
 if _targid:
-    lista2=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,'obslog','targid',str(_targid),'windowstart,windowend')
+    lista2=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,'obslog','targid',str(_targid),'windowstart,windowend')
     if len(lista2)>0:
         log1={}
         for jj in lista2[0].keys(): log1[jj]=[]
@@ -890,7 +896,7 @@ print '<tr align="center" BGCOLOR="#CCFF66"> <td width=100 > <h3> '+str('AGN NAM
       '<td width=100> <h3>type </h3></td>'+\
       ' <td  align="center" width=100 > <h3>     aka </h3></td> </tr>'
 if listar1:
-  if _user in agnkey.util.superusers:
+  if _user in agnkey.util.readpass['superusers']:
     print '<tr BGCOLOR="#CCFF66" align="center"><td > <h3>'+str(SN0)+ '</h3> </td> <td width=300> <h3>'+str(listar1[0]['redshift'])+'</h3> </td>'+\
           ' <td align="center" width=100><h3>'+str(listar1[0]['ra_sn'])[0:9]+'</h3></td>'+\
           ' <td align="center" width=100><h3>'+str(listar1[0]['dec_sn'])[0:9]+'</h3></td>'+\
@@ -1018,9 +1024,9 @@ if webp:
 print '<a id="triggers"></a>'
 #if _user in agnkey.util.superusers and _targid:
 print '<br> ____________________________________________________________________________________ </br>'
-print agnkey.agndefin.trigger(str(SN0),str(SN_RA),str(SN_DEC),str(_targid),'agnkeyview.cgi',{},agnkey.util.proposal)
+print agnkey.agndefin.trigger(str(SN0),str(SN_RA),str(SN_DEC),str(_targid),'agnkeyview.cgi',{},agnkey.util.readpass['proposal'])
 print '<br> ____________________________________________________________________________________ </br>'
-print agnkey.agndefin.triggerfloyds(str(SN0),str(SN_RA),str(SN_DEC),str(_targid),'agnkeyview.cgi',{},agnkey.util.proposal)
+print agnkey.agndefin.triggerfloyds(str(SN0),str(SN_RA),str(SN_DEC),str(_targid),'agnkeyview.cgi',{},agnkey.util.readpass['proposal'])
 print '<br> ____________________________________________________________________________________ </br>'
 print '<br></br>'
 

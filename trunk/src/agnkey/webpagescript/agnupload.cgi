@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 import cgi,os,string,glob,sys
-
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-
-##!/opt/epd/bin/python
-#import sys,os,cgi,string,glob
-#sys.path.append('/home/supernova/lib/python2.6/site-packages')
-
-os.environ['HOME']='../tmp/'
-
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname()) 
 import urllib,urllib2
+hostname=gethostname()
+
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
+
+
+os.environ['HOME']='../tmp/'
 from numpy import argsort,take,abs,sort,asarray,array
 import datetime,re,pyfits
 import agnkey
-#from agnkey import conn
 _user=os.getenv("REMOTE_USER")
 if not _user: _user='SV'
 form = cgi.FieldStorage()
@@ -29,12 +28,12 @@ else:                        _namefile=''
 if form.getlist('access'):   _access=form.getlist('access')[0]
 else:                        _access=''
 
-hostname=gethostname()
-if hostname=='engs-MacBook-Pro-4.local':
-    base_url = "http://localhost/~svalenti/cgi-bin/" 
-else:
-    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"
-    
+base_url=hostname
+
+#if hostname=='engs-MacBook-Pro-4.local':
+#    base_url = "http://localhost/~svalenti/cgi-bin/" 
+#else:
+#    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"
 
 def searchobj1():
     search='''<form action="agnkeyview.cgi" method="post" style="width=150"> 

@@ -1,27 +1,21 @@
-#!/usr/bin/python                                                                                                                                             
-                                              
+#!/usr/bin/env  python 
+
 import sys,os,cgi,string,glob
-
-
-os.environ['HOME']='../tmp/'
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-
-import agnkey
-#os.environ['HOME']=agnkey.util.workingdirectory+'tmp/'                                                                                                       
-                                              
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
+hostname=gethostname()
+
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
+
+import agnkey
+os.environ['HOME']='../tmp/'
 from numpy import argsort,take,abs
 import datetime,pyfits,re
 
-#import agndefin
-
-hostname=gethostname()
-#if hostname=='engs-MacBook-Pro-4.local':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#else:
-#    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"  
 base_url=hostname
 _user=os.getenv("REMOTE_USER")
 
@@ -113,7 +107,7 @@ if len(gg)>0:
       for jj in aa[0].keys(): ll0[jj].append(aa[i][jj])
     print '<table  border="1">'
     for i in range(0,len(ll0['name'])):
-      bb=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'permissionlog','targid',str(ll0['targid'][i]),'*')
+      bb=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'permissionlog','targid',str(ll0['targid'][i]),'*')
       if bb:
         ll1={}
         for jj in bb[0].keys(): ll1[jj]=[]
@@ -139,7 +133,7 @@ if len(gg)>0:
       for jj in aa[0].keys(): ll0[jj].append(aa[i][jj])
     print '<table  border="1">'
     for i in range(0,len(ll0['name'])):
-      bb=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'permissionlog','targid',str(ll0['targid'][i]),'*')
+      bb=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'permissionlog','targid',str(ll0['targid'][i]),'*')
       if bb:
         ll1={}
         for jj in bb[0].keys(): ll1[jj]=[]

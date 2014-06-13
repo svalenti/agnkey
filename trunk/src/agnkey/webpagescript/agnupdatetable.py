@@ -1,25 +1,21 @@
-#!/usr/bin/python                                                                                                                                                                                          
-
+#!/usr/bin/env python 
+    
 import sys,os,cgi,string,glob,re
-os.environ['HOME']='../tmp/'
-sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-
-import agnkey
-from agnkey.util import conn
-#import agndefin
-import datetime,time,ephem
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname()) 
 hostname=gethostname()
 
-#if hostname=='engs-MacBook-Pro-4.local':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#elif hostname=='dhcp42094.physics.ucdavis.edu':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#elif hostname=='dhcp43019.physics.ucdavis.edu':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#else:
-#    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"  
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+    sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+else:
+    sys.path.append('/home/cv21/lib/python2.7/site-packages/')
+
+
+os.environ['HOME']='../tmp/'
+import agnkey
+from agnkey.agnsqldef import conn
+import datetime,time,ephem
+
 base_url = hostname
 line00=''
 ####### user 
@@ -126,10 +122,10 @@ if _type=='add':
     else:
         _table='noteobjects'
         dictionary={'targid':int(_targid),'note':_note,'datenote':_date, 'user':_user}
-        agnkey.agnsqldef.insert_values(conn,_table,dictionary)
+        agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,_table,dictionary)
 
         dictionary1={'targid':int(_targid),'note':_note,'dateobs':_date, 'users':_user,'command':'add','tables':'noteobjects'}
-        agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+        agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
         
 elif _type=='delete':
     if not _id:
@@ -145,17 +141,17 @@ elif _type=='delete':
         agnkey.agnsqldef.deleteredufromarchive(_id,_table,'id')
 
         dictionary1={'targid':int(_targid),'note':_note,'dateobs':_date, 'users':_user,'command':'delete','tables':'noteobjects'}
-        agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+        agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
         
 elif _type=='delspectrum':
      _table='dataspectraexternal'
-     all1=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, _table, 'id', _id,column2='*')
+     all1=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, _table, 'id', _id,column2='*')
      if len(all1)==1:
          _file=re.sub(agnkey.util.workingdirectory,'../',all1[0]['directory']+all1[0]['namefile'])
          os.system('rm '+_file)
          agnkey.agnsqldef.deleteredufromarchive(_id,_table,'id')
          dictionary1={'targid':int(_targid),'note':_namefile,'dateobs':_date, 'users':_user,'command':'delete','tables':_table}
-         agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+         agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
          
 elif _type=='newobject':
     if (int(gg[0]['groupname']) & 1023):
@@ -173,17 +169,17 @@ elif _type=='newobject':
                else: SN_DEC=float(SN_DEC)
             _table='lsc_sn_pos'
             dictionary1={'name':SN,'ra_sn':float(SN_RA),'dec_sn':float(SN_DEC),'objtype':'agn'}
-            agnkey.agnsqldef.insert_values(conn,_table,dictionary1)
-            bb=agnkey.agnsqldef.getfromcoordinate(conn, 'lsc_sn_pos', SN_RA, SN_DEC,.01056)
+            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,_table,dictionary1)
+            bb=agnkey.agnsqldef.getfromcoordinate(agnkey.agnsqldef.conn, 'lsc_sn_pos', SN_RA, SN_DEC,.01056)
             agnkey.agnsqldef.updatevalue('lsc_sn_pos','targid',bb[0]['id'],SN,connection='agnkey',namefile0='name')
             dictionary={'name':SN,'targid':bb[0]['id']}
             _JDn=ephem.julian_date()-2400000
             dictionary1={'targid':bb[0]['id'],'groupname':1023,'jd':_JDn}          
-            agnkey.agnsqldef.insert_values(conn,'recobjects',dictionary)
-            agnkey.agnsqldef.insert_values(conn,'permissionlog',dictionary1)
+            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'recobjects',dictionary)
+            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'permissionlog',dictionary1)
 
             dictionary2={'targid':int(bb[0]['id']),'note':SN,'dateobs':_date, 'users':_user,'command':'newobject','tables':'lsc_sn_pos'}
-            agnkey.agnsqldef.insert_values(conn,'userslog',dictionary2)
+            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary2)
             
         else:
             print "Content-Type: text/html\n"
@@ -216,27 +212,27 @@ elif _type=='permission':
      agnkey.agnsqldef.updatevalue('permissionlog','groupname',int(aaa),_id,connection='agnkey',namefile0='id')
 
      dictionary1={'targid':int(_targid),'note':str(aaa),'dateobs':_date, 'users':_user,'command':'update','tables':'permissionlog'}
-     agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+     agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
      
 elif _type=='catalogue':
     agnkey.agnsqldef.updatevalue('lsc_sn_pos',_key,_note,_id,connection='agnkey',namefile0='id')
 
     dictionary1={'targid':int(_targid),'note':str(_key)+' '+str(_note),'dateobs':_date, 'users':_user,'command':'update','tables':'lsc_sn_pos'}
-    agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
     
 elif _type=='catalogue2':
     agnkey.agnsqldef.updatevalue('lsc_sn_pos',_key,_note,_id,connection='agnkey',namefile0='id')
 
     dictionary1={'targid':int(_targid),'note':str(_key)+' '+str(_note),'dateobs':_date, 'users':_user,'command':'update','tables':'lsc_sn_pos'}
-    agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
     
 elif _type=='recinfo':
     _table='recobjects'
     dictionary={'targid':int(_targid),'name':_note}
-    agnkey.agnsqldef.insert_values(conn,_table,dictionary)
+    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,_table,dictionary)
 
     dictionary1={'targid':int(_targid),'note':str(_note),'dateobs':_date, 'users':_user,'command':'add','tables':'recobjects'}
-    agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
     
 elif _type=='download':
      _JDn=ephem.julian_date()-2400000
@@ -250,7 +246,7 @@ elif _type=='download':
      print '</body>'
      print '</html>'
      dictionary1={'targid':int(_targid),'note':'download_'+str(_JDn)+'_'+_user+'.sh','dateobs':_date, 'users':_user,'command':'download','tables':'dataredulco'}
-     agnkey.agnsqldef.insert_values(conn,'userslog',dictionary1)
+     agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
      sys.exit()
 
      
@@ -339,14 +335,14 @@ elif _type=='trigger':
                datenow+datetime.timedelta(18),datenow+datetime.timedelta(20),\
                datenow+datetime.timedelta(22),datenow+datetime.timedelta(24)]
 
-    proposals=agnkey.util.proposal
-    users=agnkey.util.users
+    proposals=agnkey.util.readpass['proposal']
+    users=agnkey.util.readpass['users']
     if not _proposal:   
         _proposal=proposals[0]
         _user0=users[0]
     else:
         _user0=users[proposals.index(_proposal)]
-    passwd=agnkey.util.odinpasswd
+    passwd=agnkey.util.readpass['odinpasswd']
     print utstart[0],utend[0]
     for mm in range(0,len(utstart)):
         print str(SN),str(SN_RA),str(SN_DEC),expvec,nexpvec,filtvec,str(utstart[mm]),str(utend[mm]),_user0,_proposal,_airmass,_site,_instrument
@@ -358,7 +354,7 @@ elif _type=='trigger':
                     'windowend':float(input_str_emjd),'filters':_filters2,'exptime':_exp2,'numexp':_nexp2,'proposal':_prop2,\
                     'site':_site2,'instrument':_instrument2,'sky':float(_sky2),'seeing':float(_seeing2),\
                     'airmass':float(_airmass2),'reqnumber':int(reqnum),'tracknumber':int(tracknum)}
-        agnkey.agnsqldef.insert_values(agnkey.util.conn,'obslog',dictionary)
+        agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'obslog',dictionary)
 
 elif _type=='triggerfloyds':
     print _ntriggers
@@ -409,8 +405,8 @@ elif _type=='triggerfloyds':
         utend=[datenow+datetime.timedelta(0.083333333)]
 
 ####################   chose proposal  ######################
-    proposals=agnkey.util.proposal
-    users=agnkey.util.users
+    proposals=agnkey.util.readpass['proposal']
+    users=agnkey.util.readpass['users']
     if not _proposal:
         _proposal=proposals[0]
         _user0=users[0]
@@ -418,7 +414,7 @@ elif _type=='triggerfloyds':
         _user0=users[proposals.index(_proposal)]
     priority=1
     telclass='2m0'
-    passwd=agnkey.util.odinpasswd
+    passwd=agnkey.util.readpass['odinpasswd']
     if _site=='coj':
         _slit='2.0'
     elif _site=='ogg':
@@ -439,7 +435,7 @@ elif _type=='triggerfloyds':
                     'windowend':float(input_str_emjd),'filters':_filters2,'exptime':_exp2,'numexp':_nexp2,'proposal':_prop2,\
                     'site':_site2,'instrument':_instrument2,'sky':float(_sky2),'seeing':float(_seeing2),\
                     'airmass':float(_airmass2),'reqnumber':int(reqnum),'tracknumber':int(tracknum)}
-        agnkey.agnsqldef.insert_values(agnkey.util.conn,'obslog',dictionary)    
+        agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'obslog',dictionary)    
 
 
 elif _type=='spectrum':
