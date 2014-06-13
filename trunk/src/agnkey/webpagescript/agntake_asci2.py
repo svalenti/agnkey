@@ -5,6 +5,7 @@ from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
+os.environ['HOME']='../tmp/'
 
 if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
