@@ -180,9 +180,9 @@ if __name__ == "__main__":
 
      if not _stage or _stage in ['local','getmag','wcs','psf','psfmag','makestamp','apmag']:
                if len(listepoch)==1:
-                    lista=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(listepoch[0]),'','*',_telescope)
+                    lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(listepoch[0]),'','*',_telescope)
                else:
-                    lista=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(listepoch[0]),str(listepoch[-1]),'*',_telescope)
+                    lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(listepoch[0]),str(listepoch[-1]),'*',_telescope)
                if lista:
                     ll0={}
                     for jj in lista[0].keys(): ll0[jj]=[]
@@ -230,7 +230,7 @@ if __name__ == "__main__":
      else:
        for epo in listepoch:
           print '\n#### '+str(epo)
-          lista=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(epo),'','*',_telescope)
+          lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(epo),'','*',_telescope)
           if lista:
             ll0={}
             for jj in lista[0].keys(): ll0[jj]=[]
@@ -305,9 +305,9 @@ if __name__ == "__main__":
                elif _stage=='diff':                                    #    difference images using hotpants
                     if not _name: sys.exit('you need to select one object: use option -n/--name')
                     if _tempdate:
-                         lista1=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(_tempdate),'','*',_telescope)
+                         lista1=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(_tempdate),'','*',_telescope)
                     else:
-                         lista1=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', '20120101','20150101','*',_telescope)
+                         lista1=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', '20120101','20150101','*',_telescope)
                     if lista1:
                          ll00={}
                          for jj in lista1[0].keys(): ll00[jj]=[]

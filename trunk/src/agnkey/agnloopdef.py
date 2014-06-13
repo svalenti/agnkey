@@ -30,7 +30,7 @@ def run_getmag(imglist,_field,_output='',_interactive=False,_show=False,_bin=1e-
      magtype=[]
      for img in imglist:
 
-        ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database , 'namefile',str(img), '*')
+        ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database , 'namefile',str(img), '*')
         if ggg[0][mtype]:
           if abs(ggg[0][mtype])<=99:
             mag.append(ggg[0][mtype])
@@ -160,7 +160,7 @@ def run_cat(imglist,extlist,_interactive=False,mode=1,_type='fit',_fix=False, da
           status=array(status)[where(array(status)>0)]
           f=open('_tmpext.list','w')
           for img in extlist:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                f.write(_dir+re.sub('fits','sn2.fits',img)+'\n')
           f.close()
@@ -171,7 +171,7 @@ def run_cat(imglist,extlist,_interactive=False,mode=1,_type='fit',_fix=False, da
 
      f=open('_tmp.list','w')
      for img in imglist:
-          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
           _dir=ggg[0]['wdirectory']
           f.write(_dir+re.sub('fits','sn2.fits',img)+'\n')
      f.close()
@@ -213,7 +213,7 @@ def run_wcs(imglist,interactive=False,redo=False,_xshift=0,_yshift=0,catalogue='
           if catalogue: cc=' -c '+catalogue
           else: cc=''
           if status>=-1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                if not cc:
                 ###########################################
@@ -261,7 +261,7 @@ def run_zero(imglist,_fix,_type,_field,_catalogue,_color='',interactive=False,re
           status=checkstage(img,'zcat')
           if status==1: rr='-r'
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                if not _catalogue:
                     _ra0,_dec0,_SN0=agnkey.util.checksnlist(_dir+img,'supernovaelist.txt')
@@ -297,7 +297,7 @@ def run_apmag(imglist,database='dataredulco'):
      direc=agnkey.__path__[0]
      import os,string,glob
      for img in imglist:
-          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
           if ggg:
                _dir=ggg[0]['wdirectory'] 
                img1=re.sub('.fits','.sn2.fits',img)
@@ -328,7 +328,7 @@ def run_psf(imglist,treshold=5,interactive=False,_fwhm='',show=False,redo=False,
           print status
           if status==1: rr='-r'
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                if ggg[0]['filetype']==3: img0=re.sub('.diff.fits','.fits',img)
                else:                     img0=img
@@ -350,7 +350,7 @@ def run_fit(imglist,_ras='',_decs='',_xord=3,_yord=3,_bkg=4,_size=7,_recenter=Fa
           status=checkstage(img,'psfmag')
           print status
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                img0=re.sub('.fits','.sn2.fits',img)
                if interactive: ii='-i'
@@ -372,7 +372,7 @@ def run_fit(imglist,_ras='',_decs='',_xord=3,_yord=3,_bkg=4,_size=7,_recenter=Fa
                if ggg[0]['filetype']==3:
                     try:
                          img2 = pyfits.getheader(_dir+img)['PSF']
-                         ggg2=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img2), '*')
+                         ggg2=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img2), '*')
                          _dir2=ggg2[0]['wdirectory']
                          pp=' -p '+_dir2+re.sub('.fits','.psf.fits',img2)+' '
                          command=command+pp
@@ -400,7 +400,7 @@ def checkstage(img,stage,database='dataredulco'):
      import agnkey
      import os
      status=0
-     ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+     ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
      if not ggg:     status=-3   # not in the redo table
      else:
           _dir=ggg[0]['wdirectory']
@@ -443,10 +443,10 @@ def getcoordfromref(img2,img1,_show,database='dataredulco'):   #img1.sn2  img2.s
     from pyraf import iraf
     iraf.digiphot(_doprint=0)
     iraf.daophot(_doprint=0)
-    ggg1=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',re.sub('sn2.fits','fits',img1), '*')
+    ggg1=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',re.sub('sn2.fits','fits',img1), '*')
     _dir1=ggg1[0]['wdirectory']
 
-    ggg2=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',re.sub('sn2.fits','fits',img2), '*')
+    ggg2=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',re.sub('sn2.fits','fits',img2), '*')
     _dir2=ggg2[0]['wdirectory']
 
     print _dir1,_dir2,img1,img2
@@ -627,7 +627,7 @@ def run_local(imglist,_field,_interactive=False,database='dataredulco'):
      import os,string,glob   #MySQLdb,
      ff=open('_tmpcat.list','w')
      for img in imglist:
-          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
           if ggg:
                _dir=ggg[0]['wdirectory']
                if ggg[0]['abscat']!='X':
@@ -712,7 +712,7 @@ def checkcat(imglist,database='dataredulco'):
           status=checkstage(img,'checkpsf')
           #print img,status
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                print _dir,img
                if os.path.isfile(_dir+re.sub('.fits','.cat',img)):
@@ -746,7 +746,7 @@ def checkpsf(imglist,database='dataredulco'):
           status=checkstage(img,'checkpsf')
           print img,status
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                iraf.delete('_psf.psf.fits',verify=False)
                if os.path.isfile(_dir+re.sub('.fits','.psf.fits',img)):
@@ -789,7 +789,7 @@ def checkwcs(imglist,force=True,database='dataredulco',_z1='',_z2=''):
      for img in imglist:
           status=checkstage(img,'wcs')
           if status>=0 or force==False:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                _filter=ggg[0]['filter']
                _exptime=ggg[0]['exptime']
@@ -865,7 +865,7 @@ def makestamp(imglist,database='dataredulco',_z1='',_z2='',_interactive=True,red
           _targid=''
           status=agnkey.agnloopdef.checkstage(img,'wcs')
           if status>=0:   # or force==False:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                _output=re.sub('.fits','.png',_dir+'/'+img)
                if os.path.isfile(_output): 
@@ -929,7 +929,7 @@ def checkfast(imglist,force=True,database='dataredulco'):
      for img in imglist:
           status=checkstage(img,'wcs')
           if status>=0 or force==False:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                iraf.display(_dir+img,1,fill=True,Stdout=1)
                ###########################################
@@ -968,7 +968,7 @@ def checkmag(imglist,database='dataredulco'):
      for img in imglist:
           status=checkstage(img,'checkmag')
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                if os.path.isfile(_dir+re.sub('.fits','.og.fits',img)) and os.path.isfile(_dir+re.sub('.fits','.rs.fits',img)):
                     aaa=iraf.display(_dir+re.sub('.fits','.og.fits',img),1,fill=True,Stdout=1)
@@ -1002,7 +1002,7 @@ def checkpos(imglist,_ra,_dec,database='dataredulco'):
      for img in imglist:
           status=checkstage(img,'checkmag')
           if status>=1:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                _dir=ggg[0]['wdirectory']
                if os.path.isfile(_dir+re.sub('fits','sn2.fits',img)):  imglist2.append(_dir+re.sub('fits','sn2.fits',img))
      print imglist2,_ra,_dec
@@ -1023,7 +1023,7 @@ def checkquality(imglist,database='dataredulco'):
      for img in imglist:
           status=checkstage(img,'checkquality')
           if status==-4:
-               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database, 'namefile',str(img), '*')
+               ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
                if not ggg:     status=-3   # not in the redo table
                else:
                     _dir=ggg[0]['wdirectory']
@@ -1272,12 +1272,12 @@ def get_list(epoch,_telescope='all',_filter='',_bad='',_name='',_id='',_ra='',_d
      import datetime
      if '-' not in str(epoch): 
           epoch0=datetime.date(int(epoch[0:4]),int(epoch[4:6]),int(epoch[6:8]))
-          lista= agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,database, 'dateobs', str(epoch0),'','*',_telescope)
+          lista= agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,database, 'dateobs', str(epoch0),'','*',_telescope)
      else:
           epoch1,epoch2=string.split(epoch,'-')
           start=datetime.date(int(epoch1[0:4]),int(epoch1[4:6]),int(epoch1[6:8]))
           stop=datetime.date(int(epoch2[0:4]),int(epoch2[4:6]),int(epoch2[6:8]))
-          lista= agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,database, 'dateobs', str(start),str(stop),'*',_telescope)
+          lista= agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,database, 'dateobs', str(start),str(stop),'*',_telescope)
      if lista:
           ll0={}
           for jj in lista[0].keys(): ll0[jj]=[]
@@ -1293,7 +1293,7 @@ def get_list(epoch,_telescope='all',_filter='',_bad='',_name='',_id='',_ra='',_d
           if 'ra0' not in ll0.keys():
                for i in ll0['namefile']:
                     print i
-                    ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'datarawlco', 'namefile',i, '*')
+                    ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'datarawlco', 'namefile',i, '*')
                     ll0['ra'].append(ggg[0]['ra0'])
                     ll0['dec'].append(ggg[0]['dec0'])
           else: 
@@ -1311,8 +1311,8 @@ def check_missing(lista,database='dataredulco'):
      import datetime
      if len(lista)>0:
           for i in lista:
-               xx=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'datarawlco','namefile',str(i),column2='directory')
-               yy=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, database,'namefile',str(i),column2='wdirectory')
+               xx=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'datarawlco','namefile',str(i),column2='directory')
+               yy=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database,'namefile',str(i),column2='wdirectory')
                xx,yy=xx[0]['directory'],yy[0]['wdirectory']
                if not os.path.isfile(yy+i):
                     os.system('cp '+xx+i+' '+yy+i)

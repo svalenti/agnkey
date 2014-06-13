@@ -159,7 +159,7 @@ if __name__ == "__main__":
                                          #                    copy all information from target 
                             dictionary={}
                             try:
-                                ggg0=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'dataredulco', 'namefile',string.split(imgtar,'/')[-1], '*')
+                                ggg0=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgtar,'/')[-1], '*')
                                 for voce in ggg0[0].keys(): 
                                     if voce not in ['id']:       dictionary[voce]=ggg0[0][voce] 
                             except:
@@ -190,22 +190,22 @@ if __name__ == "__main__":
                                                                                                                      'apmag':[9999.,'aperture mag']})
                             else: print 'fits table not found '+str(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1]))
                             ###################    insert in dataredulco
-                            ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')
+                            ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')
                             if ggg and _force:   agnkey.agnsqldef.deleteredufromarchive(string.split(imgout,'/')[-1],'dataredulco','namefile')
                             if not ggg or _force:
                                 print 'insert'
                                 print dictionary
-                                agnkey.agnsqldef.insert_values(agnkey.util.conn,'dataredulco',dictionary)
+                                agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'dataredulco',dictionary)
                             else:
                                 for voce in ggg[0].keys():
                                     if voce not in ['id']: 
                                         agnkey.agnsqldef.updatevalue('dataredulco',voce,dictionary[voce],string.split(imgout,'/')[-1])
-                            ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'inoutredu', 'nameout',string.split(imgout,'/')[-1], '*')
+                            ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'inoutredu', 'nameout',string.split(imgout,'/')[-1], '*')
                             if ggg:   agnkey.agnsqldef.deleteredufromarchive(string.split(imgout,'/')[-1],'inoutredu','nameout')
                             dictionary={'namein':string.split(imgtar,'/')[-1],'nameout':string.split(imgout,'/')[-1],'nametemp':string.split(imgtemp,'/')[-1],\
                                         'tablein':'dataredulco','tableout':'dataredulco','tabletemp':'dataredulco'}
                             print 'insert in out'
                             print dictionary
-                            agnkey.agnsqldef.insert_values(agnkey.util.conn,'inoutredu',dictionary)
+                            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'inoutredu',dictionary)
                         else:
                             print 'file '+imgout+'  already there '

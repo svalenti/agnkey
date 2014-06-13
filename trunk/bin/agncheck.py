@@ -66,14 +66,14 @@ if __name__ == "__main__":
      epoch=option.epoch
      if '-' not in str(epoch): 
           epoch0=datetime.date(int(epoch[0:4]),int(epoch[4:6]),int(epoch[6:8]))
-          lista=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(epoch0),'','*',_telescope)
+          lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(epoch0),'','*',_telescope)
           #lista=getfromdataraw(agnkey.src.agnsqldef.conn, 'dataredulco', 'dateobs',str(epoch0), 'all')
      else:
           epoch1,epoch2=string.split(epoch,'-')
           start=datetime.date(int(epoch1[0:4]),int(epoch1[4:6]),int(epoch1[6:8]))
           stop=datetime.date(int(epoch2[0:4]),int(epoch2[4:6]),int(epoch2[6:8]))
           print _telescope
-          lista=agnkey.agnsqldef.getlistfromraw(agnkey.util.conn,'dataredulco', 'dateobs', str(start),str(stop),'*',_telescope)
+          lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(start),str(stop),'*',_telescope)
 
      if lista:
           ll0={}

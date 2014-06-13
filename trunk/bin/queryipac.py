@@ -33,6 +33,8 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
     wget1=str0a+str2+tfile+str3+str4+str5+str6+str7+'"'
     wget2=str0+str2+str10+str12+'"'
 
+    print wget0
+    print wget1
     os.system(wget0)    #    download cookie from ipac
     os.system(wget1)    #    download list of images to ingest
 
@@ -43,14 +45,12 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
     lista=[]
     for i in ss:
         if i[0] not in ['|','\\']:  
-            if string.split(i)[-2] in agnkey.util.proposal:
+            if string.split(i)[-2] in agnkey.util.readpass['proposal']:
                 lista.append(string.split(i)[-1])
-
-
     for img in lista:
         output=string.split(img,'/')[-1]
         downloadimage='wget --load-cookies=lcogt_img_cookies.txt -O '+str(output)+' "http://lcogtarchive.ipac.caltech.edu/cgi-bin/LCODownload/nph-lcoDownload?&file='+img+'"'
-        exist=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,dataredutable,'namefile', string.split(output,'/')[-1],column2='namefile')
+        exist=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,dataredutable,'namefile', string.split(output,'/')[-1],column2='namefile')
         if not exist or _force in ['update','yes']:
             if not os.path.isfile(output): 
                 os.system(downloadimage)
@@ -91,7 +91,7 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
             if dictionary:
                 if not exist:
                     print 'insert values'
-                    agnkey.agnsqldef.insert_values(agnkey.util.conn,dataredutable,dictionary)
+                    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,dataredutable,dictionary)
                 else:
                     print dataredutable
                     print 'update values'
@@ -135,8 +135,8 @@ if __name__ == "__main__":
         start=datetime.date(int(epoch1[0:4]),int(epoch1[4:6]),int(epoch1[6:8]))
         stop=datetime.date(int(epoch2[0:4]),int(epoch2[4:6]),int(epoch2[6:8]))
         
-    archa1=agnkey.util.ipacuser+'&'
-    archa2=agnkey.util.ipacpasswd
+    archa1=agnkey.util.readpass['ipacuser']+'&'
+    archa2=agnkey.util.readpass['ipacpasswd']
     dataredutable='dataredulco'
     print epoch1,epoch2
     print _force

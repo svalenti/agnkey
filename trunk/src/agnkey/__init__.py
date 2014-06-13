@@ -1,5 +1,5 @@
-import agnsqldef 
 import util 
+import agnsqldef 
 import agnastrodef 
 import agnabsphotdef 
 import agnsnoopy 

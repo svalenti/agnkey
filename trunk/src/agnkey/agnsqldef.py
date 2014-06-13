@@ -1,15 +1,14 @@
 import numpy as np
-#import socket
-#host = socket.gethostname()
 
 ####################################################
 
 def getconnection(site):
+   import  agnkey
+
    connection={#        CHANGE THIS LINE WITH THE INFO ON THE NEW DATABASE
                'agnkey':{'username':'cv21','hostname':'localhost','database':'lcogt'}}
    connection[site]['passwd']=agnkey.util.readpass['mysqlpasswd']
    return  connection[site]['hostname'],connection[site]['username'],connection[site]['passwd'],connection[site]['database']
-
 
 def dbConnect(lhost, luser, lpasswd, ldb):
    import sys
@@ -23,6 +22,13 @@ def dbConnect(lhost, luser, lpasswd, ldb):
       print "Error %d: %s" % (e.args[0], e.args[1])
       sys.exit (1)
    return conn
+
+try:
+   hostname, username, passwd, database=getconnection('agnkey')
+   conn = dbConnect(hostname, username, passwd, database)
+except:
+   conn=''
+   print '\### warning: problem with the database'
 
 ########################################################################
 
@@ -125,6 +131,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
 
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection(connection)
    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
+
    try:
       cursor = conn.cursor (MySQLdb.cursors.DictCursor)
       if value in [True,False]:
@@ -506,6 +513,9 @@ def targimg(img):
     import agnkey
     from agnkey.util import readkey3,readhdr
     from agnkey.agnsqldef import getfromcoordinate
+    hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
+    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
+
     import string
     _targid=''
     hdrt=agnkey.util.readhdr(img)
@@ -514,32 +524,32 @@ def targimg(img):
     _object=agnkey.util.readkey3(hdrt,'object')
     if ':' in str(_ra):         _ra,_dec=agnkey.agnabsphotdef.deg2HMS(_ra,_dec)
 
-    aa=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'recobjects', 'name', _object,'*')
+    aa=agnkey.agnsqldef.getfromdataraw(conn, 'recobjects', 'name', _object,'*')
     if len(aa)>=1: 
        _targid=aa[0]['targid']
        print _targid
-       aa=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'lsc_sn_pos','targid',str(_targid),'*')
+       aa=agnkey.agnsqldef.getfromdataraw(conn, 'lsc_sn_pos','targid',str(_targid),'*')
        _RA,_DEC,_SN=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name']
     else:
-       aa=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, 'lsc_sn_pos', _ra, _dec,.3)
+       aa=agnkey.agnsqldef.getfromcoordinate(conn, 'lsc_sn_pos', _ra, _dec,.3)
        if len(aa)==1:
           _RA,_DEC,_SN,_targid=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name'],aa[0]['targid']
        else:
           _RA,_DEC,_SN,_targid='','','',''
     if not _targid:
        dictionary={'name':_object,'ra_sn':_ra,'dec_sn':_dec}
-       agnkey.agnsqldef.insert_values(agnkey.util.conn,'lsc_sn_pos',dictionary)
-       bb=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, 'lsc_sn_pos', _ra, _dec,.01056)
+       agnkey.agnsqldef.insert_values(conn,'lsc_sn_pos',dictionary)
+       bb=agnkey.agnsqldef.getfromcoordinate(conn, 'lsc_sn_pos', _ra, _dec,.01056)
        agnkey.agnsqldef.updatevalue('lsc_sn_pos','targid',bb[0]['id'],_object,connection='agnkey',namefile0='name')
        dictionary1={'name':_object,'targid':bb[0]['id']}
-       agnkey.agnsqldef.insert_values(agnkey.util.conn,'recobjects',dictionary1)
+       agnkey.agnsqldef.insert_values(conn,'recobjects',dictionary1)
        _targid=bb[0]['id']
     if _targid:
-       cc=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,'permissionlog','targid', str(_targid),column2='groupname')
+       cc=agnkey.agnsqldef.getfromdataraw(conn,'permissionlog','targid', str(_targid),column2='groupname')
        if len(cc)==0:
           _JDn=agnkey.agnsqldef.JDnow()
           dictionary2={'targid':_targid,'jd':_JDn,'groupname':32769}
-          agnkey.agnsqldef.insert_values(agnkey.util.conn,'permissionlog',dictionary2)
+          agnkey.agnsqldef.insert_values(conn,'permissionlog',dictionary2)
     return _targid
 
 #################################################################################
@@ -614,7 +624,7 @@ def query(command):
    import MySQLdb,os,string
    lista=''
    import agnkey
-   from agnkey.util import conn
+   from agnkey.agnsqldef import conn
    try:
         cursor = conn.cursor (MySQLdb.cursors.DictCursor)
         for i in command:

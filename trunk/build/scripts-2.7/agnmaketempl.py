@@ -173,12 +173,12 @@ if __name__ == "__main__":
                   dictionary['wdirectory']=agnkey.util.workingdirectory+'lsc/'+agnkey.util.readkey3(hd,'date-night')+'/'
                   dictionary['filetype']=4
                          ###################    insert in dataredulco
-                  ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')
+                  ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')
                   if ggg and _force:   agnkey.agnsqldef.deleteredufromarchive(string.split(imgout,'/')[-1],'dataredulco','namefile')
                   if not ggg or _force:
                        print 'insert'
                        print dictionary
-                       agnkey.agnsqldef.insert_values(agnkey.util.conn,'dataredulco',dictionary)
+                       agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'dataredulco',dictionary)
                   else:
                        for voce in ggg[0].keys():
 #                for voce in ['filetype','ra0','dec0']:

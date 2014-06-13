@@ -14,6 +14,7 @@ else:
    rawdata='/archive/engineering/'
    realpass='configure'
 
+
 ###################################################
 #
 #  configure is the file where all the passwd are stored locally:
@@ -41,16 +42,16 @@ def readpasswd(directory,_file):
     return gg
 
 readpass=readpasswd(workingdirectory,realpass)
-
 #################################################################
-try:     
-   import agnkey
-   from agnkey import agnsqldef
-   hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
-   conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
-except:
-   conn=''
-   '\### warning: problem with the database'
+
+#try:     
+#from agnkey import agnsqldef
+#from agnkey import agnsqldef
+#hostname, username, passwd, database=agnsqldef.getconnection('agnkey')
+#conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
+#except:
+#   conn=''
+#   '\### warning: problem with the database'
 #######################################################################
 
 def ReadAscii2(ascifile):
@@ -802,11 +803,13 @@ def checksnlist(img,listfile):
 ##########################################################################################################
 def checksndb(img,table):
    import agnkey
+   hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
+   conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
 
    hdrt=agnkey.util.readhdr(img)
    _ra=agnkey.util.readkey3(hdrt,'RA')
    _dec=agnkey.util.readkey3(hdrt,'DEC')
-   aa=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, table, _ra, _dec,.5)
+   aa=agnkey.agnsqldef.getfromcoordinate(conn, table, _ra, _dec,.5)
    if len(aa)>=1:
       _RA,_DEC,_SN,_type=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name'],aa[0]['objtype']
    else:

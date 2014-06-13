@@ -205,12 +205,12 @@ if __name__ == "__main__":
                  dictionary['wdirectory']=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hd,'date-night')+'/'
              dictionary['filetype']=2
             ###################    insert in dataredulco
-             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'dataredulco', 'namefile',string.split(outname,'/')[-1], '*')
+             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(outname,'/')[-1], '*')
              if ggg and force:   agnkey.agnsqldef.deleteredufromarchive(string.split(outname,'/')[-1],'dataredulco','namefile')
              if not ggg or force:
                  print 'insert'
                  print dictionary
-                 agnkey.agnsqldef.insert_values(agnkey.util.conn,'dataredulco',dictionary)
+                 agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'dataredulco',dictionary)
              else:
                 for voce in ggg[0].keys():
                     print 'update'
@@ -225,13 +225,13 @@ if __name__ == "__main__":
                  os.system('mv '+outname+' '+dictionary['wdirectory']+outname)
                  os.chmod(dictionary['wdirectory']+outname,0664)
 
-             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'inoutredu', 'nameout',string.split(outname,'/')[-1], '*')
+             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'inoutredu', 'nameout',string.split(outname,'/')[-1], '*')
              if ggg:   agnkey.agnsqldef.deleteredufromarchive(string.split(outname,'/')[-1],'inoutredu','nameout')
              for img in imglist1:
                  dictionary={'namein':string.split(img,'/')[-1],'nameout':string.split(outname,'/')[-1],'tablein':'dataredulco','tableout':'dataredulco'}
                  print 'insert in out'
                  print dictionary
-                 agnkey.agnsqldef.insert_values(agnkey.util.conn,'inoutredu',dictionary)
+                 agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'inoutredu',dictionary)
 
              for gg in imglist1:  
                  os.system('rm '+re.sub('.fits','.mask.fits',string.split(gg,'/')[-1]))

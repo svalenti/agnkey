@@ -161,32 +161,32 @@ def targimg(img):  # maybe I can remove it
     _object=agnkey.util.readkey3(hdrt,'object')
     if ':' in str(_ra):         _ra,_dec=agnkey.agnabsphotdef.deg2HMS(_ra,_dec)
     print _ra,_dec,_object
-    aa=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'recobjects', 'name', _object,'*')
+    aa=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'recobjects', 'name', _object,'*')
     if len(aa)>=1: 
        _targid=aa[0]['targid']
        print _targid
-       aa=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn, 'lsc_sn_pos','targid',str(_targid),'*')
+       aa=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'lsc_sn_pos','targid',str(_targid),'*')
        _RA,_DEC,_SN=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name']
     else:
-       aa=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, 'lsc_sn_pos', _ra, _dec,.3)
+       aa=agnkey.agnsqldef.getfromcoordinate(agnkey.agnsqldef.conn, 'lsc_sn_pos', _ra, _dec,.3)
        if len(aa)==1:
           _RA,_DEC,_SN,_targid=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name'],aa[0]['targid']
        else:
           _RA,_DEC,_SN,_targid='','','',''
     if not _targid:
        dictionary={'name':_object,'ra_sn':_ra,'dec_sn':_dec}
-       agnkey.agnsqldef.insert_values(agnkey.util.conn,'lsc_sn_pos',dictionary)
-       bb=agnkey.agnsqldef.getfromcoordinate(agnkey.util.conn, 'lsc_sn_pos', _ra, _dec,.01056)
+       agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'lsc_sn_pos',dictionary)
+       bb=agnkey.agnsqldef.getfromcoordinate(agnkey.agnsqldef.conn, 'lsc_sn_pos', _ra, _dec,.01056)
        agnkey.agnsqldef.updatevalue('lsc_sn_pos','targid',bb[0]['id'],_object,connection='agnkey',namefile0='name')
        dictionary={'name':_object,'targid':bb[0]['id']}
-       agnkey.agnsqldef.insert_values(agnkey.util.conn,'recobjects',dictionary)
+       agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'recobjects',dictionary)
        _targid=bb[0]['id']
     if _targid:
-       cc=agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,'permissionlog','targid', str(_targid),column2='groupname')
+       cc=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,'permissionlog','targid', str(_targid),column2='groupname')
        if len(cc)==0:
           _JDn=agnkey.agnsqldef.JDnow()
           dictionary2={'targid':_targid,'jd':_JDn,'groupname':32769}
-          agnkey.agnsqldef.insert_values(agnkey.util.conn,'permissionlog',dictionary2)
+          agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'permissionlog',dictionary2)
     return _targid
 
 #################################################################################
@@ -199,7 +199,7 @@ def ingestfloyds(imglist,date,_force):
       hdr=agnkey.util.readhdr(img)
       telescope=hdr.get('TELID')
       instrument=hdr.get('instrume')
-      if not agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile') or _force:
+      if not agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile') or _force:
          if telescope in ['fts','ftn']:
                if instrument in ['en05','en06']:
                   _tech=None
@@ -220,8 +220,8 @@ def ingestfloyds(imglist,date,_force):
          else: dictionary={}
          if telescope in ['fts','ftn']:
                if instrument in ['en05','en06']:
-                  if not agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile'):
-                     agnkey.agnsqldef.insert_values(agnkey.util.conn,datarawtable,dictionary)
+                  if not agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile'):
+                     agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
                   elif _force:
                      for voce in dictionary:
                         if voce!='id' and voce!='namefile':

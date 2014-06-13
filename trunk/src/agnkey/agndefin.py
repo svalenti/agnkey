@@ -710,8 +710,8 @@ def uploadspectrum(img,_output,_force,_permission):
             note=note+'acces= '+str(dictionary['access'])+'\n'
 
         note=note+'database= '+datarawtable+'\n'
-        if not agnkey.agnsqldef.getfromdataraw(agnkey.util.conn,datarawtable,'namefile', string.split(_output,'/')[-1],column2='namefile'):
-            agnkey.agnsqldef.insert_values(agnkey.util.conn,datarawtable,dictionary)
+        if not agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,datarawtable,'namefile', string.split(_output,'/')[-1],column2='namefile'):
+            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
         else:
             if _force=='update':
                 note=note+'update database'+'\n'
@@ -721,7 +721,7 @@ def uploadspectrum(img,_output,_force,_permission):
             elif _force=='force':
                 note=note+'replace line in the database'+'\n'
                 agnkey.agnsqldef.deleteredufromarchive(string.split(_output,'/')[-1],datarawtable,'namefile')
-                agnkey.agnsqldef.insert_values(agnkey.util.conn,datarawtable,dictionary)
+                agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
             else: note=note+'database not changed'+'\n'
 #        note=note+str(dictionary)
         return note
