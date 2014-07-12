@@ -1,23 +1,23 @@
-#!/usr/bin/env python                                                                                                                                                                                           
+#!/usr/bin/env python
+                    
 import sys,os,cgi,string,glob
 from socket import gethostname, gethostbyname,gethostname
-
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
+os.environ['HOME']='../tmp/'
 
 #print "Content-Type: text/html\n"
 #print '<html><body>'
 #print hostname
 #print '</html></body>'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
 
-os.environ['HOME']='../tmp/'
 import agnkey
 from numpy import argsort,take,abs
 import datetime,pyfits,re

@@ -3,7 +3,7 @@
 #
 import socket
 host = socket.gethostname()
-if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
+if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
@@ -956,7 +956,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     if camera in ['sbig','sinistro','spectral']:          
        molecules=[]
        for i in range(0,len(filtervec)):
-          molecules.append({"ag_mode": "OPTIONAL", "ag_name": _inst[camera], "bin_x": int(binx[camera]), "bin_y": int(binx[camera]),
+          molecules.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": int(binx[camera]), "bin_y": int(binx[camera]),
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": _inst[camera], "priority": 1,
                             "type": "EXPOSE"})
@@ -986,14 +986,14 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     elif camera in ['oneof']:
        molecules1=[]
        for i in range(0,len(filtervec)):
-          molecules1.append({"ag_mode": "OPTIONAL", "ag_name": "SCICAM", "bin_x": 2, "bin_y": 2,
+          molecules1.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": 2, "bin_y": 2,
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": "SCICAM", "priority": 1,
                             "type": "EXPOSE"})
 
        molecules2=[]
        for i in range(0,len(filtervec)):
-          molecules2.append({"ag_mode": "OPTIONAL", "ag_name": "1M0-SCICAM-SINISTRO", "bin_x": 1, "bin_y": 1,
+          molecules2.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": 1, "bin_y": 1,
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": "1M0-SCICAM-SINISTRO", "priority": 1,
                             "type": "EXPOSE"})

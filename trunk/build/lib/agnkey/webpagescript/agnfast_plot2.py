@@ -4,8 +4,9 @@ from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
+os.environ['HOME']='../tmp/'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -13,7 +14,6 @@ else:
 from numpy import array
 import scipy
 import pyfits,os,glob
-os.environ['HOME']='../tmp/'
 import matplotlib
 #matplotlib.use('Agg')
 import numpy as np
