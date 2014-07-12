@@ -1,23 +1,23 @@
-#!/usr/bin/env python
-                    
+#!/usr/bin/env python                                                                                                                                                                                           
 import sys,os,cgi,string,glob
 from socket import gethostname, gethostbyname,gethostname
+
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
-os.environ['HOME']='../tmp/'
 
 #print "Content-Type: text/html\n"
 #print '<html><body>'
 #print hostname
 #print '</html></body>'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
 
+os.environ['HOME']='../tmp/'
 import agnkey
 from numpy import argsort,take,abs
 import datetime,pyfits,re
@@ -146,11 +146,8 @@ else:
 #    command8=["select r.name,a.ra_sn,a.dec_sn, a.targid, p.groupname, a.redshift, count(distinct(d.dateobs)) as numero ,max(d.dateobs) as last, a.objtype from lsc_sn_pos as a join recobjects as r join dataredulco as d join permissionlog as p where a.targid=r.targid and d.targid=a.targid  and p.targid=a.targid and "+str(gg)+" and a.objtype!='test1' group by r.targid order by p.groupname  desc"]
     command8=["select r.name,a.ra_sn,a.dec_sn, a.targid, p.groupname, a.redshift, count(distinct(d.dateobs)) as numero ,max(d.dateobs) as last, a.objtype from lsc_sn_pos as a join recobjects as r join dataredulco as d join permissionlog as p where a.targid=r.targid and p.targid=a.targid and "+str(gg)+" and a.objtype!='test1' group by r.targid order by p.groupname  desc"]
 
-#max(d.JD)
-
     lista8=agnkey.agnsqldef.query(command8)
-#    print ddd
-#    print body
+
     print '''</table></br></br>'''
     print '''<table class="fixed" border="1" style='table-layout:fixed'><tr align="center"> <td  height= 40  length=30 width=200> <b> AGN name </b></td> <td> <b> RA  </b></td><td>  <b>DEC</b>  </td> <td> <b> Type  </b> </td> <td> <b> Redshift </b> </td> <td> <B> N nights </b> </td> <td  width=100  align="center"> <b> last obs. </b> </td> <td> <b>  groups </b>  </td></tr>'''
     mm=0
@@ -159,15 +156,20 @@ else:
           mm=mm+1
           if mm % 2: ccc='BGCOLOR="#CCFF66"'
           else:      ccc=''
-          commnew=["select count(distinct(d.dateobs)) as dd from dataredulco as d where targid="+str(lista8[i]['targid'])]
+          commnew=["select count(distinct(d.dateobs)) as dd ,max(d.dateobs) as cc from dataredulco as d where targid="+str(lista8[i]['targid'])]
           lista99=agnkey.agnsqldef.query(commnew)
-          if len(lista99):          num=lista99[0]['dd']
-          else: num=0
+          if len(lista99):          
+              num=lista99[0]['dd']
+              last=lista99[0]['cc']
+          else: 
+              num=0
+              last=0
           oblink='<a href="agnkeyview.cgi?sn_name='+re.sub('\+','%2B',lista8[i]['name'])+'"> '+lista8[i]['name']+' </a> '
           print '<tr '+ccc+' align="center"><td align="left" length=30 ><b>'+oblink+'</b></td> <td align="left" width=100>'+\
               str(lista8[i]['ra_sn'])+'</td> <td align="left" width=100>'+str(lista8[i]['dec_sn'])+\
               '</td> <td>'+str(lista8[i]['objtype'])+'</td> <td>'+str(lista8[i]['redshift'])+'</td> <td>'+str(num)+\
-              '</td> <td>'+str(lista8[i]['last'])+'</td> <td align="left" width=400>'+expandpermissions(lista8[i]['groupname'])+'</tr>'
+              '</td> <td>'+str(last)+'</td> <td align="left" width=400>'+expandpermissions(lista8[i]['groupname'])+'</tr>'
+#              '</td> <td>'+str(lista8[i]['last'])+'</td> <td align="left" width=400>'+expandpermissions(lista8[i]['groupname'])+'</tr>'
 #              '</td> <td>'+str(lista8[i]['objtype'])+'</td> <td>'+str(lista8[i]['redshift'])+'</td> <td>'+str(lista8[i]['numero'])+\
           command88=["select name from recobjects where targid="+str(lista8[i]['targid'])]
           lista88=agnkey.agnsqldef.query(command88)
