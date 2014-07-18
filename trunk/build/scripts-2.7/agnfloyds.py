@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
+#!/Users/svalenti/usr/Ureka/variants/common/bin/python
 
 import os,string,re,sys,glob
 import datetime

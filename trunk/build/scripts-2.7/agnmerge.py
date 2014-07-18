@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
+#!/Users/svalenti/usr/Ureka/variants/common/bin/python
 
 description=">> clean and combine frames using cosmic and swarp "
 usage = "%prog list_image [options] "

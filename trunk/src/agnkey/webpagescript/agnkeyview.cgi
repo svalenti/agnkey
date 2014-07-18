@@ -1,13 +1,14 @@
 #!/usr/bin/env python                      
 
 import sys,os,cgi,string,glob
+os.environ['HOME']='../tmp/'
+
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
-os.environ['HOME']='../tmp/'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -450,22 +451,36 @@ print '''
 <title>AGNKEY</title>
 <base href='%s'>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,300,600,400italic,300italic' rel='stylesheet' type='text/css'>
-<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="flot/excanvas.min.js"></script><![endif]-->
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script> 
-<script> 
-$(function() {
-$("#includedContent").load("./schedule.cgi?targid=%s"); 
-}); 
-</script> 
-</head>
-''' %(base_url,_targid)
+<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../flot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="../flot/jquery.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.errorbars.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.selection.js"></script>
+<script language="javascript" type="text/javascript" src="../flot/jquery.flot.navigate.js"></script>
+<script language="javascript" type="text/javascript">
+  function loadIframe(obj) {
+    document.getElementById('div_loadinggif').style.display = "none";
+    document.getElementById('div_loadinggif').style.visibility = "hidden";
+    obj.style.height = 1.2*obj.contentWindow.document.body.scrollHeight + 'px';
+  }
+</script>
+<script language="javascript" type="text/javascript">
+  function collapsetd() {
+    if (window.innerWidth < 1640) {
+        document.getElementById('td_collapsable1').style.width = '0px';
+        document.getElementById('td_collapsable2').style.width = '0px';
+    } else {
+        document.getElementById('td_collapsable1').style.width = '20px';
+        document.getElementById('td_collapsable2').style.width = '200px';
+    }
+  }
+</script>''' % base_url
 
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.errorbars.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.navigate.js"></script>
+print '''<script> $(function() {$("#includedContent").load("./schedule.cgi?targid=%s"); }); </script>''' % (_targid)
+print ''' </head>'''
 
-print '<body topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" rightmargin="0" bottommargin="0" bgcolor="#ececec" link="black" vlink="black" alink="black">'
+print ''''<body topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" rightmargin="0" bottommargin="0" bgcolor="#ececec" link="black" vlink="black" alink="black"
+onload="collapsetd();" onresize="collapsetd();"> '''
 url=os.environ["REQUEST_URI"] 
 
 print '''
@@ -678,26 +693,9 @@ if len(lista33e):
     for i in range(0,len(lista33e)):
         for jj in lista33e[0].keys(): ll22e[jj].append(lista33e[i][jj])
 
-#if len(ll22)==0:    ll22=''
 if len(ll22e)==0:    ll22e=''
 
 webs=''
-#if ll22:
-#   for i in range(0,len(ll22['objname'])):
-#      _object0=ll22['objname'][i]
-#      name=ll22['namefile'][i]
-#      directory=re.sub(agnkey.util.workingdirectory,'http://'+base_url+'/AGNKEY',ll22['directory'][i])
-#      directory2='../AGNKEY/'+re.sub('/home/cv21/AGNKEY_www/AGNKEY/','',ll22['directory'][i])
-#      date=ll22['dateobs'][i]
-#      fspec=fastspec(name,name,directory)
-#      ascifil=ascifile(name,name,directory)
-#      fitsfile='<a href="'+directory2+ll22['namefile'][i]+'"> fitsfile</a>'
-#      if _user in agnkey.util.superusers:
-#         deletespectrum=agnkey.agndefin.delspectrum(SN0,SN_RA,SN_DEC,_targid,ll22['id'][i],ll22['namefile'][i],_user,url)
-#      else:
-#         deletespectrum=''
-#      webs=webs+'<tr  style="margin:0; padding:0;">'+tdopen+str(name)+tdclose+tdopen+str(date)+tdclose+\
-#            tdopen+str(fspec)+tdclose+tdopen+str(ascifil)+tdclose+tdopen+str(deletespectrum)+tdclose+tdopen+str(fitsfile)+tdclose+'</tr>'      
 
 
 if ll22e:
@@ -916,53 +914,6 @@ if listar1:
 print """</table>"""
 
 #################################################################################
-#base_url = "http://secure.lcogt.net/user/supernova/dev/"
-#print "Content-Type: text/html\n\n"
-#print '''
-#<html>
-#<head>
-#<title>AGN KEY project Marshal</title>
-#<base href='%s'>
-#<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,300,600,400italic,300italic' rel='stylesheet' type='text/css'>
-#</head>
-#''' %base_url 
-#print '<body>'
-#print '<a href="'+'agnkeymain.py"> back to full list </a> '
-#print hostname
-#print agnkey.util.workingdirectory
-#################################################################################
-           #################       Start tabl
-#print """<table border='0'  style='table-layout:fixed'  class='fixed' height='10%' cellspacing='0' cellpadding='0' width='100%' >"""
-#print """<table border='0'  class='fixed' height='10%' cellspacing='0' cellpadding='0' width='200' >"""
-#print '<tr><td>'
-##########################
-#print """<table border="0" style='table-layout:fixed'   class='fixed'  height='10%' cellspacing='0' cellpadding='0' width='60%' >"""
-#print '<tr align="center" BGCOLOR="#CCFF66"> <td width=100 > <h3> '+str('AGN NAME')+'  </h3></td><td width=100> <h3> Redshift </h3></td>'+\
-#      '<td width=100> <h3> RA </h3></td>'+\
-#      '<td width=100> <h3> DEC  </h3></td>'+\
-#      '<td width=100> <h3>type </h3></td>'+\
-#      '<td width=100 > <h3> user </h3></td> <td  align="center" width=100 > <h3>     aka </h3></td> </tr>'
-#if listar1:
-#  if _user in agnkey.util.superusers:
-#    print '<tr BGCOLOR="#CCFF66" align="center"><td > <h3>'+str(SN0)+ '</h3> </td> <td width=300> <h3>'+str(listar1[0]['redshift'])+'</h3> </td>'+\
-#          ' <td align="center" width=100><h3>'+str(listar1[0]['ra_sn'])[0:9]+'</h3></td>'+\
-#          ' <td align="center" width=100><h3>'+str(listar1[0]['dec_sn'])[0:9]+'</h3></td>'+\
-#          ' <td align="center" width=100><h3>'+str(listar1[0]['objtype'])+'</h3></td>'+\
-#          ' <td align="center" width=100 ><h3>'+str(_user)+'</h3></td>'+\
-#          ' <td align="center" width=100> <h3> '+aka+' </h3> </td></tr>'
-#    print '<tr BGCOLOR="#CCFF66" align="center"><td >'+'</td> <td width=300>'+agnkey.agndefin.objectinfo(listar1[0],_user,'redshift','agnkeyview.cgi')+\
-#          '</td> <td width=300>'+agnkey.agndefin.objectinfo(listar1[0],_user,'ra_sn','agnkeyview.cgi')+\
-#          '</td> <td width=300>'+agnkey.agndefin.objectinfo(listar1[0],_user,'dec_sn','agnkeyview.cgi')+\
-#          '</td> <td width=300>'+agnkey.agndefin.objectinfo(listar1[0],_user,'objtype','agnkeyview.cgi')+\
-#          '</td> <td width=300 >'+\
-#          '</td> <td width=300>'+agnkey.agndefin.recinfo(listar1[0],_user,'agnkeyview.cgi')+'</td>'+\
-#          '</tr>'
-#  else:
-#    print '<tr BGCOLOR="#CCFF66" align="center"><td > <h3>'+str(SN0)+ '</h3> </td> <td width=100> <h3>'+str(listar1[0]['redshift'])+'</h3> </td>'+\
-#          ' <td align="center" width=100><h3>'+str(listar1[0]['ra_sn'])[0:9]+'</h3></td>'+\
-#          ' <td align="center" width=100><h3>'+str(listar1[0]['dec_sn'])[0:9]+'</h3></td>'+\
-#          ' <td width=100><h3>'+str(listar1[0]['objtype'])+'</h3></td> <td width=100 ><h3>'+str(_user)+'</h3></td width=300> <td> <h3> '+aka+' </h3> </td></tr>'   
-#print """</table>"""
 ##############################
 print '</td>'+'<td width=50>'
 print graph10
@@ -1030,39 +981,13 @@ print '<br> ____________________________________________________________________
 print '<br></br>'
 
 print '<a id="lightcurves"></a>'
-if len(wwlandolt) or len(wwsloan):
-    print '<br> ____________________________________________________________________________________ </br>'
-    print """<table border='0'  align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >"""
-    print '<tr align="center" ><td> <h3> Sloan aperture 1</h3> </td><td>  <h3> Sloan aperture 2 </h3>   </td></tr>'
-    print '<tr align="center" >',graph1,graph2,'</tr>'
-    print '''<tr align="center">'''+'<td align="center" width=8600">'+''' <a href="../tmp/'''+str(SN0)+'''_sloan1_'''+_user+'''.txt">&bull; <b>preliminar </b> LC sloan  </a>'''+\
-          '</td><td width=400 align="center">'+\
-          ''' <a href="../tmp/'''+str(SN0)+'''_sloan2_'''+_user+'''.txt">&bull;  <b> preliminar </b> LC sloan </a></td></tr>'''
-    print '</table>'
-    
-print '<br></br>'
-if len(wwlandolt) or len(wwsloan):
-    print '<br> ____________________________________________________________________________________ </br>'
-    print """<table border='0'  align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >"""
-    print '<tr align="center" ><td> <h3> Sloan aperture 3 </h3> </td><td>  <h3> Sloan instrumental </h3>   </td></tr>'
-    print '<tr align="center" >',graph11,graph22,'</tr>'
-    print '''<tr align="center">'''+'<td align="center" width="800">'+''' <a href="../tmp/'''+str(SN0)+'''_sloan3_'''+_user+'''.txt">&bull; <b> preliminar </b> LC sloan  </a>'''+\
-          '</td><td width=400 align="center">'+\
-          ''' <a href="../tmp/'''+str(SN0)+'''_sloan0_'''+_user+'''.txt">&bull;  <b> preliminar </b> LC sloan instrumental </a></td></tr>'''
-    print '</table>'
-print '<br></br>'
+print """<table border='0'> """  #align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >
+print '<tr align="center" > <td> psf mag  ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='mag'),'</td><td> aperture mag 1 ',\
+    agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap1'),'</td> </tr>'
+print '<tr align="center" ><td>  aperture mag2 ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap2'),' </td><td> aperture mag 3',\
+    agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap3'),'</td></tr>'
+print '</table>'
 
-#print '<div>'
-#fff0,fff1=agnkey.agndefin.obsin(_targid)
-#if fff0:
-#    print '<h3> active triggers </3>'
-#    print "<table BGCOLOR='CCFF66'  color='#FFFFFF'  border='1'  align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >"+fff0+'</table>'
-#if fff1:
-#    print '<h3> past triggers </3>'
-#    print "<table color='#GFFFFF' border='1'  align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >"+fff1+'</table>'
-#    print '<br></br>'
-#print '</div>'
-#print _targid
 print '<div id="includedContent"></div></div>'
 
 print '</body></html>'

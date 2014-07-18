@@ -803,3 +803,288 @@ d and l.targid="'+str(targid)+'"'
     return lll0,lll1
 
 ##########################################################################################
+
+def get_filtclr():
+ filtclr={}
+ filtclr['U']='purple'
+ filtclr['B']='blue'
+ filtclr['V']='#00bc00'
+ filtclr['R']='red'
+ filtclr['I']= '#CCCC33'
+ filtclr['Bessell-B']='blue'
+ filtclr['Bessell-V']='#00bc00'
+ filtclr['Bessell-R']='red'
+ filtclr['Bessell-I']='#CCCC33'
+ filtclr['up']='purple'
+ filtclr['gp']='green'
+ filtclr['rp']='red'
+ filtclr['ip']='#CCCC33'
+ filtclr['zs']='black'
+ filtclr['w']='#a883b8'
+ filtclr['SDSS-U']='purple'
+ filtclr['SDSS-G']='green'
+ filtclr['SDSS-R']='red'
+ filtclr['SDSS-I']='black'  
+ filtclr['Pan-Starrs-Z']='black'
+ filtclr['H-Alpha']='grey'
+ return filtclr
+
+##############################################################################
+
+def sqlquery(db,command):
+   import MySQLdb,os,string
+   lista=''
+   try:
+       cursor = db.cursor(MySQLdb.cursors.DictCursor)
+       cursor.execute(command)
+       lista = cursor.fetchall()
+       if cursor.rowcount == 0:
+           pass
+       cursor.close()
+   except MySQLdb.Error, e: 
+       lista = "Error %d: %s" % (e.args[0], e.args[1])
+       print lista
+   return lista
+
+#################################################################
+
+# lcdata='[ {label: "COJ B",  points: {show: true, fill: true, fillColor: "blue", type: "o", radius: 2, errorbars: "y", yerr: {show:true, upperCap: "-", lowerCap: "-", radius: 2} },  color: "blue",  data: [ [-17.2193814586, 4.426, 0.161], [-17.2162217363, 0.322, 0.469], [-9.20783068286, 2.1532, 0.155], [-9.2047520373, 1.238, 0.264] ] },{}]'
+# mint, maxt, minmag, maxmag=-18.85779960560616, 0.8032181585673273, -0.5191500000005, 6.7708166666705
+
+def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag'):
+ import random
+ # Get the data string:
+ lcdata, mint, maxt, minmag, maxmag = load_lc_data(db,targid,plottype,magtype)
+ if lcdata == '':
+     print '''<span style="font-family: 'Open Sans', sans-serif; font-weight:400; font-size:14; color:black;">No photometry to display</span>'''
+     return
+ # Make the flot plot:
+ r = random.randrange(0, 10001)
+ print '''<div id="lcplot%s%s%s" style="width:%spx;height:%spx"></div>''' %(targid, magtype, str(r), str(width), str(height))
+# print '<a>d</a>'
+ print '''<script id="source_phot" language="javascript" type="text/javascript">'''
+ print '''function negformat(val, axis) {
+            return val.toFixed(axis.tickDecimals);
+          };'''
+ print '''$(function () {
+          var lcplot = $("#lcplot%s%s%s");
+          var xlabel = '<div style="position:absolute;left:%spx;bottom:5px;color:#666;font-family: \\'Open Sans\\', sans-serif; font-weight:400; font-size:12">Days Ago</div>';
+          var options = {
+                 series: { 
+                    lines: { show: false },
+                    shadowSize: 0 
+                 }, 
+                 legend: { show: false }, 
+                 xaxis: {
+                    font: {size: 12, weight: "400", family: "'Open Sans', sans-serif"},
+                    color: '#666',
+                    tickColor: '#DCDCDC',
+                    tickFormatter:negformat,
+                    autoscaleMargin: 0.02,
+	            labelHeight: 35,
+                    min: %s,
+                    max: %s
+                 }, 
+                 yaxis: {
+                    font: {size: 12, weight: "400", family: "'Open Sans', sans-serif"},
+                    color: '#666',
+                    tickColor: '#DCDCDC',
+		    tickFormatter:negformat,
+                    min: %s,
+                    max: %s,
+                    position: "left"
+                 }, 
+                 selection: { mode: "xy" },
+                 grid: { hoverable: true, borderWidth: 1 }
+                }; 
+          ''' % (targid, magtype, r, width/2-20,str(mint), str(maxt), str(minmag), str(maxmag))
+
+ print '''function plotSelected() {
+          var data = %s;
+          var plot = $.plot(lcplot, data,
+                     $.extend(true, {}, options, {})
+                     )
+  	  lcplot.append(xlabel);
+	  return plot;
+          }   
+          var plot = plotSelected();
+      ''' %lcdata
+
+ print ''' // tooltips
+          function showChartTooltip(x, y, contents) {
+              $('<div id="charttooltip%s%s%s">' + contents + '</div>').css( {
+                  position: 'absolute',
+                  display: 'None',
+                  top: y + 5,
+                  left: x + 5,
+                  border: '1px solid #fdd',
+                  padding: '2px',
+                  'background-color': '#fee',
+                  opacity: 0.8
+              }).appendTo("body").fadeIn(200);
+          }
+          var previousPoint = null;
+          $("#lcplot%s%s%s").bind("plothover", function (event, pos, item) {
+              $("#x").text(pos.x.toFixed(2));
+              $("#y").text(pos.y.toFixed(2));
+              if (item) {
+                  if (previousPoint != item.datapoint) {
+                      previousPoint = item.datapoint;
+                      $("#charttooltip%s%s%s").remove();
+                      var x = item.datapoint[0].toFixed(2),
+                          y = item.datapoint[1].toFixed(2);
+                      showChartTooltip(item.pageX, item.pageY, "<span style=\\"font-family: 'Open Sans', sans-serif; font-weight:400; font-size:12; color:black;\\"> mag: " + y + " (" + -x + " days ago) <br> " + item.series.label + "</span>");
+                  }
+              } 
+              else {
+                  $("#charttooltip%s%s%s").remove();
+                  previousPoint = null;
+              }
+          });''' %(targid, magtype, r, targid, magtype, r, targid, magtype, r, targid, magtype, r)
+
+ print '''
+       // zooming
+       lcplot.bind("plotselected", function (event, ranges) {
+           var data = %s;
+           plot = $.plot(lcplot, data,
+                  $.extend(true, {}, options, {
+                        xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+			yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+      			})
+           )
+           lcplot.append(xlabel);
+           // zooming reset button:
+           $("<div style='right:10px; top:7px; font-family:\\"Open Sans\\",sans-serif; font-weight:400; font-size:12; color:black; position:absolute; cursor:pointer'>[reset]</div>")
+           .appendTo(lcplot)
+           .click(function () { 
+              plot.getOptions().xaxes[0].min = %s;
+              plot.getOptions().xaxes[0].max = %s;
+              plot.getOptions().yaxes[0].min = %s;
+              plot.getOptions().yaxes[0].max = %s;
+              plot.setupGrid();
+              plot.draw();  
+           });
+       });
+ ''' % (lcdata,mint, maxt, minmag, maxmag)
+
+ print '''
+       // zooming reset button       
+       $("<div style='right:10px; top:7px; font-family:\\"Open Sans\\",sans-serif; font-weight:400; font-size:12; color:black; position:absolute; cursor:pointer'>[reset]</div>")
+           .appendTo(lcplot)
+           .click(function () { 
+              plot.getOptions().xaxes[0].min = %s;
+              plot.getOptions().xaxes[0].max = %s;
+              plot.getOptions().yaxes[0].min = %s;
+              plot.getOptions().yaxes[0].max = %s;
+              plot.setupGrid();
+              plot.draw();  
+           });
+       ''' %(mint, maxt, minmag, maxmag)
+ print '''}); '''
+ print '''</script> ''' 
+ return ''
+
+#################################################################################
+
+def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
+ filtclr=get_filtclr()
+ if magtype in  ['psfmag','apmag','appmagap1','appmagap2','appmagap3','mag']: 
+     if magtype=='psfmag':
+      dmagtype='psfdmag'
+     elif magtype=='apmag':
+      dmagtype='psfdmag'
+     elif magtype=='appmagap1':
+      dmagtype='dappmagap1'
+     elif magtype=='appmagap2':
+      dmagtype='dappmagap2'
+     elif magtype=='appmagap3':
+      dmagtype='dappmagap3'
+     elif magtype=='mag':
+      dmagtype='dmag'
+
+     query = '''SELECT %s, ((jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
+     query += '''FROM dataredulco '''
+     query += '''WHERE %s is not null and targid=%s ''' % (magtype,targid)
+     query += ''' and %s !=  9999   ''' % magtype
+     query += '''ORDER BY daysago desc'''
+     cursor = sqlquery(db,query)
+     if len(cursor) == 0:
+         if magtype=='mag':
+             magtype='psfmag'
+             dmagtype='psfdmag'
+             query = '''SELECT %s, ((jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
+             query += '''FROM dataredulco '''
+             query += '''WHERE %s is not null and targid=%s ''' % (magtype,targid)
+             query += ''' and %s !=  9999   ''' % magtype
+             query += '''ORDER BY daysago desc'''
+             cursor = sqlquery(db,query)
+             if len(cursor) == 0:
+                 return ('', 0, 0, 0, 0)
+         else:
+             return ('', 0, 0, 0, 0)
+
+     days,psfmag=zip(*[[i['daysago'],i[magtype]] for i in cursor])
+     maxt=max(days)
+     mint=min(days)
+     interval = maxt-mint
+     mint = mint-0.1*interval
+     maxt = maxt+0.1*interval
+
+     minmag = min(psfmag)
+     maxmag = max(psfmag)
+     interval = maxmag-minmag
+     minmag = minmag-0.15*interval
+     maxmag = maxmag+0.15*interval
+
+     query  = '''SELECT distinct p.filter, p.telescope, p.instrument '''
+     query += '''FROM dataredulco as p '''
+     query += '''WHERE p.%s is not null ''' % magtype
+     query += ''' and %s !=  9999   '''  %  magtype
+     query += '''AND p.targid=%s ''' % targid
+
+     cursor = sqlquery(db,query)
+     if len(cursor)>1:
+         if plottype == 'flot':
+             lcdata = '[ '
+             for row in cursor:
+                 lcdata += '''{label: "%s %s", ''' %(row['telescope'],row['filter'])
+                 if row['filter'] in filtclr:
+                     clr = filtclr[row['filter']]
+                 else:
+                     clr = 'black' 
+                 lcdata += ''' points: {show: true, fill: true, fillColor: "%s", type: "o", radius: 2, errorbars: "y", yerr: {show:true, upperCap: "-", lowerCap: "-", radius: 2} }, ''' %clr
+                 lcdata += ''' color: "%s", ''' %clr
+                 lcdata += ''' data: [ ''' 
+                 query =  '''SELECT ((p.jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago, '''
+                 query += '''p.%s, p.%s  ''' % (magtype,dmagtype)
+                 query += '''FROM dataredulco as p '''
+                 query += '''WHERE p.%s is not null ''' % magtype
+                 query += ''' and p.%s !=  9999   '''  % magtype
+                 query += '''AND p.targid=%s ''' %targid
+                 query += '''AND p.filter='%s' ''' %row['filter']
+                 datacursor = sqlquery(db,query)
+                 for datarow in datacursor:
+                     if datarow[dmagtype] == 9999: #HACK, need to find out why this happens (not null mag but 9999 emag)
+                         datarow[magtype] = 0 
+                     lcdata += '''[%s, %s, %s], ''' %(datarow['daysago'], datarow[magtype], datarow[dmagtype])
+                 if lcdata[-2:] == ', ':
+                     lcdata = lcdata[:-2] # remove last apostrophe
+                 lcdata += ''' ] }, '''
+             lcdata = lcdata[:-2] # remove last apostrophe
+             lcdata += ''' ]''' 
+    
+         elif plottype == 'google':
+             lcdata  = '''['Days Ago','Mag','MagLow','MagHigh',],'''             
+         else:
+             lcdata = '[]'   
+     else:
+         lcdata = '[]'
+ else:
+     lcdata = []
+     mint = 0
+     maxt = 0
+     minmag = 0
+     maxmag = 0
+ return (lcdata, mint, maxt, minmag, maxmag)
+
+########################################################################################################################

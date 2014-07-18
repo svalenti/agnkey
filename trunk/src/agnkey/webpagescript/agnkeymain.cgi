@@ -11,7 +11,7 @@ hostname=gethostname()
 #print hostname
 #print '</html></body>'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -98,11 +98,6 @@ print '''
 <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="flot/excanvas.min.js"></script><![endif]-->
 </head>
 ''' %(base_url)
-
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.errorbars.js"></script>
-#<script language="javascript" type="text/javascript" src="http://secure.lcogt.net/user/supernova/dev/flot/jquery.flot.navigate.js"></script>
 
 print '<body topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" rightmargin="0" bottommargin="0" bgcolor="#ececec" link="black" vlink="black" alink="black">'
 

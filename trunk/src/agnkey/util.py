@@ -3,7 +3,7 @@
 #
 import socket
 host = socket.gethostname()
-if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn']:
+if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
@@ -1116,10 +1116,6 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM", 
                       "type": "LAMP_FLAT", "exposure_count": 1, "ag_exp_time": 10.0, 
                       "spectra_lamp": "", "ag_mode": "OPTIONAL", "readout_mode": "", "bin_y": 1, "bin_x": 1}, 
-                     {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "", 
-                      "priority": 2, "instrument_name": "2M0-FLOYDS-SCICAM", 
-                      "type": "ARC", "exposure_count": 1, "ag_exp_time": 10.0, 
-                      "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}, 
                      {"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "", 
                       "priority": 3, "instrument_name": "2M0-FLOYDS-SCICAM", 
                       "type": "SPECTRUM", "exposure_count": 1, "ag_exp_time": 10.0, 

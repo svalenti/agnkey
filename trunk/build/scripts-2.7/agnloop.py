@@ -1,4 +1,4 @@
-#!/System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
+#!/Users/svalenti/usr/Ureka/variants/common/bin/python
 description="> process lsc data  " 
 usage= "%prog  -e epoch [-s stage -n name -f filter -d idnumber]\n available stages [wcs,psf,psfmag,zcat,abscat,mag,local,getmag]\n"
 
