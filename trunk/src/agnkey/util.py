@@ -1213,7 +1213,7 @@ def getstatus(username,passwd,tracking_id):
     import json
     params = urllib.urlencode({'username': username ,'password': passwd})
     conn = httplib.HTTPSConnection("lcogt.net")
-    print "/observe/service/request/get/userrequeststatus/" + tracking_id
+    #print "/observe/service/request/get/userrequeststatus/" + tracking_id
     conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params)
     response = conn.getresponse().read()
     python_dict = json.loads(response)
