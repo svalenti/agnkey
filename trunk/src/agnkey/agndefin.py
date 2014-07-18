@@ -857,7 +857,7 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
  lcdata, mint, maxt, minmag, maxmag = load_lc_data(db,targid,plottype,magtype)
  if lcdata == '':
      print '''<span style="font-family: 'Open Sans', sans-serif; font-weight:400; font-size:14; color:black;">No photometry to display</span>'''
-     return
+     return ''
  # Make the flot plot:
  r = random.randrange(0, 10001)
  print '''<div id="lcplot%s%s%s" style="width:%spx;height:%spx"></div>''' %(targid, magtype, str(r), str(width), str(height))
