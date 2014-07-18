@@ -1065,7 +1065,7 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
                  datacursor = sqlquery(db,query)
                  for datarow in datacursor:
                      if datarow[dmagtype] == 9999: #HACK, need to find out why this happens (not null mag but 9999 emag)
-                         datarow[magtype] = 0 
+                         datarow[dmagtype] = 0 
                      lcdata += '''[%s, %s, %s], ''' %(datarow['daysago'], datarow[magtype], datarow[dmagtype])
                  if lcdata[-2:] == ', ':
                      lcdata = lcdata[:-2] # remove last apostrophe
