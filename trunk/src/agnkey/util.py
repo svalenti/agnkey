@@ -1237,17 +1237,20 @@ def downloadfloydsraw(JD,username,passwd):
     for track in ll0['tracknumber']:
         print track
         _dict=agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-        if 'state' in _dict.keys():
-            _status=_dict['state']
-        else:
-            _status='xxxx'
-        if 'requests' in _dict.keys() and _status in ['UNSCHEDULABLE','COMPLETED']:
+        if 'state' in _dict.keys(): _status=_dict['state']
+        else:  _status='xxxx'
+        if 'requests' in _dict.keys(): 
+           _reqnumber=_dict['requests'].keys()[0]
+        else: 
+           _reqnumber=''
+        if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
             for ii in  _dict['requests'].keys():
-                _request_number=str(ii).zfill(10)
-                print _status,_request_number
+                _tracknumber=str(ii).zfill(10)
+                _date=re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+                print _status,_reqnumber
                 directory=agnkey.util.workingdirectory+'floydsraw/'
-                if _request_number!='xxxx':
-                    if not os.path.isfile(directory+_request_number+'.tar.gz'):
+                if _tracknumber!='xxxx':
+                    if not os.path.isfile(directory+_request_number+'_'+str(_date)+'.tar.gz'):
                         ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_request_number+'.tar.gz --directory-prefix='
                         line='wget --http-user='+username+' --http-password='+passwd+' '+ata+directory
                         print line
