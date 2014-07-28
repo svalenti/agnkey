@@ -779,9 +779,9 @@ d and l.targid="'+str(targid)+'"'
             if 'floyds' in ll0['filters'][i] and _request_number:
                 for jj in _request_number: 
                     data='../AGNKEY/floydsraw/'+jj+'.tar.gz'
-                    lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+_status+'</td><td>'+'<a href="'+data+'"> download tar '+'</td></tr>'
+                    lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td><td>'+'<a href="'+str(data)+'"> download tar '+'</td></tr>'
             else:
-                lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+_status+'</td></tr>'
+                lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
     if ll1:
         for i in range(0,len(ll1['name'])):
             if float(ll1['tracknumber'][i])>1:
@@ -796,10 +796,10 @@ d and l.targid="'+str(targid)+'"'
             if 'floyds' in ll1['filters'][i] and _request_number:
                 for jj in _request_number: 
                     data='../AGNKEY/floydsraw/'+jj+'.tar.gz'
-                    data='http://data.lcogt.net/download/package/spectroscopy/request/'+_request_number+'.tar.gz'
-                    lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+_status+'</td><td>'+'<a href="'+data+'"> download tar '+'</td></tr>'
+                    data='http://data.lcogt.net/download/package/spectroscopy/request/'+str(_request_number)+'.tar.gz'
+                    lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td><td>'+'<a href="'+str(data)+'"> download tar '+'</td></tr>'
             else:
-                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+_status+'</td></tr>'
+                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
     return lll0,lll1
 
 ##########################################################################################
