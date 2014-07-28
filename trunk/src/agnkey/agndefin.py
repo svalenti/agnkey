@@ -761,7 +761,8 @@ d and l.targid="'+str(targid)+'"'
             for kk in cc[0].keys():
                 ll1[kk].append(cc[jj][kk])
 
-    username,passwd='svalenti@lcogt.net','eIgheeK_'
+    readpass=agnkey.util.readpasswd(agnkey.util.workingdirectory,agnkey.util.realpass)
+    username,passwd=readpass['odinuser'],readpass['odinpasswd']
     lll0=''
     lll1=''
     if ll0:
