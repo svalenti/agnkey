@@ -855,6 +855,7 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
  import random
  # Get the data string:
  lcdata, mint, maxt, minmag, maxmag = load_lc_data(db,targid,plottype,magtype)
+
  if lcdata == '':
      print '''<span style="font-family: 'Open Sans', sans-serif; font-weight:400; font-size:14; color:black;">No photometry to display</span>'''
      return ''
@@ -866,6 +867,15 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
  print '''function negformat(val, axis) {
             return val.toFixed(axis.tickDecimals);
           };'''
+
+# dm=True
+# if dm:
+#     print '''function absmag(val, axis) {
+#                return (-val-%s).toFixed(axis.tickDecimals);
+#              };''' %dm
+
+
+
  print '''$(function () {
           var lcplot = $("#lcplot%s%s%s");
           var xlabel = '<div style="position:absolute;left:%spx;bottom:5px;color:#666;font-family: \\'Open Sans\\', sans-serif; font-weight:400; font-size:12">Days Ago</div>';
@@ -881,6 +891,7 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
                     tickColor: '#DCDCDC',
                     tickFormatter:negformat,
                     autoscaleMargin: 0.02,
+                    reversed: true ,
 	            labelHeight: 35,
                     min: %s,
                     max: %s
@@ -890,6 +901,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
                     color: '#666',
                     tickColor: '#DCDCDC',
 		    tickFormatter:negformat,
+                    transform: function (v) { return -v; },  
+                    inverseTransform: function (v) { return -v; },
+                    reversed: true ,
                     min: %s,
                     max: %s,
                     position: "left"
@@ -1002,6 +1016,7 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
      elif magtype=='mag':
       dmagtype='dmag'
 
+     invert=False
      query = '''SELECT %s, ((jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
      query += '''FROM dataredulco '''
      query += '''WHERE %s is not null and targid=%s ''' % (magtype,targid)
@@ -1020,6 +1035,8 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
              cursor = sqlquery(db,query)
              if len(cursor) == 0:
                  return ('', 0, 0, 0, 0)
+             else:
+                invert=True
          else:
              return ('', 0, 0, 0, 0)
 
@@ -1032,9 +1049,12 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
 
      minmag = min(psfmag)
      maxmag = max(psfmag)
-     interval = maxmag-minmag
-     minmag = minmag-0.15*interval
-     maxmag = maxmag+0.15*interval
+     #maxmag = min(psfmag)
+     #minmag = max(psfmag)
+
+#     interval =  maxmag-minmag
+#     maxmag = maxmag+0.15*interval
+#     minmag = minmag-0.15*interval
 
      query  = '''SELECT distinct p.filter, p.telescope, p.instrument '''
      query += '''FROM dataredulco as p '''
