@@ -1256,10 +1256,13 @@ def downloadfloydsraw(JD,username,passwd):
                 directory=agnkey.util.workingdirectory+'floydsraw/'
                 if _tracknumber!='xxxx' and _tarfile:
                     if not os.path.isfile(directory+_tarfile):
-                        ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='
-                        line='wget --http-user='+username+' --http-password='+passwd+' '+ata+directory
+#                        ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='
+#                        line='wget --http-user='+re.sub('@','%40',username)+' --http-password='+passwd+' '+ata+directory
+                        line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
+                           '" https://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='+directory
                         print line
                         os.system(line)
+                        agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,track,connection='agnkey',namefile0='tracknumber')
                     else:
                         print 'file already there'
                 else:   print 'request number not defined'
