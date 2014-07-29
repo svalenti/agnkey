@@ -731,6 +731,7 @@ def obsin(targid,_days=7):
     import agnkey
     import datetime
     import time
+    import re
     def JDnow(datenow='',verbose=False):
         _JD0=2455927.5
         if not datenow:
@@ -796,12 +797,14 @@ def obsin(targid,_days=7):
                         _reqnumber=''
                     if _status in ['UNSCHEDULABLE','COMPLETED','CANCELED']:
                         agnkey.agnsqldef.updatevalue('obslog','status',_status,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-
-                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',_reqnumber,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
+                    print str(_reqnumber)
+#                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',str(_reqnumber),str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
 
                 if 'floyds' in ll0['filters'][i] and _reqnumber:
                     if not _tarfile:
-                        _date=re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+                        print _reqnumber
+                        print _dict['requests']
+                        _date=re.sub('-','',_dict['requests'][ll0['tracknumber'][i]]['schedule'][0]['frames'][0]['day_obs'])
                         _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
                         agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
 
@@ -837,15 +840,22 @@ def obsin(targid,_days=7):
 
                     if _status in ['UNSCHEDULABLE','COMPLETED']:
                         agnkey.agnsqldef.updatevalue('obslog','status',_status,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',str(_reqnumber),str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
 
+                    print str(_reqnumber)
+#                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',str(_reqnumber),str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                 if 'floyds' in ll1['filters'][i] and _reqnumber:
                         for ii in  _reqnumber:
                             if not _tarfile:
-                                    _date=re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+                                try:
+                                    _date=re.sub('-','',_dict['requests'][str(ii)]['schedule'][0]['frames'][0]['day_obs'])
                                     _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
-                                    agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-                            lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td><td>'+'<a href="../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                                except: 
+                                    _tarfile=''
+                            if _tarfile:
+                                agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
+                                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td><td>'+'<a href="../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                            else:
+                                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                 else:
                      for ii in  _reqnumber:
                          lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'

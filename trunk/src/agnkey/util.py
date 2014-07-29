@@ -1237,6 +1237,7 @@ def downloadfloydsraw(JD,username,passwd):
     for track in ll0['tracknumber']:
         print track
         _dict=agnkey.util.getstatus(username,passwd,str(track).zfill(10))
+        print _dict
         if 'state' in _dict.keys(): _status=_dict['state']
         else:  _status='xxxx'
         if 'requests' in _dict.keys(): 
@@ -1246,17 +1247,22 @@ def downloadfloydsraw(JD,username,passwd):
         if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
             for ii in  _dict['requests'].keys():
                 _tracknumber=str(ii).zfill(10)
-                _date=re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
-                print _status,_reqnumber
+                try:
+                   _date=re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+                   print _status,_reqnumber
+                   _tarfile=_reqnumber+'_'+str(_date)+'.tar.gz'
+                except: 
+                   _tarfile=''
                 directory=agnkey.util.workingdirectory+'floydsraw/'
-                if _tracknumber!='xxxx':
-                    if not os.path.isfile(directory+_request_number+'_'+str(_date)+'.tar.gz'):
-                        ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_request_number+'.tar.gz --directory-prefix='
+                if _tracknumber!='xxxx' and _tarfile:
+                    if not os.path.isfile(directory+_tarfile):
+                        ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='
                         line='wget --http-user='+username+' --http-password='+passwd+' '+ata+directory
                         print line
                         os.system(line)
                     else:
                         print 'file already there'
                 else:   print 'request number not defined'
-
+        if str(track)=='53874':
+           raw_input('gogon')
 ##########################################################################################
