@@ -152,9 +152,9 @@ if __name__ == "__main__":
         for i in range(0,len(tel)):    runin(epoch)  # ingest raw date
         
          #  download raw floyds
-        _JDn=agnkey.agnsqldef.JDnow()-5
-        username,passwd=agnkey.util.readpass['odinuser'],agnkey.util.readpass['odinpasswd']
-        agnkey.util.downloadfloydsraw(_JDn,username,passwd)    
+    _JDn=agnkey.agnsqldef.JDnow()-10
+    username,passwd=agnkey.util.readpass['odinuser'],agnkey.util.readpass['odinpasswd']
+    agnkey.util.downloadfloydsraw(_JDn,username,passwd)    
 
 
 #        print '\n### ingest redu data'

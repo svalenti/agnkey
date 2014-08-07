@@ -1225,7 +1225,7 @@ def getstatus(username,passwd,tracking_id):
 def downloadfloydsraw(JD,username,passwd):
     import agnkey
     import os,string,re,sys
-    command=['select * from obslog where tracknumber and windowstart >'+str(JD)]
+    command=['select * from obslog where tracknumber and filters="floyds" and windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
     ll0={}
     for jj in lista[0].keys():
@@ -1256,16 +1256,16 @@ def downloadfloydsraw(JD,username,passwd):
                 directory=agnkey.util.workingdirectory+'floydsraw/'
                 if _tracknumber!='xxxx' and _tarfile:
                     if not os.path.isfile(directory+_tarfile):
-#                        ata='http://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='
-#                        line='wget --http-user='+re.sub('@','%40',username)+' --http-password='+passwd+' '+ata+directory
                         line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
                            '" https://data.lcogt.net/download/package/spectroscopy/request/'+_tarfile+' --directory-prefix='+directory
                         print line
                         os.system(line)
-                        agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,track,connection='agnkey',namefile0='tracknumber')
+                        if os.path.isfile(directory+_tarfile):
+                           agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,track,connection='agnkey',namefile0='tracknumber')
                     else:
                         print 'file already there'
                 else:   print 'request number not defined'
-        if str(track)=='53874':
+        if str(track)=='51565':
+           print _dict
            raw_input('gogon')
 ##########################################################################################
