@@ -21,10 +21,13 @@ import StringIO
 import base64
 #import agndefin
 import ephem
-_user=os.getenv("REMOTE_USER")
+try:
+    _user=os.getenv("REMOTE_USER")
+except:
+    pass
 
 #if not _user:  _user=os.environ['USER']
-#_user='SV'
+if not _user:  _user='SV'
 
 page=''
 _targid=''
@@ -357,7 +360,7 @@ _JDn=JDnow()
 
 ##############################################################################
 if len(SN)>0:    SN0=re.sub(' ','',SN[0])
-else:            SN0='PSN095542_OS'
+else:            SN0='1324+03'
 if len(SN_RA)>0:    SN_RA=SN_RA[0]
 else:               SN_RA=''    #'95.410237499999994'
 if len(SN_DEC)>0:    SN_DEC=SN_DEC[0]
@@ -481,7 +484,10 @@ print ''' </head>'''
 
 print ''''<body topmargin="0" marginheight="0" leftmargin="0" marginwidth="0" rightmargin="0" bottommargin="0" bgcolor="#ececec" link="black" vlink="black" alink="black"
 onload="collapsetd();" onresize="collapsetd();"> '''
-url=os.environ["REQUEST_URI"] 
+try:
+    url=os.environ["REQUEST_URI"] 
+except:
+    url='http://deneb.st-and.ac.uk/agnecho/cgi-bin'
 
 print '''
 <div id="container" style="width:1300px">
@@ -982,10 +988,10 @@ print '<br></br>'
 
 print '<a id="lightcurves"></a>'
 print """<table border='0'> """  #align='center'  height='10%' cellspacing='0' cellpadding='0' width=400 >
-print '<tr align="center" > <td> psf mag  ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='mag'),'</td><td> aperture mag 1 ',\
-    agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap1'),'</td> </tr>'
-print '<tr align="center" ><td>  aperture mag2 ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap2'),' </td><td> aperture mag 3',\
-    agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap3'),'</td></tr>'
+print '<tr align="center" > <td> psf mag  ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='mag'),\
+    '</td><td> aperture mag 1 ', agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap1'),'</td> </tr>'
+print '<tr align="center" ><td>  aperture mag2 ',agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap2'),\
+    ' </td><td> aperture mag 3', agnkey.agndefin.plot_phot(agnkey.agnsqldef.conn,_targid, width=400, height=250, plottype='flot',magtype='appmagap3'),'</td></tr>'
 print '</table>'
 
 print '<div id="includedContent"></div></div>'

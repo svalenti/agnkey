@@ -4,13 +4,14 @@ import sys,os,cgi,string,glob,re
 from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname()) 
 hostname=gethostname()
-os.environ['HOME']='../tmp/'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
+
+os.environ['HOME']='../tmp/'
 import agnkey
 from agnkey.agnsqldef import conn
 import datetime,time,ephem
@@ -423,7 +424,7 @@ elif _type=='triggerfloyds':
 ############################################################
 #
     for mm in range(0,len(utstart)):
-        logfile=agnkey.util.sendfloydstrigger(str(SN),_expfloyds,str(SN_RA),str(SN_DEC),str(utstart[mm]),str(utend[mm]),_user0,passwd,_proposal,str(_airmass),_site,_slit,'all')
+        logfile=agnkey.util.sendfloydstrigger(str(SN),_expfloyds,str(SN_RA),str(SN_DEC),str(utstart[mm]),str(utend[mm]),_user0,passwd,_proposal,str(_airmass),_site,_slit,'after')
 #
         line00= line00+'<p> '+logfile+' '+str(_targid)+' </p>'
         _nexp2='1'
