@@ -127,8 +127,16 @@ def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnk
          '</table>'+\
          '<table>'+\
          '<tr><td> site: <select name="site">'+\
-         '<option value="any"> any</option>  <option value="ogg">FTN</option>'+\
+         '<option value="any"> any</option>'+\
+         '<option value="ogg">FTN</option>'+\
          '<option value="coj">FTS</option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> slit: <select name="slit">'+\
+         '<option value="default">default </option>'+\
+         '<option value="1.2">1.2</option>'+\
+         '<option value="1.6">1.6</option>'+\
+         '<option value="2.0">2.0</option>'+\
+         '<option value="6.0">6.0</option>'+\
          '</select></td></tr>'+\
          '<tr><td> number of triggers: </a> <select name="ntriggers">'+\
          '<option value="1"> 1 in the next 24h </option>'+\

@@ -943,6 +943,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     fildic={'1m0':{'U':'U','B':'B','V':'V','R':'R','I':'I',\
                    'u':'up','g':'gp','r':'rp','i':'ip','z':'zs',\
                    'up':'up','gp':'gp','rp':'rp','ip':'ip','zs':'zs'}}
+    fildic['2m0']=fildic['1m0']
 
     _inst={'sinistro':'1M0-SCICAM-SINISTRO','sbig':'1M0-SCICAM-SBIG','spectral':'2M0-SCICAM-SPECTRAL','oneof':'oneof'}
     binx={'sbig':2,'sinistro':1,'spectral':2}
@@ -1110,7 +1111,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
        _location={"telescope_class": "2m0", "site": _site} 
     else:
        _location={"telescope_class": "2m0"}                
-    slitvec={ '1.6' :"SLIT_1.6AS", '2.0' :"SLIT_2.0AS", '0.9':"SLIT_0.9AS", '6.0' :"SLIT_6AS", '1.2':"SLIT_1.2AS"}
+    slitvec={ '1.6' :"SLIT_1.6AS", '2.0' :"SLIT_2.0AS", '0.9':"SLIT_0.9AS", '6.0' :"SLIT_6.0AS", '1.2':"SLIT_1.2AS"}
 
     if _calibration=='all':
         _molecules= [{"exposure_time": 20.0, "spectra_slit": slitvec[_slit], "ag_filter": "", 

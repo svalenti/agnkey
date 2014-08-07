@@ -86,6 +86,9 @@ else:                        _access=''
     ##########   expfloyds  #########
 if form.getlist('expfloyds'): _expfloyds=form.getlist('expfloyds')[0]
 else:                        _expfloyds=''
+    ##########   slit  #########
+if form.getlist('slit'): _slit=form.getlist('slit')[0]
+else:                        _slit=''
     ##########   filt,exp,nexp  #########
 filtvec=[]
 expvec=[]
@@ -415,12 +418,13 @@ elif _type=='triggerfloyds':
     priority=1
     telclass='2m0'
     passwd=agnkey.util.readpass['odinpasswd']
-    if _site=='coj':
-        _slit='2.0'
-    elif _site=='ogg':
-        _slit='1.6'
-    else:
-        _slit='2.0'
+    if _slit=='default':
+        if _site=='coj':
+            _slit='2.0'
+        elif _site=='ogg':
+            _slit='1.6'
+        else:
+            _slit='2.0'
 ############################################################
 #
     for mm in range(0,len(utstart)):
