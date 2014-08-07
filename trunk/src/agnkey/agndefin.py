@@ -809,13 +809,19 @@ def obsin(targid,_days=7):
                 if 'floyds' in ll0['filters'][i]:
                   if _reqnumber:
                     if not _tarfile:
-                        _date=re.sub('-','',_dict['requests'][ll0['tracknumber'][i]]['schedule'][0]['frames'][0]['day_obs'])
-                        _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
-                        agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-
-                    lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                        str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
-                        '</td><td>'+'<a href="../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                        try:
+                            _date=re.sub('-','',_dict['requests'][ll0['tracknumber'][i]]['schedule'][0]['frames'][0]['day_obs'])
+                            _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
+                            agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
+                        except:
+                            _tarfile=''
+                    if _tarfile:
+                        lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
+                            '</td><td>'+'<a href="../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                    else:
+                        lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                   else:
                       lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
                           str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
