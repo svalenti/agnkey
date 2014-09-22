@@ -4,7 +4,7 @@
 import socket
 host = socket.gethostname()
 if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local',\
-                'svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2','dhcp42176.physics.ucdavis.edu']:
+                'svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2','dhcp42192.physics.ucdavis.edu','dhcp42176.physics.ucdavis.edu']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
