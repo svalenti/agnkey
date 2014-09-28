@@ -166,7 +166,7 @@ if __name__ == "__main__":
                 elif dicti[_filter][img]['telescope'] in ['elp','1m0-08']:                                     kk=agnkey.sites.extintion('mcdonald')
                 elif dicti[_filter][img]['telescope'] in ['cpt','1m0-12','1m0-10','1m0-13']:                   kk=agnkey.sites.extintion('southafrica')
                 elif dicti[_filter][img]['telescope'] in ['ftn']:                                              kk=agnkey.sites.extintion('mauna')
-                elif dicti[_filter][img]['telescope'] in ['1m0-03','1m0-11','fts','coj']:                               kk=agnkey.sites.extintion('siding')
+                elif dicti[_filter][img]['telescope'] in ['1m0-03','1m0-11','fts','coj']:                      kk=agnkey.sites.extintion('siding')
                 else: 
                     print _filter,img,dicti[_filter][img]
                     sys.exit('problem with dicti')
@@ -269,7 +269,7 @@ if __name__ == "__main__":
                 elif dicti[_filter][img]['telescope'] in ['elp','1m0-08']:                                     kk=agnkey.sites.extintion('mcdonald')
                 elif dicti[_filter][img]['telescope'] in ['cpt','1m0-12','1m0-10','1m0-13']:                   kk=agnkey.sites.extintion('southafrica')
                 elif dicti[_filter][img]['telescope'] in ['ftn']:                                              kk=agnkey.sites.extintion('mauna')
-                elif dicti[_filter][img]['telescope'] in ['1m0-11','coj','fts']:                               kk=agnkey.sites.extintion('siding')
+                elif dicti[_filter][img]['telescope'] in ['1m0-03','1m0-11','coj','fts']:                               kk=agnkey.sites.extintion('siding')
                 else: 
                     print _filter,img,dicti[_filter][img]
                     sys.exit('problem with dicti')

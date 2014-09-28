@@ -102,7 +102,7 @@ if __name__ == "__main__":
      else:                 _redo=True
      if option.recenter==False:  _recenter=True
      else:                         _recenter=False
-     if _type not in ['fit','ph','mag']:  sys.argv.append('--help')
+     if _type not in ['fit','ph','mag','appmagap1','appmagap2','appmagap3']:  sys.argv.append('--help')
      if _stage:
           if _stage not in ['wcs','psf','psfmag','zcat','abscat','mag','local','getmag','merge','diff','template','apmag','makestamp']: sys.argv.append('--help')
      if _bad:
@@ -264,15 +264,60 @@ if __name__ == "__main__":
                               elif _filter in ['u','g','r','i','z','sloan']:  _field='sloan'
                               elif _filter in ['apass']:                      _field='apass'
                               else:                                           _field='sloan'
-                         if _field:
-                              print ll3['namefile']
+
+                         if _field=='apass':
+                              print  'HERE'
+                              ww0=asarray([i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['V','B']) ])
+                              ww1=asarray([i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['gp','rp','ip']) ])
                               _color=''
-                              if len(ll3['namefile'])>1:
-                                   for jj in ['u','g','r','i','z','U','B','V','R','I']:
+                              if len(ww0)>=1:
+                                   _color='BV'
+#                                   for jj in ['B','V']:
+#                                        if jj in list(set(ll3['filter'])): 
+#                                             _color=_color+agnkey.sites.filterst1(_telescope)[jj]
+                                   print _color,_calib,_field
+                                   agnkey.agnloopdef.run_zero(ll3['namefile'][ww0],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+
+                              if len(ww1)>=1:
+                                   _color=''
+                                   for jj in ['gp','rp','ip']:
                                         if jj in list(set(ll3['filter'])): 
                                              _color=_color+agnkey.sites.filterst1(_telescope)[jj]
-#                                   for jj in list(set(ll3['filter'])): _color=_color+lsc.sites.filterst1(_telescope)[jj]
-                              agnkey.agnloopdef.run_zero(ll3['namefile'],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+                                   print _color,_calib,_field
+                                   agnkey.agnloopdef.run_zero(ll3['namefile'][ww1],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+                         elif _field=='landolt':
+                              ww0=asarray([i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['U','I','R','V','B']) ])
+                              _color=''
+                              for jj in ['U','I','R','V','B']:
+                                   if jj in list(set(ll3['filter'])): 
+                                        _color=_color+agnkey.sites.filterst1(_telescope)[jj]
+                              if len(ww0)>=1:
+                                 print _color,_calib,_field
+                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww0],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+                         elif _field=='sloan':
+                              ww0=asarray([i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['us','gp','rp','ip','zs']) ])
+                              _color=''
+                              for jj in ['gp','us','rp','ip','zs']:
+                                   if jj in list(set(ll3['filter'])): 
+                                        _color=_color+agnkey.sites.filterst1(_telescope)[jj]
+                              if len(ww0)>=1:
+                                 print _color,_calib,_field
+                                 agnkey.agnloopdef.run_zero(ll3['filename'][ww0],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+                         else:
+                              print 'warning: field not defined, zeropoint not computed'
+
+###########################################################################################################################
+#                         if _field:
+#                              print ll3['namefile']
+#                              _color=''
+#                              if len(ll3['namefile'])>1:
+#                                   for jj in ['u','g','r','i','z','U','B','V','R','I']:
+#                                        if jj in list(set(ll3['filter'])): 
+#                                             _color=_color+agnkey.sites.filterst1(_telescope)[jj]
+#                              agnkey.agnloopdef.run_zero(ll3['namefile'],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+#############################################################################################################################
+
+
                elif _stage=='abscat':                                #    compute magnitudes for sequence stars > img.cat
                          if _standard:
                               mm=agnkey.agnloopdef.filtralist(ll0,_filter,'',_standard,'','','',_filetype)
