@@ -288,9 +288,7 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
     for img in imglist:
         hdr=readhdr(img)
         _instrume=readkey3(hdr,'instrume')
-        if catalogue=='inst' and _instrume in ['fs01','fs02','fs03','em03','em01','kb05','kb70','kb71',\
-                                               'kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                               'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']: catalogue='2mass'
+        if catalogue=='inst' and _instrume in agnkey.util.instrument0['all']:  catalogue='2mass'
         if not sexvec:
             sexvec=agnkey.agnastrodef.sextractor(img)
 ###################
@@ -315,11 +313,11 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
         else:  rmsx3,rmsy3,num3,fwhm3,ell3,ccc,bkg3,rasys3,decsys3=rmsx1,rmsy1,num1,fwhm1,ell1,ccc,bkg1,rasys1,decsys1
 ######################################## 
         if rmsx3 < 10 and rmsy3 < 10: 
-            if _instrume in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:
+            if _instrume in agnkey.util.instrument0['sbig']:
                 fwhmgess3=median(array(fwhm3))*.68*2.35*0.467
                 if _imex:  fwhmgessime = median(array(ccc))*0.467
                 else:     fwhmgessime = 9999
-            elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+            elif _instrume in agnkey.util.instrument0['sinistro']:
                 fwhmgess3=median(array(fwhm3))*.68*2.35*0.467          #  need to check
                 if _imex:  fwhmgessime = median(array(ccc))*0.467
                 else:     fwhmgessime = 9999
@@ -336,17 +334,13 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
             fwhmgess3=9999
             fwhmgessime=9999
             ellgess3=9999
-        if _instrume in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                         'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                         'fs01','fs02','fs03','em03','em01']:
-            mbkg3=median(bkg3)
-            agnkey.util.updateheader(img,0,{'MBKG':[mbkg3,'background level']})
+        if _instrume in agnkey.util.instrument0['all']:
+             mbkg3=median(bkg3)
+             agnkey.util.updateheader(img,0,{'MBKG':[mbkg3,'background level']})
         else:
             mbkg3=readkey3(hdr,'MBKG')
         if fwhmgess3:
-            if _instrume in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                             'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                             'fs01','fs02','fs03','em03','em01']:  
+            if _instrume in agnkey.util.instrument0['all']:
                 V=(math.pi/(4*math.log(2)))*(45000-float(mbkg3))*(float(fwhmgess3)**2)
             else:                     
                 V=(math.pi/(4*math.log(2)))*(32000-float(mbkg3))*(float(fwhmgess3)**2)
@@ -385,9 +379,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
     img=lista[0]
     hdr=readhdr(img)
     _instrume=readkey3(hdr,'instrume')
-    if _instrume in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                     'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                     'fs01','fs02','fs03','em03','em01']:
+    if _instrume in agnkey.util.instrument0['all']:
             magsel0 = 7.0
             magsel1 = 21.
     else:

@@ -544,7 +544,6 @@ def delfromdb(SN,SN_RA,SN_DEC,_targid,ii,_user,_form):
 ###################################################################################3
 ###################################################################################3
 
-
 def archivereducedspectrum(img):
     import string,re
     import pyfits
@@ -576,9 +575,14 @@ def archivereducedspectrum(img):
     else:     _dateobs=''
     #   UT
     if 'UTSTART' in hdr:  _ut=hdr.get('UTSTART')
-    elif 'UT' in hdr: _ut=hdr.get('UT')
-    elif 'DATE-OBS' in hdr:   _ut=hdr.get('DATE-OBS')
-    else: _ut=''
+    elif 'UT' in hdr: 
+        _ut=hdr.get('UT')
+    elif 'UTC-OBS' in hdr: 
+        _ut=hdr.get('UTC-OBS')
+    elif 'DATE-OBS' in hdr:   
+        _ut=hdr.get('DATE-OBS')
+    else: 
+        _ut=''
     if 'T' in _ut:    _ut=string.split(_ut,'T')[1]
 
     # ra and  dec
@@ -605,11 +609,19 @@ def archivereducedspectrum(img):
         else:      _jd=''
     else:    _jd=''
 
+    
+    if 'GRISM' in hdr:
+        _grism=re.sub('/','_',hdr.get('GRISM'))
+    elif 'GRATING' in hdr:
+        _grism=hdr.get('GRATING')
+    else:
+        _grism='grism'
+
     if _telescope in ['fts','ftn']:
         dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':float(hdr.get('MJD'))+0.5,\
                     'telescope':_telescope,'airmass':hdr.get('airmass'),'objname':_object,'ut':_ut,\
                     'instrument':hdr.get('instrume'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('APERWID'),\
-                    'targid':_targid,'grism':re.sub('/','_',hdr.get('GRISM')), 'original':hdr.get('arcfile'),'PROPID':hdr.get('PROPID'),\
+                    'targid':_targid,'grism':_grism, 'original':hdr.get('arcfile'),'PROPID':hdr.get('PROPID'),\
                     'dateobs2':hdr.get('DATE-OBS')}
 
     elif 'gemini' in _telescope.lower():
@@ -617,13 +629,13 @@ def archivereducedspectrum(img):
         else: _telescope='gn'
         dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':_jd,\
                     'telescope':_telescope,'airmass':hdr.get('AIRMASS'),'objname':_object,'ut':_ut,\
-                    'instrument':hdr.get('INSTRUME'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':hdr.get('GRATING'),\
+                    'instrument':hdr.get('INSTRUME'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':_grism,\
                     'original':hdr.get('arcfile')}
 
     else:
         dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':_jd,\
                     'telescope':_telescope,'airmass':hdr.get('airmass'),'objname':_object,'ut':_ut,\
-                    'instrument':hdr.get('instrume'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':hdr.get('GRISM'),\
+                    'instrument':hdr.get('instrume'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':_grism,\
                     'original':hdr.get('arcfile'),'observer':hdr.get('observer')}
         dictionary['namefile']=string.split(img,'/')[-1]
 
@@ -638,7 +650,6 @@ def uploadspectrum(img,_output,_force,_permission):
     import pyfits
     import agnkey
     import re,string,sys,os
-    
 
     note='input= '+img+'\n'
     try:
@@ -655,8 +666,9 @@ def uploadspectrum(img,_output,_force,_permission):
         data,hdr0 = pyfits.getdata(img, 'sci', header=True)
         try:        hdr0.__delitem__('AIRMASS')
         except:     hdr0.remove('AIRMASS') 
-        hed=['TELESCOP','OBSERVAT','RA','DEC','UT','ST','EXPTIME','MASKNAME','GRATING','CENTWAVE','OBSMODE','GAIN','RDNOISE','MJD-OBS',\
-                 'PIXSCALE','DATE-OBS','AIRMASS']
+        hed=['TELESCOP','OBSERVAT','RA','DEC','UT','ST','EXPTIME','MASKNAME',\
+             'GRATING','CENTWAVE','OBSMODE','GAIN','RDNOISE','MJD-OBS',\
+             'PIXSCALE','DATE-OBS','AIRMASS']
         for jj in hed:
             hdr0.update(jj,hdr[jj])
         if 'south' in _tel.lower(): _tel='gs'
@@ -676,8 +688,13 @@ def uploadspectrum(img,_output,_force,_permission):
             _output=str(_object)+'_'+str(_date)+'_'+str(_grism)+'_'+re.sub(':','',str(_ut))+'.fits'
     _output=re.sub('/','_',_output)
 
-    directory='/home/cv21/AGNKEY_www/AGNKEY/spectra/'+_date+'_'+_tel
-    directory1=re.sub('/home/cv21/AGNKEY_www/','../',directory)
+    if agnkey.util.host=='SVMAC':
+        directory='/Users/svalenti/redu2/AGNKEY/spectra/'+_date+'_'+_tel
+        directory1=re.sub('/Users/svalenti/redu2/','../',directory)
+    elif agnkey.util.host=='deneb':
+        directory='/home/cv21/AGNKEY_www/AGNKEY/spectra/'+_date+'_'+_tel
+        directory1=re.sub('/home/cv21/AGNKEY_www/','../',directory)
+
     dictionary['directory']=directory+'/'
     dictionary['namefile']=_output
 

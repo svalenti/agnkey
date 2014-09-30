@@ -90,7 +90,9 @@ if __name__ == "__main__":
     parser.add_option("-f", "--filter",dest="filter",default='',type="str",
                       help='-f filter [sloan,landolt,u,g,r,i,z,U,B,V,R,I] \t [%default]')
     parser.add_option("-T", "--telescope",dest="telescope",default='all',type="str",
-                      help='-T telescope fts, ftn, lsc, elp, cpt, coj, 1m0-03, 1m0-04,1m0-05, 1m0-08, 1m0-09, 1m0-10, 1m0-11, 1m0-12, 1m0-13  \t [%default]')
+                      help='-T telescope '+', '.join(agnkey.util.telescope0['all'])+', '.join(agnkey.util.site0)+\
+                      ', fts, ftn, 1m0, kb, fl \t [%default]')
+                      #help='-T telescope fts, ftn, lsc, elp, cpt, coj, 1m0-03, 1m0-04,1m0-05, 1m0-08, 1m0-09, 1m0-10, 1m0-11, 1m0-12, 1m0-13  \t [%default]')
     parser.add_option("-e", "--epoch",dest="epoch",default='',type="str",
                   help='epoch to reduce  \t [%default]')
     parser.add_option("-i", "--ingest",action="store_true",\
@@ -119,7 +121,7 @@ if __name__ == "__main__":
     else:  XX=''
         
 
-    if _telescope not in ['all','lsc','cpt','elp','coj','ftn','fts','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13']:  sys.argv.append('--help')
+    if _telescope not in agnkey.util.telescope0['all']+agnkey.util.site0+['all', 'ftn','fts','1m0','kb','fl']:  sys.argv.append('--help')
     if _filter: 
         if _filter not in ['landolt','sloan','u','g','r','i','z','U','B','V','R','I','ug','gr','gri','griz','riz','BVR','BV','BVRI','VRI']: sys.argv.append('--help')
     option,args = parser.parse_args()
@@ -137,12 +139,13 @@ if __name__ == "__main__":
 
     if _telescope:
         if _telescope=='all':
-            tel=['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13']
-        elif _telescope=='lsc':   tel=  ['1m0-04','1m0-05','1m0-09']
-        elif _telescope=='elp':     tel=['1m0-08']
-        elif _telescope=='coj':     tel=['1m0-11','1m0-03']
-        elif _telescope=='cpt':   tel=  ['1m0-10','1m0-12','1m0-13']
-    else: tel=['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13']
+            tel=agnkey.util.telescope0['all']
+        elif _telescope=='lsc':    tel=agnkey.util.telescope0['lsc']
+        elif _telescope=='ogg':    tel=agnkey.util.telescope0['ogg']
+        elif _telescope=='elp':    tel=agnkey.util.telescope0['elp']
+        elif _telescope=='coj':    tel=agnkey.util.telescope0['coj']
+        elif _telescope=='cpt':    tel=agnkey.util.telescope0['cpt']
+    else: tel=agnkey.util.telescope0['all']
 
     if _field:   fil=[_field]
     else:        fil=['landolt','sloan']
@@ -172,7 +175,8 @@ if __name__ == "__main__":
 
 #    added for new calibration
     os.system('agnloop.py -e '+epoch+' -s apmag ')  #  compute psf 
-
+#    added for new idl pipeline
+    os.system('agnloop.py -e '+epoch+' -s idlstart ')  #  compute psf 
 #############################################################################
     import glob
     ll=agnkey.agnloopdef.get_list(epoch,'all','','','','','','','dataredulco',_filetype)

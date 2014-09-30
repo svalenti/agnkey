@@ -3,14 +3,18 @@
 import sys,os,cgi,string,glob
 os.environ['HOME']='../tmp/'
 
-from socket import gethostname, gethostbyname,gethostname
+from socket import gethostname, gethostbyname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+                'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
+                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+    location='SV'
 else:
+    location='deneb'
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
 import agnkey
@@ -611,12 +615,10 @@ else:
 #############################  png files
 if len(wwimages)>0:
    listpng=array(['/agnecho/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+re.sub('.fits','.png',v) for k,v in  zip(ll0['wdirectory'],ll0['namefile'])])[wwimages]
-#re.sub('cgi-bin','',re.sub(agnkey.util.workingdirectory,base_url,k))
 else:  listpng=[]
 
 if len(lista):
     llimage=['wget --user='+str(_user)+' --password=xxxx '+'http://deneb.st-and.ac.uk/agnecho/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
-#re.sub('cgi-bin','',re.sub(agnkey.util.workingdirectory,base_url,k))+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
 else: llimage=[]
 
 webp=''
@@ -667,32 +669,20 @@ if not SN_RA and not SN_DEC:
 ################################################33
 #  spectra  archive
 if _targid:
-#    command1=["select * from datareduspectra as a where targid="+str(_targid)+" order by a.dateobs desc "]
     command1e=["select * from dataspectraexternal as a where targid="+str(_targid)+" order by a.dateobs desc "]
-#    lista33=agnkey.agnsqldef.query(command1)
     lista33e=agnkey.agnsqldef.query(command1e)
 else:
     if SN_RA and SN_DEC:       # spectra
         distance=1
-#        command1=["set @sc = pi()/180"," set @ra = "+str(SN_RA),"set @dec = "+str(SN_DEC),"set @distance = "+str(distance),"SELECT *,abs(2*asin( sqrt( sin((a.dec0-@dec)*@sc/2)*sin((a.dec0-@dec)*@sc/2) + cos(a.dec0*@sc)*cos(@dec*@sc)*sin((a.ra0-@ra)*@sc/2)*sin((a.ra0-@ra)*@sc/2.0) )))*180/pi() as hsine FROM datareduspectra HAVING hsine<@distance order by a.dateobs desc"]
         command1e=["set @sc = pi()/180"," set @ra = "+str(SN_RA),"set @dec = "+str(SN_DEC),"set @distance = "+str(distance),"SELECT *,abs(2*asin( sqrt( sin((a.dec0-@dec)*@sc/2)*sin((a.dec0-@dec)*@sc/2) + cos(a.dec0*@sc)*cos(@dec*@sc)*sin((a.ra0-@ra)*@sc/2)*sin((a.ra0-@ra)*@sc/2.0) )))*180/pi() as hsine FROM dataspectraexternal HAVING hsine<@distance order by a.dateobs desc"]
-#        lista33=agnkey.agnsqldef.query(command1)
         lista33e=agnkey.agnsqldef.query(command1e)
     else:
         if SN0:
-#            command1=["select * from datareduspectra as a where a.dateobs <="+"'"+d+"' and a.dateobs >="+"'20120909' and a.objname like '%"+SN0+"%' order by a.dateobs desc "]
             command1e=["select * from dataspectraexternal as a where a.dateobs <="+"'"+d+"' and a.dateobs >="+"'20120909' and a.objname like '%"+SN0+"%' order by a.dateobs desc "]
-#            lista33=agnkey.agnsqldef.query(command1)
             lista33e=agnkey.agnsqldef.query(command1e)
         else:
-#            lista33=''
             lista33e=''
 
-#ll22={}
-#if len(lista33):
-#    for jj in lista33[0].keys(): ll22[jj]=[]
-#    for i in range(0,len(lista33)):
-#        for jj in lista33[0].keys(): ll22[jj].append(lista33[i][jj])
 ll22e={}
 if len(lista33e):
     for jj in lista33e[0].keys(): ll22e[jj]=[]
@@ -708,8 +698,13 @@ if ll22e:
    for i in range(0,len(ll22e['objname'])):
       _object0=ll22e['objname'][i]
       name=ll22e['namefile'][i]
-      directory=re.sub(agnkey.util.workingdirectory,'http://'+base_url+'/AGNKEY',ll22e['directory'][i])
-      directory2='../AGNKEY/'+re.sub('/home/cv21/AGNKEY_www/AGNKEY/','',ll22e['directory'][i])
+      if location=='deneb':
+          directory=re.sub(agnkey.util.workingdirectory,'http://'+base_url+'/AGNKEY/',ll22e['directory'][i])
+          directory2='../AGNKEY/'+re.sub('/home/cv21/AGNKEY_www/AGNKEY/','',ll22e['directory'][i])
+      else:
+          directory='../AGNKEY/'+re.sub('/Users/svalenti/redu2/AGNKEY/','',ll22e['directory'][i])
+          directory2='../AGNKEY/'+re.sub('/Users/svalenti/redu2/AGNKEY/','',ll22e['directory'][i])
+
       date=ll22e['dateobs'][i]
       fspec=fastspec(name,name,directory)
       fitsfile='<a href="'+directory2+ll22e['namefile'][i]+'"> fitsfile</a>'

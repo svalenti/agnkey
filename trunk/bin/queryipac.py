@@ -19,9 +19,7 @@ def ingestlist(_force='yes'):
             _targid=agnkey.agnsqldef.targimg(output)
             _telescope=readkey3(hdr,'telescop')
             _instrument=readkey3(hdr,'instrume')
-            if  _telescope in ['all','lsc','elp','cpt','coj','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tar']:
-                if _instrument in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                   'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+            if _instrument in agnkey.util.instrument0['sbig']+agnkey.util.instrument0['sinistro']:
                     print '1m telescope'
                     dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                                 'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
@@ -33,10 +31,8 @@ def ingestlist(_force='yes'):
                     dictionary['filetype']=filetype
                     dictionary['targid']=_targid
                     print 'insert reduced'
-                else: dictionary=''
-            elif _telescope in ['ftn','fts']:
+            elif _instrument in agnkey.util.instrument0['spectral']:
                 print '2m telescope'
-                print '1m telescope'
                 dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                             'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
                             'wcs':readkey3(hdr,'wcserr'),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC'),\
@@ -124,9 +120,7 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
             _targid=agnkey.agnsqldef.targimg(output)
             _telescope=readkey3(hdr,'telescop')
             _instrument=readkey3(hdr,'instrume')
-            if  _telescope in ['all','lsc','elp','cpt','coj','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tar']:
-                if _instrument in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                   'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+            if _instrument in agnkey.util.instrument0['sbig']+agnkey.util.instrument0['sinistro']:
                     print '1m telescope'
                     dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                                 'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
@@ -139,9 +133,8 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
                     dictionary['targid']=_targid
                     print 'insert reduced'
                 else: dictionary=''
-            elif _telescope in ['ftn','fts']:
+            elif _instrument in agnkey.util.instrument0['spectral']:
                 print '2m telescope'
-                print '1m telescope'
                 dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                             'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
                             'wcs':readkey3(hdr,'wcserr'),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC'),\

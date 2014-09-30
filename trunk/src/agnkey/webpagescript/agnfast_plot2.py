@@ -1,12 +1,14 @@
 #!/usr/bin/env python    
 import sys,os,cgi,string,glob
-from socket import gethostname, gethostbyname,gethostname
+from socket import gethostname, gethostbyname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
 os.environ['HOME']='../tmp/'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+                'svalenti-lcogt.local','svalenti-lcogt.lco.gtn',\
+                'valenti-mbp-2.lco.gtn', 'valenti-mbp-2.attlocal.net']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -19,13 +21,14 @@ import matplotlib
 import numpy as np
 from pylab import *
 
+
 form = cgi.FieldStorage()
 SN = form.getlist('SN')
 directory = form.getlist('directory')
 
 if not SN:
-    SN=['nttPSN013615_fts_20130808_merge_2.0_56513_1_e.fits']
-    directory=['../data/WEB/floyds/20130808_fts/']
+    SN=['ttMrk1048_20140907_None_2014-09-07.fits']
+    directory=['/Users/svalenti/Sites/AGNKEY/test/']
 
 print "Content-Type: text/html\n"
 print '<html><body>'

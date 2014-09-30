@@ -16,7 +16,8 @@ if __name__ == "__main__":
      parser.add_option("-e", "--epoch",dest="epoch",default='20121212',type="str",
                   help='epoch to reduce  \t [%default]')
      parser.add_option("-T", "--telescope",dest="telescope",default='all',type="str",
-                  help='-T telescope fts, ftn, coj, lsc, elp, cpt, 1m0-03,1m0-04,1m0-05,1m0-08,1m0-09,1m0-10,1m0-11,1m0-12,1m0-13,1m0,kb,fl \t [%default]')
+                  help='-T telescope '+', '.join(agnkey.util.telescope0['all'])+', '.join(agnkey.util.site0)+\
+                  ', fts, ftn, 1m0, kb, fl \t [%default]')
      parser.add_option("-R", "--RA",dest="ra",default='',type="str",
                   help='-R  ra    \t [%default]')
      parser.add_option("-D", "--DEC",dest="dec",default='',type="str",
@@ -31,7 +32,7 @@ if __name__ == "__main__":
      parser.add_option("-b", "--bad",dest="bad",default='',type="str",
                   help='-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag,merge,diff,template,apmag] \t [%default]')
      parser.add_option("-s", "--stage",dest="stage",default='',type="str",
-                  help='-s stage [wcs,psf,psfmag,zcat,abscat,mag,getmag,merge,diff,makestamp,template,apmag] \t [%default]')
+                  help='-s stage [wcs,psf,psfmag,zcat,abscat,mag,getmag,merge,diff,makestamp,template,apmag,cosmic,idlstart] \t [%default]')
      parser.add_option("--RAS",dest="ras",default='',type="str",
                   help='-RAS  ra    \t [%default]')
      parser.add_option("--DECS",dest="decs",default='',type="str",
@@ -65,7 +66,7 @@ if __name__ == "__main__":
      parser.add_option("--calib",dest="calib",default='',type="str",
                   help='--calib  (sloan,natural,sloanprime)   \t [%default]')
      parser.add_option("--type",dest="type",default='fit',type="str",
-                  help='--type mag for zero point   [fit,ph,mag]    \t [%default]')
+                       help='--type mag for zero point   [fit,ph,mag,appmagap1,appmagap2,appmagap3]    \t [%default]')
      parser.add_option("--standard",dest="standard",default='',type="str",
                   help='--standard namestd  \t use the zeropoint from this standard    \t [%default]')
      parser.add_option("--xshift",dest="xshift",default=0,type="int",
@@ -97,14 +98,15 @@ if __name__ == "__main__":
      _type=option.type
      _stage=option.stage
      _bad=option.bad
-     if _telescope not in ['all','lsc','elp','coj', 'ftn','fts','1m0-03','1m0-04','1m0-05','1m0-08','cpt','1m0','kb','fl','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13']:  sys.argv.append('--help')
+     if _telescope not in agnkey.util.telescope0['all']+agnkey.util.site0+['all', 'ftn','fts','1m0','kb','fl']:  sys.argv.append('--help')
      if option.force==None: _redo=False
      else:                 _redo=True
      if option.recenter==False:  _recenter=True
      else:                         _recenter=False
      if _type not in ['fit','ph','mag','appmagap1','appmagap2','appmagap3']:  sys.argv.append('--help')
      if _stage:
-          if _stage not in ['wcs','psf','psfmag','zcat','abscat','mag','local','getmag','merge','diff','template','apmag','makestamp']: sys.argv.append('--help')
+          if _stage not in ['wcs','psf','psfmag','zcat','abscat','mag','local','getmag',\
+             'merge','diff','template','apmag','makestamp','cosmic','idlstart']: sys.argv.append('--help')
      if _bad:
           if _bad not in ['wcs','psf','psfmag','zcat','abscat','mag','goodcat','quality','apmag']: sys.argv.append('--help')
      option,args = parser.parse_args()
@@ -178,7 +180,7 @@ if __name__ == "__main__":
           stop=datetime.date(int(epoch2[0:4]),int(epoch2[4:6]),int(epoch2[6:8]))
           listepoch=[re.sub('-','',str(i)) for i in [start + datetime.timedelta(days=x) for x in range(0,1+(stop-start).days)]]
 
-     if not _stage or _stage in ['local','getmag','wcs','psf','psfmag','makestamp','apmag']:
+     if not _stage or _stage in ['local','getmag','wcs','psf','psfmag','makestamp','apmag','cosmic','idlstart']:
                if len(listepoch)==1:
                     lista=agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn,'dataredulco', 'dateobs', str(listepoch[0]),'','*',_telescope)
                else:
@@ -224,6 +226,11 @@ if __name__ == "__main__":
                          agnkey.agnloopdef.makestamp(ll['namefile'],'dataredulco',_z1,_z2,_interactive,_redo,_output)
                     elif _stage=='apmag':
                          agnkey.agnloopdef.run_apmag(ll['namefile'],'dataredulco')
+                    elif _stage=='cosmic':
+                         agnkey.agnloopdef.run_cosmic(ll['namefile'],'dataredulco')
+                    elif _stage=='idlstart':
+                         agnkey.agnloopdef.run_idlstart(ll['namefile'],'dataredulco',_redo)
+
 
                else: print '\n### no data selected'
 #################################################

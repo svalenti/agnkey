@@ -198,7 +198,11 @@ def ecpsf(img,ofwhm,threshold,psfstars,distance,interactive,ds9,psffun='gauss',f
     print 'INSTRUMENT:',instrument 
 
     if 'PIXSCALE' in hdr: pixelscale= agnkey.util.readkey3(hdr,'PIXSCALE')
-    elif 'CCDSCALE' in hdr: pixelscale= agnkey.util.readkey3(hdr,'CCDSCALE')
+    elif 'CCDSCALE' in hdr:
+        if 'CCDXBIN' in hdr:
+            pixelscale= agnkey.util.readkey3(hdr,'CCDSCALE')*agnkey.util.readkey3(hdr,'CCDXBIN')
+        elif 'CCDSUM' in hdr:
+            pixelscale= agnkey.util.readkey3(hdr,'CCDSCALE')*int(string.split(agnkey.util.readkey3(hdr,'CCDSUM'))[0])
 
     if instrument in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:
         scale = pixelscale
@@ -207,13 +211,13 @@ def ecpsf(img,ofwhm,threshold,psfstars,distance,interactive,ds9,psffun='gauss',f
         scale = pixelscale
         _datamax=120000
     elif instrument in ['fs01','em03']:
-        scale = pixelscale*agnkey.util.readkey3(hdr,'CCDXBIN')
+        scale = pixelscale
         _datamax=65000
     elif instrument in ['fs02','fs03']:
-        scale = pixelscale*agnkey.util.readkey3(hdr,'CCDXBIN')
+        scale = pixelscale
         _datamax=65000
     elif instrument in ['em01']:
-        scale = pixelscale*agnkey.util.readkey3(hdr,'CCDXBIN')
+        scale = pixelscale
         _datamax=65000
     try:
         _wcserr=agnkey.util.readkey3(hdr,'wcserr')
@@ -223,7 +227,12 @@ def ecpsf(img,ofwhm,threshold,psfstars,distance,interactive,ds9,psffun='gauss',f
                 elif instrument in ['fl02','fl03','fl04']:
                     seeing = float(agnkey.util.readkey3(hdr,'L1FWHM'))*.75
                 elif instrument in ['fs01','fs02','fs03','em03','em01']:
-                    seeing = float(agnkey.util.readkey3(hdr,'L1SEEING'))*scale
+                    if 'L1FWHM' in hdr:
+                        seeing = float(agnkey.util.readkey3(hdr,'L1FWHM'))*.75
+                    elif 'L1SEEING' in hdr:
+                        seeing = float(agnkey.util.readkey3(hdr,'L1SEEING'))*scale
+                    else:
+                        seeing=3
                 else: seeing=3
         else:
             seeing = float(agnkey.util.readkey3(hdr,'PSF_FWHM'))
@@ -430,7 +439,7 @@ def ecpsf(img,ofwhm,threshold,psfstars,distance,interactive,ds9,psffun='gauss',f
     rap0,decp0=[],[]
     for i in range(len(radec2)):
         aa=radec2[i].split()
-        print aa
+        #print aa
         rap.append(aa[0])
         decp.append(aa[1])
         rap0.append(agnkey.agnabsphotdef.deg2HMS(ra=aa[0]))
@@ -526,6 +535,11 @@ if __name__ == "__main__":
           capable.OF_GRAPHICS = False
 
     for img in imglist:
+    ######################################
+#        if os.path.isfile(re.sub('.fits','.clean.fits',img)):
+#            img=re.sub('.fits','.clean.fits',img)
+#            print 'use the clean'
+    ######################################
         if '.fits' in img: img = img[:-5]
         if os.path.exists(img+'.sn2.fits') and not option.redo :
             print img+': psf already calculated'
@@ -551,6 +565,12 @@ if __name__ == "__main__":
 
             iraf.delete("tmp.*",verify="no")
             iraf.delete("_psf.*",verify="no")
+            #############################################
+#            if 'clean' in img:
+#                 print 'move clean.sn2.fits in .sn2.fits'
+#                 img=re.sub('.clean','',img)
+#                 os.system('cp '+img+'.clean.sn2.fits '+img+'.sn2.fits')
+            #############################################
             print  "********** Completed in ",int(time.time()-start_time),"sec"
             print result
             try: 

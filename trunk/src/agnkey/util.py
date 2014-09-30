@@ -3,17 +3,21 @@
 #
 import socket
 host = socket.gethostname()
-if host not in ['svalenti-lcogt.att.net','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local','valenti-mbp-2.attlocal.net',\
-                'svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-mbp-2','dhcp42192.physics.ucdavis.edu','dhcp42176.physics.ucdavis.edu']:
+if host in ['deneb']:            
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-else:
+elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+              'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
+              'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
+   host='SVMAC'
    workingdirectory='/Users/svalenti/redu2/AGNKEY/'
    execdirectory='/Users/svalenti/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
+else:
+   sys.exit('system '+str(host)+' not recognize')
 
 instrument0={'sbig':['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79'],\
              'sinistro':['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10'],\
@@ -724,7 +728,7 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
 
 ###############################
 
-def Docosmic(img):
+def Docosmic(img,_sigclip=4.5,_sigfrac=0.2,_objlim=4):
    import time
    start=time.time()
    import pyfits
@@ -750,13 +754,14 @@ def Docosmic(img):
       sat     = hd['SATURATE']
       rdnoise = hd['RDNOISE']
    niter=1
-   print gain,sat,rdnoise
+   print 'gain,sat,noise,sigclip,objlim,sigfrac'
+   print gain,sat,rdnoise,_sigclip,_objlim,_sigfrac
    c = agnkey.cosmics.cosmicsimage(ar
                                  ,gain=gain
                                  ,readnoise=rdnoise
-                                 ,sigclip=5
-                                 ,sigfrac=0.3 
-                                 ,objlim=5
+                                 ,sigclip=_sigclip
+                                 ,sigfrac=_sigfrac
+                                 ,objlim=_objlim
                                  ,satlevel=sat
                                  )
    c.run(maxiter = niter)

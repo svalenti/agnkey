@@ -14,7 +14,8 @@ if __name__ == "__main__":
      parser.add_option("-e", "--epoch",dest="epoch",default='20121212',type="str",
                   help='epoch to reduce  \t [%default]')
      parser.add_option("-T", "--telescope",dest="telescope",default='all',type="str",
-                  help='-T telescope fts, ftn, lsc, elp, cpt, coj, all, 1m0-03,1m0-04, 1m0-05, 1m0-08, 1m0-09, 1m0-10, 1m0-11, 1m0-12, 1m0-13  \t [%default]')
+                help='-T telescope '+', '.join(agnkey.util.telescope0['all'])+', '.join(agnkey.util.site0)+\
+                  ', fts, ftn, 1m0, kb, fl \t [%default]')
      parser.add_option("-R", "--RA",dest="ra",default='',type="str",
                   help='-R  ra    \t [%default]')
      parser.add_option("-D", "--DEC",dest="dec",default='',type="str",
@@ -39,8 +40,7 @@ if __name__ == "__main__":
 
      option,args = parser.parse_args()
      _telescope=option.telescope
-     if _telescope not in [ 'fts', 'ftn', 'lsc', 'elp', 'cpt', 'coj', 'all', '1m0-03','1m0-04', '1m0-05', '1m0-08', '1m0-09',\
-                                 '1m0-10', '1m0-11', '1m0-12', '1m0-13']:  sys.argv.append('--help')
+     if _telescope not in agnkey.util.telescope0['all']+agnkey.util.site0+['all', 'ftn','fts','1m0','kb','fl']:  sys.argv.append('--help')
      option,args = parser.parse_args()
      _id=option.id
      _filter=option.filter

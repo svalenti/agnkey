@@ -319,6 +319,74 @@ def run_apmag(imglist,database='dataredulco'):
                     print img1,' not found'
 ###################################################################
 
+def run_cosmic(imglist,database='dataredulco',_sigclip=4.5,_sigfrac=0.2,_objlim=4):
+     import agnkey
+     direc=agnkey.__path__[0]
+     import os,string,glob
+     for img in imglist:
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
+          if ggg:
+               _dir=ggg[0]['wdirectory'] 
+               print _dir+img
+               if os.path.isfile(_dir+img):
+                    if not os.path.isfile(re.sub('.fits','.clean.fits',_dir+img)):
+                         output,mask,satu=agnkey.util.Docosmic(_dir+img,_sigclip,_sigfrac,_objlim)
+                         agnkey.util.updateheader(output,0,{'DOCOSMIC':[True,'Cosmic rejection using LACosmic']})
+                         os.system('cp '+output+' '+_dir)
+                         print output,mask,satu
+                    else:
+                         print 'cosmic rejection alread done'
+               else:
+                    print img,' not found'
+###################################################################
+
+def run_idlstart(imglist,database='dataredulco',_force=True):
+     import agnkey
+     from pyraf import iraf
+     iraf.specred(_doprint=0)
+     direc=agnkey.__path__[0]
+     import os,string,glob
+     for img in imglist:
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
+          if ggg:
+               _dir=ggg[0]['wdirectory'] 
+               
+               if os.path.isfile(_dir+img):
+               	    hdr=agnkey.util.readhdr(_dir+img)
+               	    _telescope=agnkey.util.readkey3(hdr,'telescop')
+               	    _telid=agnkey.util.readkey3(hdr,'telid')
+
+               	    if _telescope in agnkey.util.telescope0['elp']:
+                         tel_tag='LCOGT-McDonald'
+                         _observatory='mcdonald'
+               	    elif _telescope in agnkey.util.telescope0['cpt']:
+                         tel_tag='LCOGT-SAAO'
+                         _observatory='sso'
+               	    elif _telescope in agnkey.util.telescope0['ogg']:
+                         _observatory='cfht'
+                         tel_tag='FTN'
+               	    elif _telescope in agnkey.util.telescope0['lsc']:
+                         tel_tag='LCOGT-CTIO'
+                         _observatory='lco'
+               	    elif _telescope in agnkey.util.telescope0['coj']:
+                         _observatory='sso'
+                         if _telid in ['1m0a','1m0b','1m0c']:
+                              tel_tag='LCOGT-SSO'
+                         else:
+                              tel_tag='FTS'
+                    else: 
+                         sys.exit('ERROR: site and telescope not correct')
+                    if 'HJD' not in hdr.keys() or _force:
+                         iraf.specred.setjd(_dir+img,date='DATE-OBS',time='UTSTART',\
+                                            exposure='EXPTIME',ra='ra',dec='dec',epoch='',observa=_observatory)
+                    else:  print 'HJD already there'
+                    if 'TEL_TAG' not in hdr.keys() or _force:
+                         agnkey.util.updateheader(_dir+img,0,{'tel_tag':[tel_tag,'telescope identification for idl reduction']})
+                    else:  print 'tel_tag already there'
+               else:
+                    print img,' not found'
+###################################################################
+
 
 def run_psf(imglist,treshold=5,interactive=False,_fwhm='',show=False,redo=False,xwindow='',database='dataredulco'):
      import agnkey

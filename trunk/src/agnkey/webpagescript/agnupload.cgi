@@ -5,7 +5,9 @@ ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','svalenti-lcogt.local']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+                'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
+                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -29,11 +31,6 @@ if form.getlist('access'):   _access=form.getlist('access')[0]
 else:                        _access=''
 
 base_url=hostname
-
-#if hostname=='engs-MacBook-Pro-4.local':
-#    base_url = "http://localhost/~svalenti/cgi-bin/" 
-#else:
-#    base_url = "http://secure.lcogt.net/user/supernova/dev/cgi-bin/"
 
 def searchobj1():
     search='''<form action="agnkeyview.cgi" method="post" style="width=150"> 
