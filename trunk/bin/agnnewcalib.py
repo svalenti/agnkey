@@ -191,7 +191,6 @@ if __name__ == "__main__":
         if not _landolt:
             if _filter in ['B','V']:
                 _landolt=vizq(_ra0,_dec0,'apass',20)
-
         if _landolt:   _cat=_landolt
                 
     if _cat:
@@ -269,25 +268,33 @@ if __name__ == "__main__":
 #                aaa=iraf.noao.digiphot.daophot.phot(re.sub('sn2.','',img),'_coord','STDOUT',veri='no',verbose='no',Stdout=1)   
 ####################################################
             aaa=iraf.noao.digiphot.daophot.phot(re.sub('sn2.','',img),'_coord','STDOUT',veri='no',verbose='no',Stdout=1)   
+            for ii in aa: print ii 
             aaa=[i for i in aaa if i[0]!='#']
             mag1,dmag1=string.split(aaa[-3])[4],string.split(aaa[-3])[5]
             mag2,dmag2=string.split(aaa[-2])[4],string.split(aaa[-2])[5]
             mag3,dmag3=string.split(aaa[-1])[4],string.split(aaa[-1])[5]
-            if float(mag1): 
+            flux1,dflux1=string.split(aaa[-1])[3],string.split(aaa[-1])[3]
+
+            totalflux=(float(flux1)/_exptime)*10**(float(ZZ0)/-2.5)   #  compute total flux
+
+            agnkey.agnsqldef.updatevalue('dataredulco','apflux1',totalflux,string.split(re.sub('sn2.','',img),'/')[-1])
+            agnkey.agnsqldef.updatevalue('dataredulco','dapflux1',float(flux1),string.split(re.sub('sn2.','',img),'/')[-1])
+
+            if mag1!='INDEF': 
                 print float(mag1)+ZZ0
                 try:
                     agnkey.agnsqldef.updatevalue('dataredulco','appmagap1',float(mag1)+ZZ0,string.split(re.sub('sn2.','',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue('dataredulco','dappmagap1',float(dmag1),string.split(re.sub('sn2.','',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue('dataredulco','instmagap1',float(mag1),string.split(re.sub('sn2.','',img),'/')[-1])
                 except: pass
-            if float(mag2): 
+            if mag2!='INDEF': 
                 print float(mag2)+ZZ0
                 try:
                     agnkey.agnsqldef.updatevalue('dataredulco','appmagap2',float(mag3)+ZZ0,string.split(re.sub('sn2.','',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue('dataredulco','dappmagap2',float(dmag1),string.split(re.sub('sn2.','',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue('dataredulco','instmagap2',float(mag3),string.split(re.sub('sn2.','',img),'/')[-1])
                 except: pass
-            if float(mag3): 
+            if mag3!='INDEF': 
                 print float(mag3)+ZZ0
                 try:
                     agnkey.agnsqldef.updatevalue('dataredulco','appmagap3',float(mag3)+ZZ0,string.split(re.sub('sn2.','',img),'/')[-1])

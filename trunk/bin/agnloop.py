@@ -66,7 +66,7 @@ if __name__ == "__main__":
      parser.add_option("--calib",dest="calib",default='',type="str",
                   help='--calib  (sloan,natural,sloanprime)   \t [%default]')
      parser.add_option("--type",dest="type",default='fit',type="str",
-                       help='--type mag for zero point   [fit,ph,mag,appmagap1,appmagap2,appmagap3]    \t [%default]')
+                       help='--type mag for zero point   [fit,ph,mag,appmagap1,appmagap2,appmagap3,flux1]    \t [%default]')
      parser.add_option("--standard",dest="standard",default='',type="str",
                   help='--standard namestd  \t use the zeropoint from this standard    \t [%default]')
      parser.add_option("--xshift",dest="xshift",default=0,type="int",
@@ -103,7 +103,7 @@ if __name__ == "__main__":
      else:                 _redo=True
      if option.recenter==False:  _recenter=True
      else:                         _recenter=False
-     if _type not in ['fit','ph','mag','appmagap1','appmagap2','appmagap3']:  sys.argv.append('--help')
+     if _type not in ['fit','ph','mag','appmagap1','appmagap2','appmagap3','flux1']:  sys.argv.append('--help')
      if _stage:
           if _stage not in ['wcs','psf','psfmag','zcat','abscat','mag','local','getmag',\
              'merge','diff','template','apmag','makestamp','cosmic','idlstart']: sys.argv.append('--help')

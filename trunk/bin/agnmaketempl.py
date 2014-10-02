@@ -25,6 +25,8 @@ if __name__ == "__main__":
                        default=False,help='force archiving \t\t [%default]')
      parser.add_option("--mag",dest="mag",action='store_true',
                        default=False,help='chose mag interactively \t\t [%default]')
+     parser.add_option("--pos",dest="pos",action='store_true',
+                       default=False,help='chose mag interactively \t\t [%default]')
      option,args = parser.parse_args()    
      if len(args)<1 : sys.argv.append('--help')
      option,args = parser.parse_args()
@@ -52,70 +54,91 @@ if __name__ == "__main__":
      _show=option.show
      _force=option.force
      chosemag=option.mag
+     chosepos=option.pos
 ##################################
      from pyraf import iraf
      from iraf import digiphot
      from iraf import daophot
+     import pywcs
 ##################################
+     goon=False
      for fil in imgdic:
          imglist1=imgdic[fil]['img']
          for img0 in imglist1:
              if not imgdic[fil]['psf']:
                  if os.path.exists(re.sub('.fits','.psf.fits',img0)):
                      imgdic[fil]['psf'].append(re.sub('.fits','.psf.fits',img0))
+
              if not imgdic[fil]['psf']:  
                  psfimg=''
                  print 'psf not found'
-             else:
+             else: 
+                  print '\### found psffile'
+                  goon=True
+          
+             if goon:
                  psfimg=imgdic[fil]['psf'][0]
                  print img0, psfimg,_ra,_dec
-                 print '\### found psffile'
                  if os.path.exists(re.sub('.fits','.sn2.fits',img0)):
                      hdr1=agnkey.util.readhdr(re.sub('.fits','.sn2.fits',img0))
                      _xpos=agnkey.util.readkey3(hdr1,'PSFX1')
                      _ypos=agnkey.util.readkey3(hdr1,'PSFY1')
                      _mag=agnkey.util.readkey3(hdr1,'PSFMAG1')
                      _exptime=agnkey.util.readkey3(hdr1,'exptime')
-                     try:
-                          _mag=float(_mag)+2.5*math.log10(float(_exptime))
-                     except: _mag=0.0
-                     print _mag,_exptime
-                     print 'found x y position and mag !!! '
+                     print 'found fits table'
+#######################  chose mag  ##############
+                 if not chosemag:
+                      if _mag:
+                           print 'use mag from fits table'
+                           try:
+                                _mag=float(_mag)+2.5*math.log10(float(_exptime))
+                           except: 
+                                _mag=0.0
+                      else:
+                           print 'mag not found, mag not input, no modification to the template '
+                           _mag=0
                  else:
-                     xpos,_ypos,_mag='','',''
-                     if not _ra and not _dec:  _ra,_dec,_SN0=agnkey.util.checksnlist(img0,'supernovaelist.txt')
-                     if not _ra and not _dec:  _ra,_dec,_SN0=agnkey.util.checksndb(img0,'lsc_sn_pos')
-                     if not _ra and not _dec:  print '\n### not found ra and dec'
-                     else:
-                         print '\n### found ra and dec'
-                         import pywcs
-                         hdr0=agnkey.util.readhdr(img0)
-                         wcs = pywcs.WCS(hdr0)
-                         pix1 = wcs1.wcs_sky2pix(array(zip(xpix,ypix),float), 1)
-                         _xpos, _ypos = zip(*pix1)
-             if chosemag:
-                  _mag0=raw_input('which mag do you want to subtract  '+str(_mag)+' ? ' )
-                  if str(_mag0)=='0.0': _mag=float(_mag0) 
-                  
-             print img0,psfimg,_xpos,_ypos,_mag
-             if not img0 or not psfimg:  sys.exit('missing too many info')
-             else:
-                  jj=0
-                  while not _xpos or not _ypos:
-                         print "  MARK SN REGION WITH - x -, EXIT  - q -"
-                         try:
-                              agnkey.util.delete('tmp.log')
-                              zz1,zz2,goon=agnkey.util.display_image(img,1,'','',True)
-#                              iraf.display(img,1,fill=True,Stdout=1)
-                              iraf.imexamine(img,1,wcs='logical',logfile='tmp.log',  keeplog=True)
-                              xytargets = iraf.fields('tmp.log','1,2',Stdout=1)
-                              _xpos, _ypos = string.split(xytargets[0])[0],string.split(xytargets[0])[1]
-                         except: 
-                              _xpos,_ypos='',''
-                         jj=jj+1
-                         if jj>10: break
+                      _mag0=raw_input('which mag do you want to subtract  '+str(_mag)+' ? ' )
+                      if not _mag0:  
+                           _mag=float(_mag)
+                      else:  
+                           _mag=float(_mag0)
 
-                  if not _mag and str(_mag)!='0.0':       _mag=raw_input('which magnitude ? ')
+#######################  Chose Ra   and    Dec  ##############
+                 if not chosepos:
+                      if not _ra and not _dec:
+                           _ra,_dec,_SN0,_type=agnkey.util.checksndb(img0,'lsc_sn_pos')
+                      if _ra and _dec:
+                           print 'use ra and dec from input database !!! '
+                           hdr0=agnkey.util.readhdr(img0)
+                           wcs = pywcs.WCS(hdr0)
+                           pix1 = wcs.wcs_sky2pix(array(zip([_ra],[_dec]),float), 1)
+                           _xpos, _ypos = pix1[0][0],pix1[0][1] 
+                 else: 
+                      _xpos, _ypos = '',''
+                 if _xpos and _ypos:
+                      print 'use xpos and ypos from fits table'
+                      print _xpos, _ypos
+                 else:
+                      print 'no xpos and ypos define, do that interactively'
+                      jj=0
+                      while not _xpos or not _ypos:
+                                print "  MARK SN REGION WITH - x -, EXIT  - q -"
+                                try:
+                                     agnkey.util.delete('tmp.log')
+                                     zz1,zz2,goon=agnkey.util.display_image(img,1,'','',True)
+                                     #                              iraf.display(img,1,fill=True,Stdout=1)
+                                     iraf.imexamine(img,1,wcs='logical',logfile='tmp.log',  keeplog=True)
+                                     xytargets = iraf.fields('tmp.log','1,2',Stdout=1)
+                                     _xpos, _ypos = string.split(xytargets[0])[0],string.split(xytargets[0])[1]
+                                except: 
+                                     _xpos,_ypos='',''
+                                jj=jj+1
+                                if jj>10:
+                                     goon=False 
+                                     break
+
+             if goon:
                   print _xpos,_ypos,_mag
                   print img0,psfimg,_xpos,_ypos,_mag
                   imgout=re.sub('.fits','.temp.fits',string.split(img0,'/')[-1])
@@ -149,7 +172,7 @@ if __name__ == "__main__":
                        iraf.imarith(img0,'-',img0,'_tmp.fits',verbose='no')
                        if float(_mag)!=0.0:
                             iraf.daophot.addstar("_tmp.fits",'ddd',psfimg,"_tmp2.fits",nstar=1,veri='no',simple='yes',verb='no')
-                            iraf.imarith(img0,'-','_tmp2.fits',imgout,verbose='no')
+                            iraf.imarith(img0,'-','_tmp2.fits',imgout,verbose='yes')
                        else:
                             print '\####  copy file '
                             iraf.imcopy(img0,imgout,verbose='yes')
@@ -158,6 +181,7 @@ if __name__ == "__main__":
                             answ=raw_input('ok  ? [[y]/n]')
                             if not answ: answ='y'
                        else: answ='y'
+                       raw_input('ddd')
                        agnkey.util.delete('_tmp.fits,_tmp2.fits,_tmp2.fits.art,ddd')
                        if answ=='n':
                             agnkey.util.delete(imgout)
@@ -170,7 +194,7 @@ if __name__ == "__main__":
                                    'objname':agnkey.util.readkey3(hd,'object'),'ut':agnkey.util.readkey3(hd,'ut'),'wcs':agnkey.util.readkey3(hd,'wcserr'),\
                                    'instrument':agnkey.util.readkey3(hd,'instrume'),'ra0':agnkey.util.readkey3(hd,'RA'),'dec0':agnkey.util.readkey3(hd,'DEC')}
                   dictionary['namefile']=string.split(imgout,'/')[-1]
-                  dictionary['wdirectory']=agnkey.util.workingdirectory+'lsc/'+agnkey.util.readkey3(hd,'date-night')+'/'
+                  dictionary['wdirectory']=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hd,'date-night')+'/'
                   dictionary['filetype']=4
                          ###################    insert in dataredulco
                   ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')

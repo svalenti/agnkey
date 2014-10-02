@@ -5,26 +5,60 @@ import os,string,re,sys,glob
 #from numpy import array, median, argmin, sqrt, round, isnan, compress, std
 import agnkey
 import time
+import numpy as np
 import pyfits
 from optparse import OptionParser,OptionGroup
 
-def crossmatchtwofiles(img1,img2):
-    import agnkey
-    from numpy import array, argmin, min, sqrt
-    xpix1,ypix1,fw1,cl1,cm1,ell1,bkg1=agnkey.agnastrodef.sextractor(img1)
-    xpix2,ypix2,fw2,cl2,cm2,ell2,bkg2=agnkey.agnastrodef.sextractor(img2)
 
-    xpix1,ypix1,xpix2,ypix2=array(xpix1,float),array(ypix1,float),array(xpix2,float),array(ypix2,float)    
-    distvec=[]
-    pos1=[]
-    pos2=[]
-    f=open('substamplist','w')
-    for jj in range(0,len(xpix1)):
-            dist = sqrt((xpix2-xpix1[jj])**2+(ypix2-ypix1[jj])**2)
-            if min(dist)<=3.:
-                f.write('%10.10s\t%10.10s\n' % (str(xpix1[jj]),str(ypix1[jj])))
-    f.close()
-    return 'substamplist'
+def crossmatchtwofiles(img1,img2,radius=3):
+    import agnkey
+    import pywcs
+    from numpy import array, argmin, min, sqrt
+    hd1 = pyfits.getheader(img1)
+    hd2 = pyfits.getheader(img2)
+    wcs1 = pywcs.WCS(hd1)
+    wcs2 = pywcs.WCS(hd2)
+
+    xpix1,ypix1,fw1,cl1,cm1,ell1,bkg1,fl1=agnkey.agnastrodef.sextractor(img1)
+    xpix2,ypix2,fw2,cl2,cm2,ell2,bkg2,fl2=agnkey.agnastrodef.sextractor(img2)
+    xpix1,ypix1,xpix2,ypix2=array(xpix1,float),array(ypix1,float),array(xpix2,float),array(ypix2,float)  
+
+    bb=wcs1.wcs_pix2sky(zip(xpix1,ypix1), 1)    #   transform pixel in coordinate
+    xra1,xdec1=zip(*bb)
+    bb=wcs2.wcs_pix2sky(zip(xpix2,ypix2), 1)    #   transform pixel in coordinate
+    xra2,xdec2=zip(*bb)
+
+    xra1,xdec1,xra2,xdec2=array(xra1,float),array(xdec1,float),array(xra2,float),array(xdec2,float)  
+    distvec,pos1,pos2=agnkey.agnastrodef.crossmatch(xra1,xdec1,xra2,xdec2,radius)
+    #dict={}
+    dict={'ra1':xra1[pos1],'dec1':xdec1[pos1],'ra2':xra2[pos2],'dec2':xdec2[pos2],\
+         'xpix1':xpix1[pos1],'ypix1':ypix1[pos1],'xpix2':xpix2[pos2],'ypix2':ypix2[pos2]}
+    np.savetxt('substamplist',zip(xpix1[pos1],ypix1[pos1]),fmt='%10.10s\t%10.10s')    
+    return 'substamplist',dict
+
+#    distvec=[]
+#    pos1=[]
+#    pos2=[]
+#    f=open('substamplist','w')
+#    for jj in range(0,len(xra1)):
+#            dist = sqrt((xra2-xra1[jj])**2+(xdec2-xdec1[jj])**2)  # find the common using coordinate
+#            print min(dist)
+#            if min(dist)<=radius:
+#                f.write('%10.10s\t%10.10s\n' % (str(xpix1[jj]),str(ypix1[jj])))
+#    f.close()
+#    return 'substamplist',xra1,xdec1,xra2,xdec2
+
+#    distvec=[]
+#    pos1=[]
+#    pos2=[]
+#    f=open('substamplist','w')
+#    for jj in range(0,len(xpix1)):
+#            dist = sqrt((xpix2-xpix1[jj])**2+(ypix2-ypix1[jj])**2)
+#            print min(dist)
+#            if min(dist)<=radius:
+#                f.write('%10.10s\t%10.10s\n' % (str(xpix1[jj]),str(ypix1[jj])))
+#    f.close()
+#    return 'substamplist',xpix1,ypix1,xpix2,ypix2
 
 ###################################################
 if __name__ == "__main__":
@@ -83,6 +117,9 @@ if __name__ == "__main__":
          if _obj not in listatemp[_filter]: listatemp[_filter][_obj]=[]
          listatemp[_filter][_obj].append(img)
 
+     from pyraf import iraf
+     from iraf import images
+     from iraf import immatch
      for f in listatar:
          for o in listatar[f]:
              if f in listatemp:
@@ -97,8 +134,27 @@ if __name__ == "__main__":
                         outmask=re.sub('.fits','.mask.fits',string.split(imgout,'/')[-1])
                         hdtar = pyfits.getheader(imgtar)
                         artar = pyfits.getdata(imgtar)
+
+
+##############################       use geomap to register the two images        ############################
+                        substamplist,dict=crossmatchtwofiles(imgtar,imgtemp,4)
+                        xra1,xdec1,xra2,xdec2,xpix1,ypix1,xpix2,ypix2=dict['ra1'],dict['dec1'],dict['ra2'],\
+                                                                      dict['dec2'],dict['xpix1'],dict['ypix1'],dict['xpix2'],dict['ypix2']
+#                        substamplist,xra1,xdec1,xra2,xdec2=crossmatchtwofiles(imgtar,imgtemp,4)
+#                        substamplist,xpix1,ypix1,xpix2,ypix2=crossmatchtwofiles(imgtar,imgtemp,4)
+#                        distvec,pos0,pos1=agnkey.agnastrodef.crossmatch(xra1,xdec1,xra2,xdec2,4)
+#                        distvec,pos0,pos1=agnkey.agnastrodef.crossmatchxy(xpix1,ypix1,xpix2,ypix2,4)
+                        vector4=[str(k)+' '+str(v)+' '+str(j)+' '+str(l) for k,v,j,l in  zip(xpix1,ypix1,xpix2,ypix2)]
+                        np.savetxt('tmpcoo',vector4,fmt='%1s')
+                        iraf.immatch.geomap('tmpcoo',"tmp$db",1,hdtar['NAXIS1'],1,hdtar['NAXIS2'],fitgeom="rxyscale",functio="legendre",\
+                                                xxor=2,xyor=2,xxterms="half",yxor=2,yyor=2, yxterms="half",calctype="real",inter='No')
+                        agnkey.util.delete('_temp.fits')
+                        iraf.immatch.gregister(imgtemp,"_temp","tmp$db","tmpcoo",geometr="geometric",flux='yes')
+                        imgtemp='_temp.fits'
+###########################################################
+
                         #_dir='/science/supernova/data/lsc/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
-                        _dir=agnkey.util.workingdirectory+'lsc/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
+                        _dir=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
                         if not os.path.isfile(_dir+imgout) or _force: 
                             artar = where(artar>saturation,2,0)
                             out_fits = pyfits.PrimaryHDU(header=hdtar,data=artar)
@@ -133,7 +189,7 @@ if __name__ == "__main__":
                             normalize = 'i'     #normalize to (t)emplate, (i)mage, or (u)nconvolved (t)
                             _afssc = ''
                             if afssc:
-                                 substamplist=crossmatchtwofiles(imgtar,imgtemp)
+                                 substamplist,xpix1,ypix1,xpix2,ypix2=crossmatchtwofiles(imgtar,imgtemp)
                                  _afssc = ' -cmp '+str(substamplist)+' -afssc 1 '
                             line = agnkey.util.execdirectory+"hotpants -inim "+\
                                    str(imgtar)+" -tmplim "+str(imgtemp)+\
@@ -154,7 +210,12 @@ if __name__ == "__main__":
                             agnkey.util.updateheader(imgout,0,{'target':[string.split(imgtar,'/')[-1],'target image']})
                             if hd['CONVOL00']=='TEMPLATE':   agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtar,'/')[-1],'image to compute  psf']})
                             else:                            agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtemp,'/')[-1],'image to compute  psf']})
-                         
+
+                            if _show:
+                                iraf.display(imgtar,frame=1,fill='yes')
+                                iraf.display(imgtemp,frame=2,fill='yes')
+                                iraf.display(imgout,frame=3,fill='yes')
+#                            raw_input('stop here')
 
                                          #                    copy all information from target 
                             dictionary={}
@@ -163,20 +224,18 @@ if __name__ == "__main__":
                                 for voce in ggg0[0].keys(): 
                                     if voce not in ['id']:       dictionary[voce]=ggg0[0][voce] 
                             except:
-                                dictionary={'dateobs':agnkey.util.readkey3(hd,'date-obs'),'exptime':agnkey.util.readkey3(hd,'exptime'), 'filter':agnkey.util.readkey3(hd,'filter'),\
-                                             'telescope':agnkey.util.readkey3(hd,'telescop'),'airmass':agnkey.util.readkey3(hd,'airmass'),'objname':agnkey.util.readkey3(hd,'object'),\
-                                             'wcs':agnkey.util.readkey3(hd,'wcserr'),'ut':agnkey.util.readkey3(hd,'ut'),'jd':agnkey.util.readkey3(hd,'JD'),\
-                                             'instrument':agnkey.util.readkey3(hd,'instrume'),'ra0':agnkey.util.readkey3(hd,'RA'),'dec0':agnkey.util.readkey3(hd,'DEC')}
+                                dictionary={'dateobs':agnkey.util.readkey3(hd,'date-obs'),'exptime':agnkey.util.readkey3(hd,'exptime'),\
+                                            'filter':agnkey.util.readkey3(hd,'filter'), 'telescope':agnkey.util.readkey3(hd,'telescop'),\
+                                            'airmass':agnkey.util.readkey3(hd,'airmass'),'objname':agnkey.util.readkey3(hd,'object'),\
+                                            'wcs':agnkey.util.readkey3(hd,'wcserr'),'ut':agnkey.util.readkey3(hd,'ut'),\
+                                            'jd':agnkey.util.readkey3(hd,'JD'), 'instrument':agnkey.util.readkey3(hd,'instrume'),\
+                                            'ra0':agnkey.util.readkey3(hd,'RA'),'dec0':agnkey.util.readkey3(hd,'DEC')}
 
                             dictionary['mag']=9999
                             dictionary['psfmag']=9999
                             dictionary['apmag']=9999
                             dictionary['namefile']=string.split(imgout,'/')[-1]
-                            if _tel in ['fts','ftn']:
-                                _telescope='fts'
-                            else:
-                                _telescope='lsc'
-                            dictionary['wdirectory']=agnkey.util.workingdirectory+str(_telescope)+'/'+agnkey.util.readkey3(hd,'date-night')+'/'
+                            dictionary['wdirectory']=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hd,'date-night')+'/'
                             dictionary['filetype']=3
                             if not os.path.isdir(dictionary['wdirectory']): 
                                 print dictionary['wdirectory']
@@ -184,10 +243,13 @@ if __name__ == "__main__":
                             if not os.path.isfile(dictionary['wdirectory']+imgout) or _force=='yes': 
                                 print 'mv '+imgout+' '+dictionary['wdirectory']+imgout
                                 os.system('mv '+imgout+' '+dictionary['wdirectory']+imgout)
+                                os.system('mv '+imgtemp+' '+dictionary['wdirectory']+re.sub('.diff.','.ref.',imgout))
                             if os.path.isfile(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1])):
-                                os.system('cp '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1])+' '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',imgout))
-                                agnkey.util.updateheader(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',imgout),0,{'mag':[9999.,'apparent'],'psfmag':[9999.,'inst mag'],\
-                                                                                                                     'apmag':[9999.,'aperture mag']})
+                                os.system('cp '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1])+' '+\
+                                          dictionary['wdirectory']+re.sub('.fits','.sn2.fits',imgout))
+                                agnkey.util.updateheader(dictionary['wdirectory']+\
+                                                         re.sub('.fits','.sn2.fits',imgout),0,{'mag':[9999.,'apparent'], \
+                                                            'psfmag':[9999.,'inst mag'], 'apmag':[9999.,'aperture mag']})
                             else: print 'fits table not found '+str(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1]))
                             ###################    insert in dataredulco
                             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')

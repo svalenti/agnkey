@@ -27,6 +27,9 @@ def run_getmag(imglist,_field,_output='',_interactive=False,_show=False,_bin=1e-
      elif magtype=='appmagap3':
           mtype='appmagap3' 
           mtypeerr='psfdmag'
+     elif magtype=='flux1':
+          mtype='flux1' 
+          mtypeerr='flux1'
 
      if _field=='landolt': filters0=['U','B','V','R','I','Bessell-B','Bessell-V','Bessell-R','Bessell-I']# to be raplace when more telescopes available with dictionary
      elif _field=='sloan': filters0=['up','gp','rp','ip','zs','SDSS-G','SDSS-R','SDSS-I','Pan-Starrs-Z']
@@ -656,7 +659,7 @@ def filtralist(ll2,_filter,_id,_name,_ra,_dec,_bad,_filetype=1):
                for jj in ll1.keys(): ll1[jj]=[]
      if _ra and _dec:
           from numpy import abs
-          ww=asarray([i for i in range(len(ll1['ra'])) if ( abs(float(ll1['ra'][i])-float(_ra))<.5 and  abs(float(ll1['dec'][i])-float(_dec))<.5 )])
+          ww=asarray([i for i in range(len(ll1['ra0'])) if ( abs(float(ll1['ra0'][i])-float(_ra))<.5 and  abs(float(ll1['dec0'][i])-float(_dec))<.5 )])
           if len(ww)>0:
                for jj in ll1.keys(): ll1[jj]=array(ll1[jj])[ww]
           else:  
