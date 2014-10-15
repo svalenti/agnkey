@@ -309,7 +309,7 @@ if __name__ == "__main__":
                                         _color=_color+agnkey.sites.filterst1(_telescope)[jj]
                               if len(ww0)>=1:
                                  print _color,_calib,_field
-                                 agnkey.agnloopdef.run_zero(ll3['filename'][ww0],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
+                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww0],_fix,_type,_field,_catalogue,_color,_interactive,_redo,_show,_cutmag,'dataredulco',_calib)
                          else:
                               print 'warning: field not defined, zeropoint not computed'
 

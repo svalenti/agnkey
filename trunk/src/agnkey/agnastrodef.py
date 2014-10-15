@@ -5,8 +5,8 @@ def xpa(arg):
 
 def vizq(_ra,_dec,catalogue,radius):
     import os,string,re
-#    _site='vizier.u-strasbg.fr'
-    _site='vizier.cfa.harvard.edu'
+    _site='vizier.u-strasbg.fr'
+#    _site='vizier.cfa.harvard.edu'
     cat={'usnoa2':['I/252/out','USNO-A2.0','Rmag'],\
          '2mass':['II/246/out','2MASS','Jmag'],\
          'usnob1':['I/284/out','USNO-B1.0','R2mag'],\
