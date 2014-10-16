@@ -39,7 +39,7 @@ def ingestlist(_force='yes'):
                             'observer':readkey3(hdr,'OBSERVER'),'propid':readkey3(hdr,'PROPID'),\
                             'USERID':readkey3(hdr,'USERID'),'temperature':readkey3(hdr,'CCDATEMP'),'dateobs2':readkey3(hdr,'DATE-OBS')}
                 dictionary['namefile']=string.split(output,'/')[-1]
-                dictionary['wdirectory']=agnkey.util.workingdirectoy+'1mtel/'+readkey3(hdr,'date-night')+'/'
+                dictionary['wdirectory']=agnkey.util.workingdirectory+'1mtel/'+readkey3(hdr,'date-night')+'/'
                 dictionary['filetype']=filetype
                 dictionary['targid']=_targid
                 print 'insert reduced'
@@ -132,7 +132,7 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
                     dictionary['filetype']=filetype
                     dictionary['targid']=_targid
                     print 'insert reduced'
-                else: dictionary=''
+               # else: dictionary=''
             elif _instrument in agnkey.util.instrument0['spectral']:
                 print '2m telescope'
                 dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
@@ -141,7 +141,7 @@ def ingestfromipac(d0s,d1s,dataredutable,archa1,archa2,_force):
                             'observer':readkey3(hdr,'OBSERVER'),'propid':readkey3(hdr,'PROPID'),\
                             'USERID':readkey3(hdr,'USERID'),'temperature':readkey3(hdr,'CCDATEMP'),'dateobs2':readkey3(hdr,'DATE-OBS')}
                 dictionary['namefile']=string.split(output,'/')[-1]
-                dictionary['wdirectory']=agnkey.util.workingdirectoy+'1mtel/'+readkey3(hdr,'date-night')+'/'
+                dictionary['wdirectory']=agnkey.util.workingdirectory+'1mtel/'+readkey3(hdr,'date-night')+'/'
                 dictionary['filetype']=filetype
                 dictionary['targid']=_targid
                 print 'insert reduced'

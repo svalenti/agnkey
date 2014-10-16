@@ -213,7 +213,7 @@ def readkey3(hdr,keyword):
                          'observer'  : 'OBSERVER',\
                          'exptime'   : 'EXPTIME',\
                          'instrume'  : 'INSTRUME',\
-                         'JD'        : 'MJD',\
+                         'JD'        : 'MJD-OBS',\
                          'filter'    : 'FILTER',\
                          'gain'      : 'GAIN',\
                          'ron'       : 'RDNOISE',\
