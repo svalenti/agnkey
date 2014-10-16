@@ -30,7 +30,7 @@ if __name__ == "__main__":
      parser.add_option("-b", "--bad",dest="bad",default='',type="str",
                   help='-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag,quality] \t [%default]')
      parser.add_option("-s", "--stage",dest="stage",default='',type="str",
-                  help='-s stage [checkwcs,checkpsf,checkmag,checkquality,checkpos,checkcat,checkmissing,checkfvd] \t [%default]')
+                       help='-s stage [checkwcs,checkpsf,checkmag,checkquality,checkpos,checkcat,checkmissing,checkfvd,checkclean] \t [%default]')
      parser.add_option("--filetype",dest="filetype",default=1,type="int",
                   help='filetype  1 [single], 2 [merge], 3 differences \t [%default]')
      parser.add_option("--z1",dest="z1",default=None,type="int",
@@ -55,7 +55,7 @@ if __name__ == "__main__":
      if option.force==None: _redo=False
      else:                 _redo=True
      if _stage:
-          if _stage not in ['checkfast','checkwcs','checkpsf','checkmag','checkquality','checkpos','checkcat','checkmissing','checkfvd']: sys.argv.append('--help')
+          if _stage not in ['checkfast','checkwcs','checkpsf','checkmag','checkquality','checkpos','checkcat','checkmissing','checkfvd','checkclean']: sys.argv.append('--help')
      if _bad:
           if _bad not in ['wcs','psf','psfmag','zcat','abscat','mag','goodcat','quality']: sys.argv.append('--help')
      if _filter: 
@@ -109,5 +109,7 @@ if __name__ == "__main__":
                     agnkey.agnloopdef.check_missing(ll['namefile'])
                elif _stage=='checkfvd':
                     agnkey.agnloopdef.checkfilevsdatabase(ll)
+               elif _stage=='checkclean':
+                    agnkey.agnloopdef.checkclean(ll['namefile'])
                else: print _stage+' not defined'
      else: print '\n### no data selected'

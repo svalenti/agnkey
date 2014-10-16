@@ -227,7 +227,7 @@ if __name__ == "__main__":
                     elif _stage=='apmag':
                          agnkey.agnloopdef.run_apmag(ll['namefile'],'dataredulco')
                     elif _stage=='cosmic':
-                         agnkey.agnloopdef.run_cosmic(ll['namefile'],'dataredulco')
+                         agnkey.agnloopdef.run_cosmic(ll['namefile'],'dataredulco',4.5,0.2,4,_redo)
                     elif _stage=='idlstart':
                          agnkey.agnloopdef.run_idlstart(ll['namefile'],'dataredulco',_redo)
 

@@ -28,8 +28,8 @@ def run_getmag(imglist,_field,_output='',_interactive=False,_show=False,_bin=1e-
           mtype='appmagap3' 
           mtypeerr='psfdmag'
      elif magtype=='flux1':
-          mtype='flux1' 
-          mtypeerr='flux1'
+          mtype='apflux1' 
+          mtypeerr='apflux1'
 
      if _field=='landolt': filters0=['U','B','V','R','I','Bessell-B','Bessell-V','Bessell-R','Bessell-I']# to be raplace when more telescopes available with dictionary
      elif _field=='sloan': filters0=['up','gp','rp','ip','zs','SDSS-G','SDSS-R','SDSS-I','Pan-Starrs-Z']
@@ -322,20 +322,24 @@ def run_apmag(imglist,database='dataredulco'):
                     print img1,' not found'
 ###################################################################
 
-def run_cosmic(imglist,database='dataredulco',_sigclip=4.5,_sigfrac=0.2,_objlim=4):
+def run_cosmic(imglist,database='dataredulco',_sigclip=4.5,_sigfrac=0.2,_objlim=4,_force=False):
      import agnkey
      direc=agnkey.__path__[0]
      import os,string,glob
+     print _force
      for img in imglist:
           ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
           if ggg:
                _dir=ggg[0]['wdirectory'] 
                print _dir+img
                if os.path.isfile(_dir+img):
-                    if not os.path.isfile(re.sub('.fits','.clean.fits',_dir+img)):
+                    if not os.path.isfile(re.sub('.fits','.clean.fits',_dir+img)) or _force:
                          output,mask,satu=agnkey.util.Docosmic(_dir+img,_sigclip,_sigfrac,_objlim)
                          agnkey.util.updateheader(output,0,{'DOCOSMIC':[True,'Cosmic rejection using LACosmic']})
-                         os.system('cp '+output+' '+_dir)
+                         print 'mv '+output+' '+_dir
+                         os.system('mv '+output+' '+_dir)
+                         os.system('mv '+mask+' '+_dir)
+                         os.system('mv '+satu+' '+_dir)
                          print output,mask,satu
                     else:
                          print 'cosmic rejection alread done'
@@ -997,6 +1001,42 @@ def makestamp(imglist,database='dataredulco',_z1='',_z2='',_interactive=True,red
           elif status==-5: print 'status '+str(status)+': png already done' 
           else: print 'status '+str(status)+': unknown status' 
 
+def checkclean(imglist,force=True,database='dataredulco'):
+     import agnkey
+     import os,string   #MySQLdb,
+     direc=agnkey.__path__[0]
+     from pyraf import iraf
+     iraf.digiphot(_doprint=0)
+     iraf.daophot(_doprint=0)
+     for img in imglist:
+          ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile',str(img), '*')
+          _dir=ggg[0]['wdirectory']
+          imgclean=re.sub('.fits','.clean.fits',img)
+          if os.path.isfile(_dir+imgclean):
+               iraf.display(_dir+img,1,fill=True,Stdout=1)
+               iraf.display(_dir+imgclean,2,fill=True,Stdout=1)
+               ###########################################
+               aa=raw_input('>>>good or bad quality [[g]/b]? ')
+               if not aa: aa='g'
+               if aa in ['bad','b','B']:
+                    agnkey.agnsqldef.updatevalue(database,'wcs',9999,string.split(img,'/')[-1])
+                    agnkey.agnsqldef.updatevalue(database,'psf','X' ,string.split(img,'/')[-1])
+                    agnkey.agnsqldef.updatevalue(database,'psfmag',9999,string.split(img,'/')[-1])
+                    if os.path.isfile(_dir+re.sub('.fits','.psf.fits',img)):
+                         print 'rm '+_dir+re.sub('.fits','.psf.fits',img)
+                         os.system('rm '+_dir+re.sub('.fits','.psf.fits',img))
+                    if os.path.isfile(_dir+re.sub('.fits','.sn2.fits',img)):
+                         print 'rm '+_dir+re.sub('.fits','.sn2.fits',img)
+                         os.system('rm '+_dir+re.sub('.fits','.sn2.fits',img))
+                    print 'updatestatus bad quality'
+                    agnkey.agnsqldef.updatevalue(database,'quality',1,string.split(img,'/')[-1])
+               else:
+                    print 'updatestatus quality good'
+                    agnkey.agnsqldef.updatevalue(database,'quality',127,string.split(img,'/')[-1])
+          else: print 'clean image not found' 
+
+##################################################################
+
 def checkfast(imglist,force=True,database='dataredulco'):
      import agnkey
      import os,string   #MySQLdb,
@@ -1035,6 +1075,7 @@ def checkfast(imglist,force=True,database='dataredulco'):
           elif status==-2: print 'status '+str(status)+': .fits file not found' 
           elif status==-4: print 'status '+str(status)+': bad quality image' 
           else: print 'status '+str(status)+': unknown status' 
+
 
 ##################################################################
 def checkmag(imglist,database='dataredulco'):
@@ -1538,7 +1579,7 @@ def run_template(listtemp,show=False,_force=False):
      else:             ii= ''
      if _force: ff=' -f '
      else:    ff=' '
-     command='agnmaketempl.py _temp.list '+ii+ff
+     command='agnmaketempl.py _temp.list --clean '+ii+ff
      print command
      os.system(command)
 

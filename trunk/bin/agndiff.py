@@ -92,7 +92,6 @@ if __name__ == "__main__":
      _checkast=option.check
      _force=option.force
      _show=option.show
-     saturation=40000
      nrxy=option.nrxy
      nsxy=option.nsxy
      ko=option.ko
@@ -134,8 +133,17 @@ if __name__ == "__main__":
                         outmask=re.sub('.fits','.mask.fits',string.split(imgout,'/')[-1])
                         hdtar = pyfits.getheader(imgtar)
                         artar = pyfits.getdata(imgtar)
-
-
+                        
+                        if os.path.isfile(re.sub('.fits','.sn2.fits',imgtemp)):
+                             hdtempsn = pyfits.getheader(re.sub('.fits','.sn2.fits',imgtemp))
+                        else: 
+                             hdtempsn={}
+                        
+                        if 'SATURATE' in hdtar:
+                            saturation=hdtar['SATURATE']
+                        else:
+                            saturation=50000
+                            
 ##############################       use geomap to register the two images        ############################
                         substamplist,dict=crossmatchtwofiles(imgtar,imgtemp,4)
                         xra1,xdec1,xra2,xdec2,xpix1,ypix1,xpix2,ypix2=dict['ra1'],dict['dec1'],dict['ra2'],\
@@ -144,15 +152,37 @@ if __name__ == "__main__":
 #                        substamplist,xpix1,ypix1,xpix2,ypix2=crossmatchtwofiles(imgtar,imgtemp,4)
 #                        distvec,pos0,pos1=agnkey.agnastrodef.crossmatch(xra1,xdec1,xra2,xdec2,4)
 #                        distvec,pos0,pos1=agnkey.agnastrodef.crossmatchxy(xpix1,ypix1,xpix2,ypix2,4)
+                        print len(xpix1)
                         vector4=[str(k)+' '+str(v)+' '+str(j)+' '+str(l) for k,v,j,l in  zip(xpix1,ypix1,xpix2,ypix2)]
                         np.savetxt('tmpcoo',vector4,fmt='%1s')
-                        iraf.immatch.geomap('tmpcoo',"tmp$db",1,hdtar['NAXIS1'],1,hdtar['NAXIS2'],fitgeom="rxyscale",functio="legendre",\
+                        iraf.immatch.geomap('tmpcoo',"tmp$db",1,hdtar['NAXIS1'],1,hdtar['NAXIS2'],fitgeom="general",functio="legendre",\
                                                 xxor=2,xyor=2,xxterms="half",yxor=2,yyor=2, yxterms="half",calctype="real",inter='No')
-                        agnkey.util.delete('_temp.fits')
-                        iraf.immatch.gregister(imgtemp,"_temp","tmp$db","tmpcoo",geometr="geometric",flux='yes')
-                        imgtemp='_temp.fits'
-###########################################################
 
+                        agnkey.util.delete('_temp0.fits')
+                        agnkey.util.delete('_temp.fits')
+                        agnkey.util.delete('_tar.fits')
+                        
+                        iraf.immatch.gregister(imgtemp,"_temp0","tmp$db","tmpcoo",geometr="geometric",interpo='nearest',flux='yes',verbose='yes')
+
+                        if hdtar['INSTRUME'] in agnkey.util.instrument0['sbig']:
+                            iraf.imarith('_temp0.fits','+','200','_temp.fits',verbose='yes')
+                            iraf.imarith(imgtar,'+','200','_tar.fits',verbose='yes')
+                        else:
+                            iraf.imcopy('_temp0.fits','_temp.fits',verbose='yes')
+                            iraf.imcopy(imgtar,'_tar.fits',verbose='yes')
+                                        
+                        imgtemp0=imgtemp
+                        imgtemp='_temp.fits'
+                        imgtar0=imgtar
+                        imgtar='_tar.fits'
+                        
+                        if _show:
+                                iraf.display(imgtemp0,frame=4,fill='yes')
+                                iraf.display(imgtemp,frame=3,fill='yes')
+                                iraf.display(imgtar0,frame=2,fill='yes')
+                                iraf.display(imgtar,frame=1,fill='yes')
+###########################################################
+                        #raw_input('ddd')
                         #_dir='/science/supernova/data/lsc/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
                         _dir=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
                         if not os.path.isfile(_dir+imgout) or _force: 
@@ -170,6 +200,8 @@ if __name__ == "__main__":
                             _ron_tar=agnkey.util.readkey3(hdr0,'ron')
                             _gain_temp=agnkey.util.readkey3(hdr1,'gain')
                             _ron_temp=agnkey.util.readkey3(hdr1,'ron')
+                            
+                            
                             max_fwhm=agnkey.util.readkey3(hdr0,'L1FWHM')  # to be check
                             _tel=agnkey.util.readkey3(hdr1,'TELID')
                             satnew = float(saturation)
@@ -206,21 +238,22 @@ if __name__ == "__main__":
                             print line
                             os.system(line)
                             hd = pyfits.getheader(imgout)
-                            agnkey.util.updateheader(imgout,0,{'template':[string.split(imgtemp,'/')[-1],'template image']})
-                            agnkey.util.updateheader(imgout,0,{'target':[string.split(imgtar,'/')[-1],'target image']})
-                            if hd['CONVOL00']=='TEMPLATE':   agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtar,'/')[-1],'image to compute  psf']})
-                            else:                            agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtemp,'/')[-1],'image to compute  psf']})
+                            agnkey.util.updateheader(imgout,0,{'template':[string.split(imgtemp0,'/')[-1],'template image']})
+                            agnkey.util.updateheader(imgout,0,{'target':[string.split(imgtar0,'/')[-1],'target image']})
+                            if hd['CONVOL00']=='TEMPLATE':   agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtar0,'/')[-1],'image to compute  psf']})
+                            else:                            agnkey.util.updateheader(imgout,0,{'PSF':[string.split(imgtemp0,'/')[-1],'image to compute  psf']})
+
 
                             if _show:
-                                iraf.display(imgtar,frame=1,fill='yes')
-                                iraf.display(imgtemp,frame=2,fill='yes')
+                                #iraf.display(imgtar,frame=1,fill='yes')
+                                #iraf.display(imgtemp,frame=2,fill='yes')
                                 iraf.display(imgout,frame=3,fill='yes')
 #                            raw_input('stop here')
 
                                          #                    copy all information from target 
                             dictionary={}
                             try:
-                                ggg0=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgtar,'/')[-1], '*')
+                                ggg0=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgtar0,'/')[-1], '*')
                                 for voce in ggg0[0].keys(): 
                                     if voce not in ['id']:       dictionary[voce]=ggg0[0][voce] 
                             except:
@@ -244,13 +277,24 @@ if __name__ == "__main__":
                                 print 'mv '+imgout+' '+dictionary['wdirectory']+imgout
                                 os.system('mv '+imgout+' '+dictionary['wdirectory']+imgout)
                                 os.system('mv '+imgtemp+' '+dictionary['wdirectory']+re.sub('.diff.','.ref.',imgout))
-                            if os.path.isfile(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1])):
-                                os.system('cp '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1])+' '+\
+                            if os.path.isfile(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1])):
+                                os.system('cp '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1])+' '+\
                                           dictionary['wdirectory']+re.sub('.fits','.sn2.fits',imgout))
                                 agnkey.util.updateheader(dictionary['wdirectory']+\
                                                          re.sub('.fits','.sn2.fits',imgout),0,{'mag':[9999.,'apparent'], \
-                                                            'psfmag':[9999.,'inst mag'], 'apmag':[9999.,'aperture mag']})
-                            else: print 'fits table not found '+str(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar,'/')[-1]))
+                                                            'psfmag':[9999.,'inst mag'], 'apmag':[9999.,'aperture mag']})      
+                                if 'ZPN' in hdtempsn:
+                                      agnkey.util.updateheader(dictionary['wdirectory']+\
+                                            re.sub('.fits','.sn2.fits',imgout),0,{'ZPNref':[hdtempsn['ZPN'],'ZPN reference image']})
+                                if 'apflux1' in hdtempsn:
+                                    agnkey.util.updateheader(dictionary['wdirectory']+\
+                                            re.sub('.fits','.sn2.fits',imgout),0,{\
+                                            'apfl1re':[hdtempsn['apflux1'],'flux reference image'],\
+                                            'dapfl1re':[hdtempsn['dapflux1'],'error flux reference image']})
+                            else: print 'fits table not found '+str(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1]))
+                            
+                            
+                            
                             ###################    insert in dataredulco
                             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')
                             if ggg and _force:   agnkey.agnsqldef.deleteredufromarchive(string.split(imgout,'/')[-1],'dataredulco','namefile')
@@ -264,7 +308,7 @@ if __name__ == "__main__":
                                         agnkey.agnsqldef.updatevalue('dataredulco',voce,dictionary[voce],string.split(imgout,'/')[-1])
                             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'inoutredu', 'nameout',string.split(imgout,'/')[-1], '*')
                             if ggg:   agnkey.agnsqldef.deleteredufromarchive(string.split(imgout,'/')[-1],'inoutredu','nameout')
-                            dictionary={'namein':string.split(imgtar,'/')[-1],'nameout':string.split(imgout,'/')[-1],'nametemp':string.split(imgtemp,'/')[-1],\
+                            dictionary={'namein':string.split(imgtar0,'/')[-1],'nameout':string.split(imgout,'/')[-1],'nametemp':string.split(imgtemp0,'/')[-1],\
                                         'tablein':'dataredulco','tableout':'dataredulco','tabletemp':'dataredulco'}
                             print 'insert in out'
                             print dictionary

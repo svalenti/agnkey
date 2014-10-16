@@ -1,14 +1,14 @@
 ##################################################################
 #       change this directory accordingly to your system
 #
-import socket
+import socket,sys
 host = socket.gethostname()
 if host in ['deneb']:            
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',\
               'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
               'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
    host='SVMAC'
@@ -728,13 +728,13 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
 
 ###############################
 
-def Docosmic(img,_sigclip=4.5,_sigfrac=0.2,_objlim=4):
+def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    import time
    start=time.time()
    import pyfits
    import agnkey
    import re,os,string
-   from numpy import array,where,int16
+   from numpy import array,where,int16,uint8
    hd = pyfits.getheader(img)
    ar = pyfits.getdata(img)
    _tel=hd['TELID']
@@ -755,8 +755,15 @@ def Docosmic(img,_sigclip=4.5,_sigfrac=0.2,_objlim=4):
       rdnoise = hd['RDNOISE']
    niter=1
    print 'gain,sat,noise,sigclip,objlim,sigfrac'
-   print gain,sat,rdnoise,_sigclip,_objlim,_sigfrac
+   ar[ar<0]=sat   #    set as saturated vaule all negative values
+   if 'L1SIGMA' in hd and 'L1MEAN' in hd:
+      _pssl=((gain*hd['L1SIGMA'])**2-rdnoise**2)/gain-hd['L1MEAN']
+   else:
+      _pssl=0.0
+
+   print gain,sat,rdnoise,_sigclip,_objlim,_sigfrac,_pssl
    c = agnkey.cosmics.cosmicsimage(ar
+                                 ,pssl=_pssl
                                  ,gain=gain
                                  ,readnoise=rdnoise
                                  ,sigclip=_sigclip
@@ -769,17 +776,17 @@ def Docosmic(img,_sigclip=4.5,_sigfrac=0.2,_objlim=4):
    outmask=re.sub('.fits','.mask.fits',string.split(img,'/')[-1])
    outsat=re.sub('.fits','.sat.fits',string.split(img,'/')[-1])
 
-   out1=c.cleanarray
-   out2=c.cleanarray-c.rawarray
+   out1=c.getcleanarray()
+   out2=c.getcleanarray()-c.rawarray
    out3=c.getsatstars()
 
    out_fits = pyfits.PrimaryHDU(header=hd,data=out1)
    out_fits.writeto(out, clobber=True, output_verify='fix')
 
-   out_fits = pyfits.PrimaryHDU(header=hd,data=where(out2==0,0,1))
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out2!=0).astype(uint8))
    out_fits.writeto(outmask, clobber=True, output_verify='fix')
 
-   out_fits = pyfits.PrimaryHDU(header=hd,data=where(out3,1,0))
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out3!=0).astype(uint8))
    out_fits.writeto(outsat, clobber=True, output_verify='fix')
 
 #   if bp==16:           out_fits.scale('int16', 'old')
