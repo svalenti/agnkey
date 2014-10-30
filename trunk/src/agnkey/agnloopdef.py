@@ -1530,7 +1530,7 @@ def run_merge(imglist,_redu=False):
      os.system(command)
 
 #####################################################################
-def run_diff(listtar,listtemp,_show=False,_force=False):
+def run_diff(listtar,listtemp,_show=False,_force=False,_normalize='i'):
      import agnkey
      direc=agnkey.__path__[0]
      from numpy import where, array
@@ -1554,7 +1554,7 @@ def run_diff(listtar,listtemp,_show=False,_force=False):
      else:             ii= ''
      if _force: ff=' -f '
      else:    ff=' '
-     command='agndiff.py _tar.list _temp.list '+ii+ff
+     command='agndiff.py _tar.list _temp.list '+ii+ff+'--normalize '+_normalize
      print command
      os.system(command)
 ######################################################################3

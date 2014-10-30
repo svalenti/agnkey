@@ -6,7 +6,10 @@ def getconnection(site):
    import  agnkey
 
    connection={#        CHANGE THIS LINE WITH THE INFO ON THE NEW DATABASE
-               'agnkey':{'username':'cv21','hostname':'localhost','database':'lcogt'}}
+               'agnkey':{}}
+   connection[site]['database']=agnkey.util.readpass['database']
+   connection[site]['hostname']=agnkey.util.readpass['hostname']
+   connection[site]['username']=agnkey.util.readpass['mysqluser']
    connection[site]['passwd']=agnkey.util.readpass['mysqlpasswd']
    return  connection[site]['hostname'],connection[site]['username'],connection[site]['passwd'],connection[site]['database']
 

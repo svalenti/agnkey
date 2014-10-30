@@ -36,29 +36,6 @@ def crossmatchtwofiles(img1,img2,radius=3):
     np.savetxt('substamplist',zip(xpix1[pos1],ypix1[pos1]),fmt='%10.10s\t%10.10s')    
     return 'substamplist',dict
 
-#    distvec=[]
-#    pos1=[]
-#    pos2=[]
-#    f=open('substamplist','w')
-#    for jj in range(0,len(xra1)):
-#            dist = sqrt((xra2-xra1[jj])**2+(xdec2-xdec1[jj])**2)  # find the common using coordinate
-#            print min(dist)
-#            if min(dist)<=radius:
-#                f.write('%10.10s\t%10.10s\n' % (str(xpix1[jj]),str(ypix1[jj])))
-#    f.close()
-#    return 'substamplist',xra1,xdec1,xra2,xdec2
-
-#    distvec=[]
-#    pos1=[]
-#    pos2=[]
-#    f=open('substamplist','w')
-#    for jj in range(0,len(xpix1)):
-#            dist = sqrt((xpix2-xpix1[jj])**2+(ypix2-ypix1[jj])**2)
-#            print min(dist)
-#            if min(dist)<=radius:
-#                f.write('%10.10s\t%10.10s\n' % (str(xpix1[jj]),str(ypix1[jj])))
-#    f.close()
-#    return 'substamplist',xpix1,ypix1,xpix2,ypix2
 
 ###################################################
 if __name__ == "__main__":
@@ -71,18 +48,27 @@ if __name__ == "__main__":
             default=False, help=' show result  \t\t\t [%default]')
      hotpants = OptionGroup(parser, "hotpants parameters")
      hotpants.add_option("--nrxy",dest="nrxy",default='1,1',\
-                             help='Number of image region in x y directions \t [%default]')
+            help='Number of image region in x y directions \t [%default]')
      hotpants.add_option("--nsxy",dest="nsxy",default='8,8',
-                         help="Number of region's stamps in x y directions\t [%default]")
+            help="Number of region's stamps in x y directions\t [%default]")
      hotpants.add_option("--ko",dest="ko",default='1',
-                         help='spatial order of kernel variation within region\t [%default]') 
+            help='spatial order of kernel variation within region\t [%default]') 
      hotpants.add_option("--bgo",dest="bgo",default='1',
-                         help='spatial order of background variation within region \t [%default]')
+            help='spatial order of background variation within region \t [%default]')
      hotpants.add_option("--afssc",dest="afssc",default=False,\
-                             action="store_true",help='use selected stamps \t\t\t [%default]')
+            action="store_true",help='use selected stamps \t\t\t [%default]')
+     hotpants.add_option("--normalize",dest="normalize",default='i',\
+            help='normalize zero point to image [i] or template [t] \t [%default]')
+     hotpants.add_option("--interpolation",dest="interpolation",default='drizzle',\
+            help='interpolation algorithm  [drizzle,nearest,linear,poly3,poly5,spline3]\t [%default]')
      parser.add_option_group(hotpants)
 
      option,args = parser.parse_args()    
+     _normalize=option.normalize
+     _interpolation=option.interpolation
+     if _normalize not in ['i','t']:  sys.argv.append('--help')
+     if _interpolation not in ['drizzle','nearest','linear','poly3','poly5','spline3']:  
+     		sys.argv.append('--help')
      if len(args)<2 : sys.argv.append('--help')
      option,args = parser.parse_args()
      imglisttar = agnkey.util.readlist(args[0])
@@ -98,6 +84,7 @@ if __name__ == "__main__":
      bgo=option.bgo
      afssc=option.afssc
 
+     
      listatar={}
      for img in imglisttar:
          hdr=agnkey.util.readhdr(img)
@@ -154,15 +141,20 @@ if __name__ == "__main__":
 #                        distvec,pos0,pos1=agnkey.agnastrodef.crossmatchxy(xpix1,ypix1,xpix2,ypix2,4)
                         print len(xpix1)
                         vector4=[str(k)+' '+str(v)+' '+str(j)+' '+str(l) for k,v,j,l in  zip(xpix1,ypix1,xpix2,ypix2)]
+                        if len(vector4)>=12:
+                            num=3
+                        else:
+                            num=2
                         np.savetxt('tmpcoo',vector4,fmt='%1s')
                         iraf.immatch.geomap('tmpcoo',"tmp$db",1,hdtar['NAXIS1'],1,hdtar['NAXIS2'],fitgeom="general",functio="legendre",\
-                                                xxor=2,xyor=2,xxterms="half",yxor=2,yyor=2, yxterms="half",calctype="real",inter='No')
-
+                                                xxor=num,xyor=num,xxterms="half",yxor=num,yyor=num, yxterms="half",calctype="real",inter='No')
+                        
                         agnkey.util.delete('_temp0.fits')
                         agnkey.util.delete('_temp.fits')
                         agnkey.util.delete('_tar.fits')
-                        
-                        iraf.immatch.gregister(imgtemp,"_temp0","tmp$db","tmpcoo",geometr="geometric",interpo='nearest',flux='yes',verbose='yes')
+
+                        iraf.immatch.gregister(imgtemp,"_temp0","tmp$db","tmpcoo",geometr="geometric",interpo=_interpolation,\
+                                                   boundar='constant', constan=0, flux='yes',verbose='yes')
 
                         if hdtar['INSTRUME'] in agnkey.util.instrument0['sbig']:
                             iraf.imarith('_temp0.fits','+','200','_temp.fits',verbose='yes')
@@ -182,8 +174,6 @@ if __name__ == "__main__":
                                 iraf.display(imgtar0,frame=2,fill='yes')
                                 iraf.display(imgtar,frame=1,fill='yes')
 ###########################################################
-                        #raw_input('ddd')
-                        #_dir='/science/supernova/data/lsc/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
                         _dir=agnkey.util.workingdirectory+'1mtel/'+agnkey.util.readkey3(hdtar,'date-night')+'/'
                         if not os.path.isfile(_dir+imgout) or _force: 
                             artar = where(artar>saturation,2,0)
@@ -218,7 +208,8 @@ if __name__ == "__main__":
                             radius = max(10,radius)    # minimum
                             radius = min(20,radius)    # maximum
                             sconv = '-sconv'          # all regions convolved in same direction (0)
-                            normalize = 'i'     #normalize to (t)emplate, (i)mage, or (u)nconvolved (t)
+                            normalize = _normalize       #normalize to (t)emplate, (i)mage, or (u)nconvolved (t)
+                            
                             _afssc = ''
                             if afssc:
                                  substamplist,xpix1,ypix1,xpix2,ypix2=crossmatchtwofiles(imgtar,imgtemp)
@@ -273,27 +264,46 @@ if __name__ == "__main__":
                             if not os.path.isdir(dictionary['wdirectory']): 
                                 print dictionary['wdirectory']
                                 os.mkdir(dictionary['wdirectory'])
-                            if not os.path.isfile(dictionary['wdirectory']+imgout) or _force=='yes': 
+                            if not os.path.isfile(dictionary['wdirectory']+imgout) or _force in ['yes',True]: 
                                 print 'mv '+imgout+' '+dictionary['wdirectory']+imgout
                                 os.system('mv '+imgout+' '+dictionary['wdirectory']+imgout)
                                 os.system('mv '+imgtemp+' '+dictionary['wdirectory']+re.sub('.diff.','.ref.',imgout))
-                            if os.path.isfile(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1])):
-                                os.system('cp '+dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1])+' '+\
+                                
+###########################################################################################################
+#                           choose sn2 file depending on 
+#                           normalization parameter 
+#                           
+########################################################################################################## 
+                            if normalize=='i':
+                                print 'scale to target'
+                                imgscale=imgtar0
+                                pathscale=os.path.split(imgtar0)[0]+'/'
+                            elif normalize=='t':
+                                print 'scale to reference'
+                                imgscale=imgtemp0
+                                pathscale=os.path.split(imgtemp0)[0]+'/'                                
+                                
+                                
+                            if os.path.isfile(pathscale+re.sub('.fits','.sn2.fits',string.split(imgscale,'/')[-1])):
+                                os.system('cp '+pathscale+re.sub('.fits','.sn2.fits',string.split(imgscale,'/')[-1])+' '+\
                                           dictionary['wdirectory']+re.sub('.fits','.sn2.fits',imgout))
                                 agnkey.util.updateheader(dictionary['wdirectory']+\
                                                          re.sub('.fits','.sn2.fits',imgout),0,{'mag':[9999.,'apparent'], \
                                                             'psfmag':[9999.,'inst mag'], 'apmag':[9999.,'aperture mag']})      
+                                                            
+                                                            
                                 if 'ZPN' in hdtempsn:
                                       agnkey.util.updateheader(dictionary['wdirectory']+\
                                             re.sub('.fits','.sn2.fits',imgout),0,{'ZPNref':[hdtempsn['ZPN'],'ZPN reference image']})
+                                            
                                 if 'apflux1' in hdtempsn:
                                     agnkey.util.updateheader(dictionary['wdirectory']+\
                                             re.sub('.fits','.sn2.fits',imgout),0,{\
                                             'apfl1re':[hdtempsn['apflux1'],'flux reference image'],\
                                             'dapfl1re':[hdtempsn['dapflux1'],'error flux reference image']})
-                            else: print 'fits table not found '+str(dictionary['wdirectory']+re.sub('.fits','.sn2.fits',string.split(imgtar0,'/')[-1]))
-                            
-                            
+                            else: print 'fits table not found '+str(dictionary['wdirectory']+\
+                            		re.sub('.fits','.sn2.fits',string.split(imgscale,'/')[-1]))
+                           
                             
                             ###################    insert in dataredulco
                             ggg=agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',string.split(imgout,'/')[-1], '*')

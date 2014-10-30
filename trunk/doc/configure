@@ -1,0 +1,10 @@
+users        ['stefano_valenti']  #  include here the list of user and proposal that can trigger the network 
+proposal     ['KEY2014A-002']     #  this list is also used to download data from IPAC archive
+superusers   ['SV','KH','CV','dsand','agnkey']  #   this is the list of super user on agnagent 
+ipacuser     svalenti@lcogt.net        #  this is the user that will downlod data from IPAC
+ipacpasswd   xxxxxxx                  # ipac passord 
+odinpasswd   xxxxxxx                  # odin password
+odinuser     svalenti@lcogt.net       # odin user 
+mysqlpasswd  xxxxxxx                  # password for the mysql account
+ipacuser2     cv21@st-andrews.ac.uk   # not used 
+ipacpasswd2  xxxxxxx                  # not used

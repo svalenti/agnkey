@@ -26,14 +26,14 @@ extract the files from the tarball
 > python setup.py install  (--record files.txt) --prefix=/user_directory  (eg /Users/svalenti)
 
 ##########################################################################
-To uninstall a previus version 
+To uninstall a previous version 
 
 - delete the agnkey directory in your site-package path
 - delete the agnkey****.egg-info from the same directory
 - delete the agnkey executable:agnkey 
 
 or if during installation  you used the option: --record files.txt
-you can run the following command in theterminal:
+you can run the following command in the terminal:
 > cat files.txt | xargs sudo rm -rf
 
 ############################################################
