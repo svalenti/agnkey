@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="976d23e7-7a5a-467e-9600-d00fba1ec254" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/__init__.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/__init__.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agncheck.py" afterPath="$PROJECT_DIR$/trunk/bin/agncheck.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agndiff.py" afterPath="$PROJECT_DIR$/trunk/bin/agndiff.py" />
     </list>
     <ignored path="agnkey.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -47,6 +48,8 @@
         <option value="$PROJECT_DIR$/trunk/setup.py" />
         <option value="$PROJECT_DIR$/trunk/src/agnkey/util.py" />
         <option value="$PROJECT_DIR$/trunk/src/agnkey/__init__.py" />
+        <option value="$PROJECT_DIR$/trunk/bin/agncheck.py" />
+        <option value="$PROJECT_DIR$/trunk/bin/agndiff.py" />
       </list>
     </option>
   </component>
@@ -110,6 +113,24 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="trunk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="agnkey" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="agnkey" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="trunk" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bin" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -356,7 +377,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="617" max-vertical-offset="5910">
           <caret line="69" column="13" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
           <folding>
-            <element signature="e#194#208#0" expanded="false" />
+            <element signature="e#194#208#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -373,9 +394,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="5661" max-vertical-offset="6135">
           <caret line="396" column="86" selection-start-line="396" selection-start-column="86" selection-end-line="396" selection-end-column="86" />
-          <folding>
-            <element signature="e#91#100#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -401,9 +420,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="4320" max-vertical-offset="5490">
           <caret line="310" column="0" selection-start-line="310" selection-start-column="0" selection-end-line="310" selection-end-column="0" />
-          <folding>
-            <element signature="e#91#100#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -432,9 +449,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.93670887" vertical-offset="5706" max-vertical-offset="6240">
           <caret line="410" column="0" selection-start-line="410" selection-start-column="0" selection-end-line="410" selection-end-column="0" />
-          <folding>
-            <element signature="e#91#100#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -456,16 +471,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/bin/agnloop.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.93492407" vertical-offset="6094" max-vertical-offset="6615">
-          <caret line="435" column="0" selection-start-line="435" selection-start-column="0" selection-end-line="435" selection-end-column="0" />
-          <folding>
-            <element signature="e#194#208#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/trunk/bin/agnastro.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.93670887" vertical-offset="2481" max-vertical-offset="3015">
@@ -481,7 +486,7 @@
         <state vertical-scroll-proportion="0.53797466" vertical-offset="0" max-vertical-offset="474">
           <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#11#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -491,7 +496,7 @@
         <state vertical-scroll-proportion="0.16741072" vertical-offset="0" max-vertical-offset="20085">
           <caret line="5" column="27" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
           <folding>
-            <element signature="e#126#139#0" expanded="true" />
+            <element signature="e#126#139#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -509,6 +514,36 @@
         <state vertical-scroll-proportion="0.25949368" vertical-offset="267" max-vertical-offset="750">
           <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agncheck.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.93492407" vertical-offset="1489" max-vertical-offset="2010">
+          <caret line="128" column="0" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
+          <folding>
+            <element signature="e#96#110#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agndiff.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.9023861" vertical-offset="4909" max-vertical-offset="5430">
+          <caret line="355" column="51" selection-start-line="355" selection-start-column="51" selection-end-line="355" selection-end-column="51" />
+          <folding>
+            <element signature="e#120#129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agnloop.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="13.765822" vertical-offset="0" max-vertical-offset="6615">
+          <caret line="435" column="0" selection-start-line="435" selection-start-column="0" selection-end-line="435" selection-end-column="0" />
+          <folding>
+            <element signature="e#194#208#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
