@@ -7,7 +7,7 @@ import re
 import os
 from agnkey.agnastrodef import *
 from optparse import OptionParser
-from numpy import sqrt
+import numpy as np
 
 import time
 
@@ -138,8 +138,8 @@ if __name__ == "__main__":
                 print '\n### check astrometry: fine \n### rmsx rmsy nstars: ' + astrostring
                 agnkey.util.updateheader(img, 0, {'PSF_FWHM': [fwhmgess, 'FHWM (arcsec) - computed with sectractor'],
                                                   'ELLIPTIC': [ellgess, 'ellipticity of point sources (1-b/a)'],
-                                                  'CRDER1': [(1 / sqrt(2.)) * float(rmsx3), 'Random error in axis 1'],
-                                                  'CRDER2': [(1 / sqrt(2.)) * float(rmsy3), 'Random error in axis 2'],
+                                                  'CRDER1': [(1 / np.sqrt(2.)) * float(rmsx3), 'Random error in axis 1'],
+                                                  'CRDER2': [(1 / np.sqrt(2.)) * float(rmsy3), 'Random error in axis 2'],
                                                   'CUNIT1': ['deg', 'unit of the coord. trans.'],
                                                   'CUNIT2': ['deg', 'unit of the coord. trans.'],
                                                   'CSYER1': [rasys3, 'Systematic error (RA_m - Ra_ref)'],

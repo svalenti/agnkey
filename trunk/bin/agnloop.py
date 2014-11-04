@@ -2,7 +2,6 @@
 description = "> process lsc data  "
 usage = "%prog  -e epoch [-s stage -n name -f filter -d idnumber]\n available stages [wcs,psf,psfmag,zcat,abscat,mag,local,getmag]\n"
 
-import MySQLdb
 import string
 import re
 import sys
@@ -51,13 +50,13 @@ if __name__ == "__main__":
                       help='size of the stamp for the fit \t [%default]')
     parser.add_option("-t", "--threshold", dest="threshold", default=5.,
                       type='float', help='Source detection threshold \t\t\t %default')
-    parser.add_option("-i", "--interactive", action="store_true", \
+    parser.add_option("-i", "--interactive", action="store_true",
                       dest='interactive', default=False, help='Interactive \t\t\t [%default]')
-    parser.add_option("--show", action="store_true", \
+    parser.add_option("--show", action="store_true",
                       dest='show', default=False, help='show psf fit \t\t\t [%default]')
-    parser.add_option("-c", "--center", action="store_false", \
+    parser.add_option("-c", "--center", action="store_false",
                       dest='recenter', default=True, help='recenter \t\t\t [%default]')
-    parser.add_option("--fix", action="store_false", \
+    parser.add_option("--fix", action="store_false",
                       dest='fix', default=True, help='fix color \t\t\t [%default]')
     parser.add_option("--cutmag", dest="cutmag", default=99., type="float",
                       help='--cutmag  [magnitude instrumental cut for zeropoint ]  \t [%default]')
@@ -70,7 +69,8 @@ if __name__ == "__main__":
     parser.add_option("--calib", dest="calib", default='', type="str",
                       help='--calib  (sloan,natural,sloanprime)   \t [%default]')
     parser.add_option("--type", dest="type", default='fit', type="str",
-                      help='--type mag for zero point   [fit,ph,mag,appmagap1,appmagap2,appmagap3,flux1]    \t [%default]')
+                      help='--type mag for zero point   [fit,ph,mag,appmagap1,appmagap2,appmagap3,flux1]   '
+                           ' \t [%default]')
     parser.add_option("--standard", dest="standard", default='', type="str",
                       help='--standard namestd  \t use the zeropoint from this standard    \t [%default]')
     parser.add_option("--xshift", dest="xshift", default=0, type="int",
@@ -107,8 +107,7 @@ if __name__ == "__main__":
     _bad = option.bad
     if _normalize not in ['i', 't']:
         sys.argv.append('--help')
-    if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb',
-                                                                              'fl']:
+    if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb', 'fl']:
         sys.argv.append('--help')
     if option.force == None:
         _redo = False
@@ -122,11 +121,11 @@ if __name__ == "__main__":
         sys.argv.append('--help')
     if _stage:
         if _stage not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
-                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart']: sys.argv.append(
-            '--help')
+                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart']:
+            sys.argv.append('--help')
     if _bad:
-        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality',
-                        'apmag']: sys.argv.append('--help')
+        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag']:
+            sys.argv.append('--help')
     option, args = parser.parse_args()
     _id = option.id
     _filter = option.filter
@@ -175,8 +174,7 @@ if __name__ == "__main__":
     if _filter:
         if _filter not in ['landolt', 'sloan', 'apass', 'u', 'g', 'r', 'i', 'z', 'U', 'B', 'V', 'R', 'I',
                            'SDSS-I', 'SDSS-G', 'SDSS-R', 'Pan-Starrs-Z', 'Bessell-B', 'Bessell-V', 'Bessell-R',
-                           'Bessell-I',
-                           'ug', 'gr', 'gri', 'griz', 'riz', 'BVR', 'BV', 'BVRI', 'VRI']:
+                           'Bessell-I', 'ug', 'gr', 'gri', 'griz', 'riz', 'BVR', 'BV', 'BVRI', 'VRI']:
             sys.argv.append('--help')
         else:
             try:
@@ -232,7 +230,7 @@ if __name__ == "__main__":
             ll0['dec'] = ll0['dec0'][:]
             ll = agnkey.agnloopdef.filtralist(ll0, _filter, _id, _name, _ra, _dec, _bad, _filetype)
             print '##' * 50
-            print "# IMAGE                                    OBJECT           FILTER           WCS           PSF   "+\
+            print "# IMAGE                                  OBJECT           FILTER           WCS           PSF   " + \
                   "        PSFMAG    APMAG       ZCAT          MAG      ABSCAT"
             for i in range(0, len(ll['namefile'])):
                 try:
@@ -248,9 +246,9 @@ if __name__ == "__main__":
                            str(ll['mag'][i]), str(ll['abscat'][i]))
             print '\n###  total number = ' + str(len(ll['namefile']))
             # ####################################
-            if _stage == 'local':  #     calibrate local sequence from .cat files
+            if _stage == 'local':  # calibrate local sequence from .cat files
                 agnkey.agnloopdef.run_local(ll['namefile'], _field, _interactive)
-            elif _stage == 'getmag':  #     get final magnitude from mysql
+            elif _stage == 'getmag':  # get final magnitude from mysql
                 if not _field:
                     sys.exit('use option --field landolt or sloan')
                 else:
@@ -283,11 +281,13 @@ if __name__ == "__main__":
                                                     _telescope)
             if lista:
                 ll0 = {}
-                for jj in lista[0].keys(): ll0[jj] = []
+                for jj in lista[0].keys():
+                    ll0[jj] = []
                 for i in range(0, len(lista)):
-                    for jj in lista[0].keys(): ll0[jj].append(lista[i][jj])
+                    for jj in lista[0].keys():
+                        ll0[jj].append(lista[i][jj])
 
-                inds = argsort(ll0['jd'])  #  sort by jd
+                inds = argsort(ll0['jd'])  # sort by jd
                 for i in ll0.keys():
                     ll0[i] = take(ll0[i], inds)
                 ll0['ra'] = ll0['ra0'][:]
@@ -366,7 +366,7 @@ if __name__ == "__main__":
                         else:
                             print 'warning: field not defined, zeropoint not computed'
 
-                    elif _stage == 'abscat':  #    compute magnitudes for sequence stars > img.cat
+                    elif _stage == 'abscat':  # compute magnitudes for sequence stars > img.cat
                         if _standard:
                             mm = agnkey.agnloopdef.filtralist(ll0, _filter, '', _standard, '', '', '', _filetype)
                             if len(mm['namefile']) > 0:
@@ -383,7 +383,7 @@ if __name__ == "__main__":
                         else:
                             agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 1, _type, _fix, 'dataredulco',
                                                       _field)
-                    elif _stage == 'mag':  #    compute final magnitude using:   mag1  mag2  Z1  Z2  C1  C2
+                    elif _stage == 'mag':  # compute final magnitude using:   mag1  mag2  Z1  Z2  C1  C2
                         if _standard:
                             mm = agnkey.agnloopdef.filtralist(ll0, _filter, '', _standard, '', '', '', _filetype)
                             if len(mm['namefile']) > 0:
@@ -400,10 +400,10 @@ if __name__ == "__main__":
                         else:
                             agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 2, _type, False, 'dataredulco',
                                                       _field)
-                    elif _stage == 'merge':  #    merge images using lacos and swarp
+                    elif _stage == 'merge':  # merge images using lacos and swarp
                         listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                         agnkey.agnloopdef.run_merge(array(listfile), _redo)
-                    elif _stage == 'diff':  #    difference images using hotpants
+                    elif _stage == 'diff':  # difference images using hotpants
                         if not _name: sys.exit('you need to select one object: use option -n/--name')
                         if _tempdate:
                             lista1 = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs',
@@ -413,11 +413,14 @@ if __name__ == "__main__":
                                                                      '20120101', '20150101', '*', _telescope)
                         if lista1:
                             ll00 = {}
-                            for jj in lista1[0].keys(): ll00[jj] = []
+                            for jj in lista1[0].keys():
+                                ll00[jj] = []
                             for i in range(0, len(lista1)):
-                                for jj in lista1[0].keys(): ll00[jj].append(lista1[i][jj])
+                                for jj in lista1[0].keys():
+                                    ll00[jj].append(lista1[i][jj])
                             inds = argsort(ll00['jd'])  #  sort by jd
-                            for i in ll00.keys():   ll00[i] = take(ll00[i], inds)
+                            for i in ll00.keys():
+                                ll00[i] = take(ll00[i], inds)
                             lltemp = agnkey.agnloopdef.filtralist(ll00, _filter, _id, _name, _ra, _dec, _bad, 4)
                         else:
                             sys.exit('template not found')
@@ -425,8 +428,9 @@ if __name__ == "__main__":
                         listtar = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                         listtemp = [k + v for k, v in zip(lltemp['wdirectory'], lltemp['namefile'])]
                         agnkey.agnloopdef.run_diff(array(listtar), array(listtemp), _show, _redo, _normalize)
-                        if len(listtemp) == 0 or len(listtar) == 0: sys.exit('no data selected ')
-                    elif _stage == 'template':  #    merge images using lacos and swarp
+                        if len(listtemp) == 0 or len(listtar) == 0:
+                            sys.exit('no data selected ')
+                    elif _stage == 'template':  # merge images using lacos and swarp
                         listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                         agnkey.agnloopdef.run_template(array(listfile), _show, _redo)
                     else:
