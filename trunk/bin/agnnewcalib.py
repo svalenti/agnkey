@@ -2,7 +2,6 @@
 description = ">> new calibration"
 usage = "%prog image [options] "
 
-import os
 import string
 import re
 import sys
@@ -12,7 +11,6 @@ import time
 import agnkey
 import pyfits
 import numpy as np
-import math
 
 
 def vizq(_ra, _dec, catalogue, radius):
@@ -159,7 +157,7 @@ if __name__ == "__main__":
 
         _exptime = hdr['exptime']
         # _ra0,_dec0=agnkey.agnabsphotdef.deg2HMS(_ra0,_dec0)
-        #_apass=vizq(_ra0,_dec0,'apass',20)
+        # _apass=vizq(_ra0,_dec0,'apass',20)
         #_sloan=vizq(_ra0,_dec0,'sdss7',20)
 
         _object = agnkey.util.readkey3(hdr, 'object')
@@ -249,9 +247,6 @@ if __name__ == "__main__":
                 iraf.imcoords(_doprint=0)
                 iraf.digiphot(_doprint=0)
                 iraf.daophot(_doprint=0)
-                from iraf import digiphot
-                from iraf import daophot
-                from iraf import ptools
 
                 lll = [str(rasn) + '    ' + str(decsn)]
                 sss = iraf.wcsctran('STDIN', 'STDOUT', img, Stdin=lll, inwcs='world', units='degrees degrees',

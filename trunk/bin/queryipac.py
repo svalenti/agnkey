@@ -3,7 +3,6 @@
 import os
 import string
 import sys
-import numpy as np
 import datetime
 import agnkey
 import glob
