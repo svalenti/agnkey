@@ -82,25 +82,33 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     zmag = 0.
     varord = 0  # -1 analitic 0 - numeric
     if fixaperture:
-        print 'use fix aperture 4 8 10 12'
-        a1, a2, a3, a4, = int(5), int(8), int(10), int(12)
+        print 'use fix aperture 5 8 10'
+        hdr = agnkey.util.readhdr(img+'.fits')
+        _pixelscale = agnkey.util.readkey3(hdr, 'PIXSCALE')
+        a1, a2, a3, a4, = float(5. / _pixelscale), float(5. / _pixelscale), float(8. / _pixelscale), float(
+                    10. / _pixelscale)
     else:
         a1, a2, a3, a4, = int(fwhm + 0.5), int(fwhm * 2 + 0.5), int(fwhm * 3 + 0.5), int(fwhm * 4 + 0.5)
 
     iraf.fitskypars.annulus = a4
-    iraf.photpars.apertures = '%d,%d,%d' % (a2, a3, a4)
+    iraf.fitskypars.dannulus = a4
+    iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
+    iraf.noao.digiphot.daophot.daopars.wsannul = int(a4)
     iraf.fitskypars.salgori = 'mean'  #mode,mean,gaussian
+    iraf.photpars.apertures = '%d,%d,%d' % (a2, a3, a4)
+    #    iraf.photpars.apertures = '%d,%d,%d'%(a2,a3,a4)
     iraf.datapars.datamin = -100
     iraf.datapars.datamax = _datamax
     iraf.datapars.readnoise = agnkey.util.readkey3(hdr, 'ron')
     iraf.datapars.epadu = agnkey.util.readkey3(hdr, 'gain')
-    iraf.datapars.exposure = 'EXPTIME'  #agnkey.util.readkey3(hdr,'exptime')
-    iraf.datapars.airmass = ''
-    iraf.datapars.filter = ''
-    iraf.photpars.zmag = zmag
-    iraf.centerpars.calgori = 'centroid'
-    iraf.centerpars.cbox = a2
+    iraf.datapars.exposure = 'exptime'  #agnkey.util.readkey3(hdr,'exptime')
+    iraf.datapars.airmass = 'airmass'
+    iraf.datapars.filter = 'filter2'
+    iraf.centerpars.calgori = 'gauss'
+    iraf.centerpars.cbox = 1
     iraf.daopars.recenter = 'yes'
+    iraf.photpars.zmag = zmag
+
     iraf.delete('_psf2.ma*', verify=False)
 
     iraf.phot(img, '_psf2.coo', '_psf2.mag', interac=False, verify=False, verbose=False)
@@ -109,7 +117,8 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     iraf.daopars.functio = psffun
     iraf.daopars.fitrad = a1
     iraf.daopars.fitsky = 'yes'
-    iraf.daopars.sannulus = a4
+    iraf.daopars.sannulus = int(a4)
+    iraf.daopars.wsannul = int(a4)
     iraf.daopars.recenter = 'yes'
     iraf.daopars.varorder = varord
     iraf.delete("_als,_psf.grp,_psf.nrj", verify=False)
@@ -129,12 +138,19 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     varord = 0  # -1 analitic 0 - numeric
 
     if fixaperture:
-        print 'use fix aperture 4 8 10 12'
-        a1, a2, a3, a4, = int(5), int(8), int(10), int(12)
+        print 'use fix aperture 5 8 10'
+        hdr = agnkey.util.readhdr(img+'.fits')
+        _pixelscale = agnkey.util.readkey3(hdr, 'PIXSCALE')
+        a1, a2, a3, a4, = float(5. / _pixelscale), float(5. / _pixelscale), float(8. / _pixelscale), float(
+                    10. / _pixelscale)
+#        a1, a2, a3, a4, = int(5), int(8), int(10), int(12)
     else:
         a1, a2, a3, a4, = int(fwhm + 0.5), int(fwhm * 2 + 0.5), int(fwhm * 3 + 0.5), int(fwhm * 4 + 0.5)
 
     iraf.fitskypars.annulus = a4
+    iraf.fitskypars.dannulus = a4
+    iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
+    iraf.noao.digiphot.daophot.daopars.wsannul = int(a4)
     iraf.fitskypars.salgori = 'mean'  #mode,mean,gaussian
     iraf.photpars.apertures = '%d,%d,%d' % (a2, a3, a4)
     #    iraf.photpars.apertures = '%d,%d,%d'%(a2,a3,a4)
@@ -142,11 +158,11 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.datapars.datamax = _datamax
     iraf.datapars.readnoise = agnkey.util.readkey3(hdr, 'ron')
     iraf.datapars.epadu = agnkey.util.readkey3(hdr, 'gain')
-    iraf.datapars.exposure = 'EXPTIME'  #agnkey.util.readkey3(hdr,'exptime')
-    iraf.datapars.airmass = ''
-    iraf.datapars.filter = ''
-    iraf.centerpars.calgori = 'centroid'
-    iraf.centerpars.cbox = a2
+    iraf.datapars.exposure = 'exptime'  #agnkey.util.readkey3(hdr,'exptime')
+    iraf.datapars.airmass = 'airmass'
+    iraf.datapars.filter = 'filter2'
+    iraf.centerpars.calgori = 'gauss'
+    iraf.centerpars.cbox = 1
     iraf.daopars.recenter = 'yes'
     iraf.photpars.zmag = zmag
 
@@ -157,7 +173,8 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.daopars.functio = psffun
     iraf.daopars.fitrad = a1
     iraf.daopars.fitsky = 'yes'
-    iraf.daopars.sannulus = a4
+    iraf.daopars.sannulus = int(a4)
+    iraf.daopars.wsannul = int(a4)
     iraf.daopars.recenter = 'yes'
     iraf.daopars.varorder = varord
 

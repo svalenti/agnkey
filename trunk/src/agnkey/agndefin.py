@@ -649,6 +649,7 @@ def archivereducedspectrum(img):
 def uploadspectrum(img,_output,_force,_permission):
     import pyfits
     import agnkey
+    import numpy as np
     import re,string,sys,os
 
     note='input= '+img+'\n'
@@ -673,7 +674,7 @@ def uploadspectrum(img,_output,_force,_permission):
             hdr0.update(jj,hdr[jj])
         if 'south' in _tel.lower(): _tel='gs'
         else: _tel='gn'
-        pyfits.writeto(re.sub('.fits','0.fits',img), float32(data), hdr0)
+        pyfits.writeto(re.sub('.fits','0.fits',img), np.float32(data), hdr0)
         img=re.sub('.fits','0.fits',img)
 ############################################# 
 
@@ -828,7 +829,7 @@ def obsin(targid,_days=7):
                     if not _tarfile:
                         try:
                             _date=re.sub('-','',_dict['requests'][ll0['tracknumber'][i]]['schedule'][0]['frames'][0]['day_obs'])
-                            _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
+                            _tarfile=_reqnumber+'_'+str(_date)+'.tar.gz'
                             agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                         except:
                             _tarfile=''

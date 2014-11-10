@@ -10,8 +10,8 @@ if host in ['deneb']:
    rawdata='/archive/engineering/'
    realpass='configure'
 elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',
-              'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',
-              'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
+              'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
+              'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu','dhcp43028.physics.ucdavis.edu']:
    host = 'SVMAC'
    workingdirectory = '/Users/svalenti/redu2/AGNKEY/'
    execdirectory = '/Users/svalenti/bin/'

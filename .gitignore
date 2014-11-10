@@ -4,3 +4,7 @@
 *.xml
 
 *.xml
+
+trunk/build/
+
+trunk/dist/

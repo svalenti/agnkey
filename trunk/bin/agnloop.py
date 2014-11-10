@@ -256,7 +256,8 @@ if __name__ == "__main__":
                 for ff in fields:
                     agnkey.agnloopdef.run_getmag(ll['namefile'], _field, _output, _interactive, _show, _bin, _type)
             elif _stage == 'psf':
-                agnkey.agnloopdef.run_psf(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo, XX)
+                agnkey.agnloopdef.run_psf(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
+                                          XX, _fix, 'dataredulco')
             elif _stage == 'psfmag':
                 agnkey.agnloopdef.run_fit(ll['namefile'], _ras, _decs, _xord, _yord, _bkg, _size, _recenter, _ref,
                                           _interactive, _show, _redo, _dmax)
@@ -265,7 +266,7 @@ if __name__ == "__main__":
             elif _stage == 'makestamp':
                 agnkey.agnloopdef.makestamp(ll['namefile'], 'dataredulco', _z1, _z2, _interactive, _redo, _output)
             elif _stage == 'apmag':
-                agnkey.agnloopdef.run_apmag(ll['namefile'], 'dataredulco')
+                agnkey.agnloopdef.run_apmag(ll['namefile'], 'dataredulco',_ra,_dec)
             elif _stage == 'cosmic':
                 agnkey.agnloopdef.run_cosmic(ll['namefile'], 'dataredulco', 4.5, 0.2, 4, _redo)
             elif _stage == 'idlstart':

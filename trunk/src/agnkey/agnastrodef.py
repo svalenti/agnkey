@@ -123,6 +123,7 @@ def wcsstart(img,CRPIX1='',CRPIX2=''):
         CDELT1=0.000083705976*(-1)
         CDELT2=0.000083705976
     elif _instrume.lower() in ['em03','em01']:
+        angle=readkey3(hdr,'ROTSKYPA')#posang)
         theta=(angle*pi/180.)
         CDELT0=7.63077724258886e-05 #7.7361111111111123e-05 
         CD1_1=(-1)*CDELT0*cos(theta)
@@ -567,13 +568,19 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
     _filter=readkey3(hdr,'filter')
     _instrume=readkey3(hdr,'instrume')
     _date=readkey3(hdr,'date-night')
+    _telescope=readkey3(hdr,'telescope')
     _object=readkey3(hdr,'object')
     # atmospheric absorptions for LSC
-    if _telescope in ['lsc','1m0-04','1m0-05','1m0-09']:     kk=agnkey.sites.extintion('ctio')
-    elif _telescope in ['elp','1m0-08']:                     kk=agnkey.sites.extintion('mcdonald')
-    elif _telescope in ['cpt','1m0-12','1m0-10','1m0-13']:   kk=agnkey.sites.extintion('southafrica')
-    elif _telescope in ['ftn','Faulkes Telescope North']:    kk=agnkey.sites.extintion('mauna')
-    elif _telescope in ['coj','1m0-11','fts','Faulkes Telescope South']:    kk=agnkey.sites.extintion('siding')
+    if _telescope in ['lsc','1m0-04','1m0-05','1m0-09']:
+        kk=agnkey.sites.extintion('ctio')
+    elif _telescope in ['elp','1m0-08']:
+        kk=agnkey.sites.extintion('mcdonald')
+    elif _telescope in ['cpt','1m0-12','1m0-10','1m0-13']:
+        kk=agnkey.sites.extintion('southafrica')
+    elif _telescope in ['ftn','Faulkes Telescope North']:
+        kk=agnkey.sites.extintion('mauna')
+    elif _telescope in ['coj','1m0-11','fts','Faulkes Telescope South']:
+        kk=agnkey.sites.extintion('siding')
 #    kk={'U':0.63,'u':0.70,'B':0.32,'g':0.26,'V':0.18,'r':0.15,'R':0.13,'i':0.08,'I':0.07,'z':0.06}
     if 1==1:
         if catalogue:
