@@ -1,7 +1,7 @@
 
 *.xml
 
-*/*xml
+.idea/*xml
 
 trunk/build/
 

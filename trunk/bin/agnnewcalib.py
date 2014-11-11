@@ -347,6 +347,7 @@ if __name__ == "__main__":
 
                 zmag= 0.0
                 _datamax=45000
+                _center='no'
 
                 iraf.fitskypars.annulus = a4
                 iraf.fitskypars.dannulus = a4
@@ -363,7 +364,7 @@ if __name__ == "__main__":
                 iraf.datapars.filter = 'filter2'
                 iraf.centerpars.calgori = 'gauss'
                 iraf.centerpars.cbox = 1
-                iraf.daopars.recenter = 'yes'
+                iraf.daopars.recenter = _center
                 iraf.photpars.zmag = zmag
 
                 ####################################################

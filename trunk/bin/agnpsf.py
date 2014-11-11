@@ -90,6 +90,8 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     else:
         a1, a2, a3, a4, = int(fwhm + 0.5), int(fwhm * 2 + 0.5), int(fwhm * 3 + 0.5), int(fwhm * 4 + 0.5)
 
+    _center='no'
+
     iraf.fitskypars.annulus = a4
     iraf.fitskypars.dannulus = a4
     iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
@@ -106,7 +108,7 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     iraf.datapars.filter = 'filter2'
     iraf.centerpars.calgori = 'gauss'
     iraf.centerpars.cbox = 1
-    iraf.daopars.recenter = 'yes'
+    iraf.daopars.recenter = _center
     iraf.photpars.zmag = zmag
 
     iraf.delete('_psf2.ma*', verify=False)
@@ -119,7 +121,7 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     iraf.daopars.fitsky = 'yes'
     iraf.daopars.sannulus = int(a4)
     iraf.daopars.wsannul = int(a4)
-    iraf.daopars.recenter = 'yes'
+    iraf.daopars.recenter = _center
     iraf.daopars.varorder = varord
     iraf.delete("_als,_psf.grp,_psf.nrj", verify=False)
     iraf.group(img, '_psf2.mag', img + '.psf', '_psf.grp', verify=False, verbose=False)
@@ -147,6 +149,9 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     else:
         a1, a2, a3, a4, = int(fwhm + 0.5), int(fwhm * 2 + 0.5), int(fwhm * 3 + 0.5), int(fwhm * 4 + 0.5)
 
+
+    _center='no'
+
     iraf.fitskypars.annulus = a4
     iraf.fitskypars.dannulus = a4
     iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
@@ -163,7 +168,7 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.datapars.filter = 'filter2'
     iraf.centerpars.calgori = 'gauss'
     iraf.centerpars.cbox = 1
-    iraf.daopars.recenter = 'yes'
+    iraf.daopars.recenter = _center
     iraf.photpars.zmag = zmag
 
     iraf.delete('_psf.ma*,' + img + '.psf.fit?,_psf.ps*,_psf.gr?,_psf.n*,_psf.sub.fit?', verify=False)
@@ -175,7 +180,7 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.daopars.fitsky = 'yes'
     iraf.daopars.sannulus = int(a4)
     iraf.daopars.wsannul = int(a4)
-    iraf.daopars.recenter = 'yes'
+    iraf.daopars.recenter = _center
     iraf.daopars.varorder = varord
 
     if interactive:
