@@ -2,15 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="976d23e7-7a5a-467e-9600-d00fba1ec254" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/trunk/src/agnkey/standard/cat/apass/Mrk1048_apass.cat" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/agnastrodef.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/agnastrodef.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/agndefin.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/agndefin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/agnkey.iml" afterPath="$PROJECT_DIR$/.idea/agnkey.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agnloop.py" afterPath="$PROJECT_DIR$/trunk/bin/agnloop.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/agnloopdef.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/agnloopdef.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/agnabsphotdef.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/agnabsphotdef.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agnmag.py" afterPath="$PROJECT_DIR$/trunk/bin/agnmag.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agnnewcalib.py" afterPath="$PROJECT_DIR$/trunk/bin/agnnewcalib.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/bin/agnpsf.py" afterPath="$PROJECT_DIR$/trunk/bin/agnpsf.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/trunk/src/agnkey/util.py" afterPath="$PROJECT_DIR$/trunk/src/agnkey/util.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -57,7 +51,6 @@
         <option value="$PROJECT_DIR$/trunk/bin/agncatalogue.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agncheck.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agndiff.py" />
-        <option value="$PROJECT_DIR$/trunk/bin/agnmag.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agnmaglocal.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agnmaketempl.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agnmerge.py" />
@@ -65,13 +58,15 @@
         <option value="$PROJECT_DIR$/trunk/bin/queryipac.py" />
         <option value="$PROJECT_DIR$/trunk/bin/runagn.py" />
         <option value="$USER_HOME$/Dropbox/paper/distributions/nove/nove.py" />
-        <option value="$PROJECT_DIR$/trunk/src/agnkey/util.py" />
-        <option value="$PROJECT_DIR$/trunk/bin/agnpsf.py" />
         <option value="$PROJECT_DIR$/trunk/bin/agnloop.py" />
-        <option value="$PROJECT_DIR$/trunk/bin/agnnewcalib.py" />
         <option value="$PROJECT_DIR$/trunk/src/agnkey/agnloopdef.py" />
         <option value="$PROJECT_DIR$/trunk/src/agnkey/agndefin.py" />
         <option value="$PROJECT_DIR$/trunk/src/agnkey/agnastrodef.py" />
+        <option value="$PROJECT_DIR$/trunk/bin/agnmag.py" />
+        <option value="$PROJECT_DIR$/trunk/src/agnkey/util.py" />
+        <option value="$PROJECT_DIR$/trunk/src/agnkey/agnabsphotdef.py" />
+        <option value="$PROJECT_DIR$/trunk/bin/agnpsf.py" />
+        <option value="$PROJECT_DIR$/trunk/bin/agnnewcalib.py" />
       </list>
     </option>
   </component>
@@ -443,6 +438,25 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.370945" sideWeight="0.4996299" order="5" side_tool="false" content_ui="tabs" />
     </layout>
+    <layout-to-restore>
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33858266" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30789474" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.370945" sideWeight="0.5003701" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3276316" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32894737" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21478873" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.370945" sideWeight="0.4996299" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33200532" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -461,7 +475,9 @@
     </option>
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/trunk/bin/agnloop.py">
@@ -589,13 +605,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/bin/agnabsphot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="870">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/trunk/bin/agnarchivingspec.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.677215" vertical-offset="4146" max-vertical-offset="4620">
@@ -666,24 +675,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/src/agnkey/util.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.1538463" vertical-offset="10790" max-vertical-offset="20070">
-          <caret line="731" column="65" selection-start-line="730" selection-start-column="0" selection-end-line="731" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/trunk/bin/agncatalogue.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.31578946" vertical-offset="3360" max-vertical-offset="3855">
           <caret line="238" column="35" selection-start-line="238" selection-start-column="35" selection-end-line="238" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/bin/agnnewcalib.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="4.6153846" vertical-offset="4350" max-vertical-offset="8010">
-          <caret line="282" column="36" selection-start-line="282" selection-start-column="36" selection-end-line="282" selection-end-column="36" />
         </state>
       </provider>
     </entry>
@@ -716,25 +711,7 @@
         <state vertical-scroll-proportion="4.6253443" vertical-offset="2" max-vertical-offset="5625">
           <caret line="224" column="82" selection-start-line="224" selection-start-column="79" selection-end-line="224" selection-end-column="82" />
           <folding>
-            <element signature="e#123#132#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/bin/agnmag.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.3113604" vertical-offset="4687" max-vertical-offset="5400">
-          <caret line="68" column="26" selection-start-line="68" selection-start-column="26" selection-end-line="68" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/trunk/bin/agnpsf.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.028926" vertical-offset="8739" max-vertical-offset="9465">
-          <caret line="194" column="46" selection-start-line="194" selection-start-column="40" selection-end-line="194" selection-end-column="46" />
-          <folding>
-            <element signature="e#277#311#0" expanded="true" />
+            <element signature="e#123#132#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -751,6 +728,58 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="1.0123967" vertical-offset="0" max-vertical-offset="6600">
           <caret line="55" column="65" selection-start-line="55" selection-start-column="65" selection-end-line="55" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agnnewcalib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.423077" vertical-offset="4985" max-vertical-offset="7875">
+          <caret line="348" column="30" selection-start-line="348" selection-start-column="30" selection-end-line="348" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agnabsphot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4752066" vertical-offset="0" max-vertical-offset="915">
+          <caret line="29" column="65" selection-start-line="29" selection-start-column="65" selection-end-line="29" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/src/agnkey/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.26367462" vertical-offset="19897" max-vertical-offset="21300">
+          <caret line="1340" column="23" selection-start-line="1340" selection-start-column="23" selection-end-line="1340" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agnmag.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33333334" vertical-offset="941" max-vertical-offset="4875">
+          <caret line="78" column="36" selection-start-line="78" selection-start-column="33" selection-end-line="78" selection-end-column="36" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/bin/agnpsf.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6542857" vertical-offset="2017" max-vertical-offset="9465">
+          <caret line="165" column="33" selection-start-line="165" selection-start-column="33" selection-end-line="165" selection-end-column="33" />
+          <folding>
+            <element signature="e#277#311#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trunk/src/agnkey/agnabsphotdef.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.72634643" vertical-offset="2816" max-vertical-offset="16470">
+          <caret line="221" column="61" selection-start-line="221" selection-start-column="61" selection-end-line="221" selection-end-column="61" />
           <folding />
         </state>
       </provider>

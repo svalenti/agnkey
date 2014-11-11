@@ -167,18 +167,28 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
     _ra=agnkey.util.readkey3(hdr,'RA')
     _dec=agnkey.util.readkey3(hdr,'DEC')
     print _filter
-    if _telescope in ['lsc','1m0-04','1m0-05','1m0-09']:     kk=agnkey.sites.extintion('ctio')
-    elif _telescope in ['elp','1m0-08']:                     kk=agnkey.sites.extintion('mcdonald')
-    elif _telescope in ['cpt','1m0-12','1m0-10','1m0-13']:   kk=agnkey.sites.extintion('southafrica')
-    elif _telescope in ['ftn','Faulkes Telescope North']:    kk=agnkey.sites.extintion('mauna')
-    elif _telescope in ['1m0-03','1m0-11','coj','fts','Faulkes Telescope South']:    kk=agnkey.sites.extintion('siding')
+    if _telescope in ['lsc','1m0-04','1m0-05','1m0-09']:
+        kk=agnkey.sites.extintion('ctio')
+    elif _telescope in ['elp','1m0-08']:
+        kk=agnkey.sites.extintion('mcdonald')
+    elif _telescope in ['cpt','1m0-12','1m0-10','1m0-13']:
+        kk=agnkey.sites.extintion('southafrica')
+    elif _telescope in ['ftn','Faulkes Telescope North']:
+        kk=agnkey.sites.extintion('mauna')
+    elif _telescope in ['1m0-03','1m0-11','coj','fts','Faulkes Telescope South']:
+        kk=agnkey.sites.extintion('siding')
 
-    if _calib=='apass': _field='apass'
-    if _field=='apass': _calib='apass'
-    if _calib=='apass' and not _catalogue: sys.exit('ERROR: apass option for field or calib is valid only when apass catalogue is also provided')
+    if _calib=='apass':
+        _field='apass'
+    if _field=='apass':
+        _calib='apass'
+    if _calib=='apass' and not _catalogue:
+        sys.exit('ERROR: apass option for field or calib is valid only when apass catalogue is also provided')
 
-    if _calib not in ['sloan','sloanprime','natural','apass','']:   colorefisso=agnkey.sites.colfix(_instrume)
-    else:                                                           colorefisso=agnkey.sites.colfix(_instrume,_calib)
+    if _calib not in ['sloan','sloanprime','natural','apass','']:
+        colorefisso=agnkey.sites.colfix(_instrume)
+    else:
+        colorefisso=agnkey.sites.colfix(_instrume,_calib)
 
     print redo
     print _cat
@@ -191,7 +201,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                  agnkey.agnsqldef.updatevalue(database,'zcat','X',string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
      except: print 'module mysqldef not found'
 
-     column=makecatalogue([img])[_filter][img]
+     column=agnkey.util.makecatalogue2([img])[_filter][img]
 
      rasex=array(column['ra0'],float)
      decsex=array(column['dec0'],float)
@@ -776,42 +786,42 @@ def meanclip3(xx,yy,slope, clipsig=3.0, maxiter=5, converge_num=0.1, verbose=0):
 
 ########################################################################
 
-def makecatalogue(imglist):
-    import pyfits
-    import agnkey
-    from numpy import array, zeros
-    filters={}
-    dicti={}
-    for img in imglist:
-        t = pyfits.open(img)
-        tbdata = t[1].data
-        hdr1=t[0].header
-        hdr2=t[1].header
-        _filter=agnkey.util.readkey3(hdr1,'filter')
-        _exptime=agnkey.util.readkey3(hdr1,'exptime')
-        _airmass=agnkey.util.readkey3(hdr1,'airmass')
-        _telescope=agnkey.util.readkey3(hdr1,'telescop')
-        if _filter not in dicti: dicti[_filter]={}
-        if img not in dicti[_filter]: dicti[_filter][img]={}
-        for jj in hdr1:
-            if jj[0:2]=='ZP':
-                dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
+#def makecatalogue(imglist):
+#    import pyfits
+#    import agnkey
+#    from numpy import array, zeros
+#    filters={}
+#    dicti={}
+#    for img in imglist:
+#        t = pyfits.open(img)
+#        tbdata = t[1].data
+#        hdr1=t[0].header
+#        hdr2=t[1].header
+#        _filter=agnkey.util.readkey3(hdr1,'filter')
+#        _exptime=agnkey.util.readkey3(hdr1,'exptime')
+#        _airmass=agnkey.util.readkey3(hdr1,'airmass')
+#        _telescope=agnkey.util.readkey3(hdr1,'telescop')
+#        if _filter not in dicti: dicti[_filter]={}
+#        if img not in dicti[_filter]: dicti[_filter][img]={}
+#        for jj in hdr1:
+#            if jj[0:2]=='ZP':
+#                dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
 
-        dicti[_filter][img]['JD']=agnkey.util.readkey3(hdr1,'JD')
-        dicti[_filter][img]['exptime']=_exptime
-        dicti[_filter][img]['airmass']=_airmass
-        dicti[_filter][img]['telescope']=_telescope
+#        dicti[_filter][img]['JD']=agnkey.util.readkey3(hdr1,'JD')
+#        dicti[_filter][img]['exptime']=_exptime
+#        dicti[_filter][img]['airmass']=_airmass
+#        dicti[_filter][img]['telescope']=_telescope
         
-        for col in tbdata.columns.names:
-            dicti[_filter][img][col]=tbdata.field(col)
-        if 'ra0' not in tbdata.columns.names:
-            dicti[_filter][img]['ra0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
-            dicti[_filter][img]['dec0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
-            for i in range(0,len(dicti[_filter][img]['ra'])):
-#                dicti[_filter][img]['ra0'][i]=float(iraf.real(dicti[_filter][img]['ra'][i]))*15
-#                dicti[_filter][img]['dec0'][i]=float(iraf.real(dicti[_filter][img]['dec'][i]))
-                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
-    return dicti
+#        for col in tbdata.columns.names:
+#            dicti[_filter][img][col]=tbdata.field(col)
+#        if 'ra0' not in tbdata.columns.names:
+#            dicti[_filter][img]['ra0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+#            dicti[_filter][img]['dec0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+#            for i in range(0,len(dicti[_filter][img]['ra'])):
+##                dicti[_filter][img]['ra0'][i]=float(iraf.real(dicti[_filter][img]['ra'][i]))*15
+##                dicti[_filter][img]['dec0'][i]=float(iraf.real(dicti[_filter][img]['dec'][i]))
+#                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
+#    return dicti
 
 ######################################################################################################
 def finalmag(Z1,Z2,C1,C2,m1,m2):

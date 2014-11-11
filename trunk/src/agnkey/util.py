@@ -1331,3 +1331,86 @@ def downloadfloydsraw(JD,username,passwd):
            print _dict
            raw_input('gogon')
 ##########################################################################################
+
+def makecatalogue(imglist):
+    import pyfits
+    import agnkey
+
+    filters = {}
+    dicti = {}
+    for img in imglist:
+        t = pyfits.open(img)
+        tbdata = t[1].data
+        hdr1 = t[0].header
+        _filter = agnkey.util.readkey3(hdr1, 'filter')
+        _exptime = agnkey.util.readkey3(hdr1, 'exptime')
+        _airmass = agnkey.util.readkey3(hdr1, 'airmass')
+        _telescope = agnkey.util.readkey3(hdr1, 'telescop')
+        _psfmag1 = agnkey.util.readkey3(hdr1, 'PSFMAG1')
+        _psfdmag1 = agnkey.util.readkey3(hdr1, 'PSFDMAG1')
+        _apmag1 = agnkey.util.readkey3(hdr1, 'APMAG1')
+        print img
+        print _filter
+        print _psfmag1
+        print _apmag1
+        if _filter not in dicti:
+            dicti[_filter] = {}
+        if img not in dicti[_filter]:
+            dicti[_filter][img] = {}
+        for jj in hdr1:
+            if jj[0:2] == 'ZP':
+                dicti[_filter][img][jj] = agnkey.util.readkey3(hdr1, jj)
+        dicti[_filter][img]['JD'] = agnkey.util.readkey3(hdr1, 'JD')
+        dicti[_filter][img]['exptime'] = _exptime
+        dicti[_filter][img]['airmass'] = _airmass
+        dicti[_filter][img]['telescope'] = _telescope
+        try:
+            dicti[_filter][img]['PSFMAG1'] = float(_psfmag1)
+            dicti[_filter][img]['APMAG1'] = float(_apmag1)
+            dicti[_filter][img]['PSFDMAG1'] = float(_psfdmag1)
+        except:
+            dicti[_filter][img]['PSFMAG1'] = 9999.
+            dicti[_filter][img]['APMAG1'] = 9999.
+            dicti[_filter][img]['PSFDMAG1'] = 0.0
+    return dicti
+
+################################################################################
+
+def makecatalogue2(imglist):
+    import pyfits
+    import agnkey
+    from numpy import array, zeros
+    filters={}
+    dicti={}
+    for img in imglist:
+        t = pyfits.open(img)
+        tbdata = t[1].data
+        hdr1=t[0].header
+        hdr2=t[1].header
+        _filter=agnkey.util.readkey3(hdr1,'filter')
+        _exptime=agnkey.util.readkey3(hdr1,'exptime')
+        _airmass=agnkey.util.readkey3(hdr1,'airmass')
+        _telescope=agnkey.util.readkey3(hdr1,'telescop')
+        if _filter not in dicti: dicti[_filter]={}
+        if img not in dicti[_filter]: dicti[_filter][img]={}
+        for jj in hdr1:
+            if jj[0:2]=='ZP':
+                dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
+
+        dicti[_filter][img]['JD']=agnkey.util.readkey3(hdr1,'JD')
+        dicti[_filter][img]['exptime']=_exptime
+        dicti[_filter][img]['airmass']=_airmass
+        dicti[_filter][img]['telescope']=_telescope
+
+        for col in tbdata.columns.names:
+            dicti[_filter][img][col]=tbdata.field(col)
+        if 'ra0' not in tbdata.columns.names:
+            dicti[_filter][img]['ra0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+            dicti[_filter][img]['dec0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+            for i in range(0,len(dicti[_filter][img]['ra'])):
+#                dicti[_filter][img]['ra0'][i]=float(iraf.real(dicti[_filter][img]['ra'][i]))*15
+#                dicti[_filter][img]['dec0'][i]=float(iraf.real(dicti[_filter][img]['dec'][i]))
+                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
+    return dicti
+
+##########################################################################################

@@ -150,7 +150,7 @@ if __name__ == "__main__":
     imglist = agnkey.util.readlist(args[0])
     for img in imglist:
         print img
-        table = agnkey.agnabsphotdef.makecatalogue([img])
+        table = agnkey.util.makecatalogue2([img])
         _filter = table.keys()[0]
         _rasex = table[table.keys()[0]][table[table.keys()[0]].keys()[0]]['ra0']
         _decsex = table[table.keys()[0]][table[table.keys()[0]].keys()[0]]['dec0']
@@ -345,28 +345,27 @@ if __name__ == "__main__":
                 a1, a2, a3, a4, = float(5. / _pixelscale), float(5. / _pixelscale), float(8. / _pixelscale), float(
                     10. / _pixelscale)
 
-                _datamin = -100
-                _datamax = 45000
-                iraf.noao.digiphot.daophot.photpars.zmag = 0
-                iraf.noao.digiphot.daophot.datapars.readnoi = _gain  #1.4   #_ron
-                iraf.noao.digiphot.daophot.datapars.epadu = _ron  #  13      #_gain
-                iraf.noao.digiphot.daophot.datapars.datamin = -100  # -100  #_datamin
-                iraf.noao.digiphot.daophot.datapars.datamax = 51000  #_datamax
-                iraf.noao.daophot.fitskypars.salgori = 'mean'  # 'median', default is 'mode'
-                iraf.noao.daophot.fitskypars.annulus = a4
-                iraf.noao.daophot.fitskypars.dannulus = a4
-                iraf.noao.daophot.photpars.apertures = '%d,%d,%d' % (a2, a3, a4)
-                iraf.noao.digiphot.daophot.datapars.exposure = 'exptime'
-                iraf.noao.digiphot.daophot.datapars.airmass = 'airmass'
-                iraf.noao.digiphot.daophot.datapars.filter = 'filter2'
-                iraf.noao.digiphot.daophot.daopars.psfrad = a4
-                iraf.noao.digiphot.daophot.daopars.fitrad = a1
-                iraf.noao.digiphot.daophot.daopars.sannulus = int(a3)
+                zmag= 0.0
+                _datamax=45000
+
+                iraf.fitskypars.annulus = a4
+                iraf.fitskypars.dannulus = a4
+                iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
                 iraf.noao.digiphot.daophot.daopars.wsannul = int(a4)
-                iraf.noao.digiphot.daophot.daopars.recenter = 'no'
-                iraf.noao.digiphot.daophot.daopars.fitsky = 'yes'
-                iraf.noao.digiphot.daophot.centerpars.cbox = 1
-                iraf.noao.digiphot.daophot.centerpars.calgori = 'gauss'
+                iraf.fitskypars.salgori = 'mean'  #mode,mean,gaussian
+                iraf.photpars.apertures = '%d,%d,%d' % (a2, a3, a4)
+                iraf.datapars.datamin = -100
+                iraf.datapars.datamax = _datamax
+                iraf.datapars.readnoise = agnkey.util.readkey3(hdr, 'ron')
+                iraf.datapars.epadu = agnkey.util.readkey3(hdr, 'gain')
+                iraf.datapars.exposure = 'exptime'  #agnkey.util.readkey3(hdr,'exptime')
+                iraf.datapars.airmass = 'airmass'
+                iraf.datapars.filter = 'filter2'
+                iraf.centerpars.calgori = 'gauss'
+                iraf.centerpars.cbox = 1
+                iraf.daopars.recenter = 'yes'
+                iraf.photpars.zmag = zmag
+
                 ####################################################
                 #                    this is in the case we want to measure magnitudes on images cleaned from cosmic
                 ####################################################

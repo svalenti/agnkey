@@ -13,49 +13,6 @@ import agnkey
 import numpy as np
 
 
-def makecatalogue(imglist):
-    import pyfits
-    import agnkey
-
-    filters = {}
-    dicti = {}
-    for img in imglist:
-        t = pyfits.open(img)
-        tbdata = t[1].data
-        hdr1 = t[0].header
-        _filter = agnkey.util.readkey3(hdr1, 'filter')
-        _exptime = agnkey.util.readkey3(hdr1, 'exptime')
-        _airmass = agnkey.util.readkey3(hdr1, 'airmass')
-        _telescope = agnkey.util.readkey3(hdr1, 'telescop')
-        _psfmag1 = agnkey.util.readkey3(hdr1, 'PSFMAG1')
-        _psfdmag1 = agnkey.util.readkey3(hdr1, 'PSFDMAG1')
-        _apmag1 = agnkey.util.readkey3(hdr1, 'APMAG1')
-        print img
-        print _filter
-        print _psfmag1
-        print _apmag1
-        if _filter not in dicti:
-            dicti[_filter] = {}
-        if img not in dicti[_filter]:
-            dicti[_filter][img] = {}
-        for jj in hdr1:
-            if jj[0:2] == 'ZP':
-                dicti[_filter][img][jj] = agnkey.util.readkey3(hdr1, jj)
-        dicti[_filter][img]['JD'] = agnkey.util.readkey3(hdr1, 'JD')
-        dicti[_filter][img]['exptime'] = _exptime
-        dicti[_filter][img]['airmass'] = _airmass
-        dicti[_filter][img]['telescope'] = _telescope
-        try:
-            dicti[_filter][img]['PSFMAG1'] = float(_psfmag1)
-            dicti[_filter][img]['APMAG1'] = float(_apmag1)
-            dicti[_filter][img]['PSFDMAG1'] = float(_psfdmag1)
-        except:
-            dicti[_filter][img]['PSFMAG1'] = 9999.
-            dicti[_filter][img]['APMAG1'] = 9999.
-            dicti[_filter][img]['PSFDMAG1'] = 0.0
-    return dicti
-
-
 if __name__ == "__main__":
     start_time = time.time()
     parser = OptionParser(usage=usage, description=description)
@@ -93,7 +50,7 @@ if __name__ == "__main__":
     typemag = 'PSFMAG1'
     typemagerr = 'PSFDMAG1'
     namemag = {'fit': ['PSFMAG1', 'PSFDMAG1'], 'ph': ['APMAG1', 'PSFDMAG1']}
-    dicti0 = makecatalogue(lista)
+    dicti0 = agnkey.util.makecatalogue(lista)
     dicti = {}
     for _filter in dicti0:
         for img in dicti0[_filter]:
@@ -119,7 +76,7 @@ if __name__ == "__main__":
             queste1 = agnkey.agnloopdef.chosecolor(allfilters, True)
         if _exzp:
             lista2 = agnkey.util.readlist(_exzp)
-            dicti2 = makecatalogue(lista2)
+            dicti2 = agnkey.util.makecatalogue(lista2)
             for _filter2 in dicti2:
                 img2 = dicti2[_filter2].keys()[0]
                 for jj in dicti2[_filter2][img2].keys():

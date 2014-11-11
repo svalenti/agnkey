@@ -1,9 +1,7 @@
 
 *.xml
 
-*.xml
-
-*.xml
+*/*xml
 
 trunk/build/
 
