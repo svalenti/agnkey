@@ -6,3 +6,5 @@
 trunk/build/
 
 trunk/dist/
+
+.idea/workspace.xml
