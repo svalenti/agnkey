@@ -293,6 +293,11 @@ if __name__ == "__main__":
                        'ZPNNUM': [len(data2), 'number of stars used for zeropoint']}
             agnkey.util.updateheader(img, 0, headers)
 
+            agnkey.util.updateheader(img, 0, {'ZZ2': [ZZ2, 'zeropoint with aperture 2']})
+            agnkey.util.updateheader(img, 0, {'ZZ3': [ZZ3, 'zeropoint with aperture 3']})
+            agnkey.util.updateheader(img, 0, {'ZZ4': [ZZ4, 'zeropoint with aperture 4']})
+
+
             if _ra and _dec:
                 print 'use ra and dec from user'
                 print _ra,_dec

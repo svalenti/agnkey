@@ -198,9 +198,12 @@ def querycatalogue(catalogue,img,method='iraf'):
                 sys.exit('Error: catalogue '+str(catalogue)+'not in the list [usnob1,usnoa2,2mass]')
         else:
           if method=='iraf':
-            if catalogue=='usnoa2':    lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='usno2@noao',verbose='no',Stdout=1)
-            elif catalogue=='usnob1':  lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='usnob1@noao',verbose='no',Stdout=1)
-            elif catalogue=='2mass':   lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='twomass@noao',verbose='no',Stdout=1)
+            if catalogue=='usnoa2':
+                lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='usno2@noao',verbose='no',Stdout=1)
+            elif catalogue=='usnob1':
+                lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='usnob1@noao',verbose='no',Stdout=1)
+            elif catalogue=='2mass':
+                lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='twomass@noao',verbose='no',Stdout=1)
 #            elif catalogue=='gsc1':    lll=iraf.noao.astcat.agetcat('pars','STDOUT',catalog='gsc1@cadc',verbose='no',Stdout=1)
             else:
                 sys.exit('Error: catalogue '+str(catalogue)+'not in the list [usnob1,usnoa2,2mass]')
@@ -276,7 +279,8 @@ def querycatalogue(catalogue,img,method='iraf'):
         return stdcoo
 #############################################################
 
-def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,_tollerance1,_tollerance2,sexvec='',_guess=False,_numin=4,method='iraf',xshift=0,yshift=0):
+def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,_tollerance1,_tollerance2,
+                 sexvec='',_guess=False,_numin=4,method='iraf',xshift=0,yshift=0):
     import agnkey
     from agnkey.util import delete,readkey3,readhdr
     from agnkey.agnastrodef import agnastrometry2
@@ -289,7 +293,8 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
     for img in imglist:
         hdr=readhdr(img)
         _instrume=readkey3(hdr,'instrume')
-        if catalogue=='inst' and _instrume in agnkey.util.instrument0['all']:  catalogue='2mass'
+        if catalogue=='inst' and _instrume in agnkey.util.instrument0['all']:
+            catalogue='2mass'
         if not sexvec:
             sexvec=agnkey.agnastrodef.sextractor(img)
 ###################

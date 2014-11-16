@@ -1,16 +1,14 @@
 import agnkey
 
 
-def run_getmag(imglist, _field, _output='', _interactive=False, _show=False, _bin=1e-10, magtype='mag',
-               database='dataredulco'):
+def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-10, magtype='mag',
+               database='dataredulco',ra='',dec=''):
     import agnkey
     import datetime
     import numpy as np
-    #import agnsqldef
-    #from numpy import array, compress, abs, mean, asarray, std, take, argsort, sort, sqrt
-    #import os, string, glob, re, sys
-
-    #direc = agnkey.__path__[0]
+    import re
+    import os
+    print magtype,ra,dec
     if magtype == 'mag':
         mtype = 'mag'
         mtypeerr = 'dmag'
@@ -43,80 +41,109 @@ def run_getmag(imglist, _field, _output='', _interactive=False, _show=False, _bi
     else:
         filters0 = ['up', 'gp', 'rp', 'ip', 'zs', 'SDSS-G', 'SDSS-R', 'SDSS-I', 'Pan-Starrs-Z']
 
-    setup = {}
-    mag, dmag, jd, filt, tel, date, namefile = [], [], [], [], [], [], []
-    z1, z2 = [], []
-    magtype = []
-    for img in imglist:
+    mag=ll[mtype]
+    dmag=ll[mtypeerr]
+    jd=ll['jd']
+    namefile=ll['namefile']
+    filt=ll['filter']
+    tel=ll['telescope']
+    date=ll['dateobs']
+    z1=ll['z1']
+    z2=ll['z2']
+    _magtype=ll['magtype']
 
-        ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
-        if ggg[0][mtype]:
-            if abs(ggg[0][mtype]) <= 99:
-                mag.append(ggg[0][mtype])
-                dmag.append(ggg[0][mtypeerr])
-                jd.append(ggg[0]['jd'])
-                namefile.append(img)
-                filt.append(ggg[0]['filter'])
-                tel.append(ggg[0]['telescope'])
-                date.append(ggg[0]['dateobs'])
-                z1.append(ggg[0]['z1'])
-                z2.append(ggg[0]['z2'])
-                magtype.append(ggg[0]['magtype'])
-                if tel[-1] not in setup:  setup[tel[-1]] = {}
-                if filt[-1] not in setup[tel[-1]]:  setup[tel[-1]][filt[-1]] = {}
-    for _tel in setup:
-        for _fil in setup[_tel]:
-            jd0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(jd))
-            mag0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(mag))
-            dmag0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(dmag))
-            date0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(date))
-            namefile0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(namefile))
-            z10 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(z1))
-            z20 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(z2))
-            magtype0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(magtype))
-            inds = np.argsort(jd0)
-            mag0 = np.take(mag0, inds)
-            dmag0 = np.take(dmag0, inds)
-            date0 = np.take(date0, inds)
-            namefile0 = np.take(namefile0, inds)
-            jd0 = np.take(jd0, inds)
-            z10 = np.take(z10, inds)
-            z20 = np.take(z20, inds)
-            magtype0 = np.take(magtype0, inds)
-            # z3= 
-            magtype1, mag1, dmag1, jd1, date1, namefile1 = [], [], [], [], [], []
-            done = []
-            for i in range(0, len(jd0)):
-                if i not in done:
-                    ww = np.asarray([j for j in range(len(jd0)) if
+    if ra and dec:
+        if magtype == 'appmagap1':
+            mtype='magp2'
+            zz='ZZ2'
+        elif magtype == 'appmagap2':
+            mtype='magp3'
+            zz='ZZ3'
+        elif magtype == 'appmagap3':
+            mtype='magp4'
+            zz='ZZ4'
+        listtar = [k + re.sub('.fits','.sn2.fits',v) for k, v in zip(ll['wdirectory'], ll['namefile'])]
+        for ii in range(0,len(listtar)):
+            if os.path.isfile(listtar[ii]):
+                dict=agnkey.util.makecatalogue2([listtar[ii]])
+                if mtype in dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]].keys():
+                    magvec=dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]][mtype]
+                    ravec=dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]]['ra0']
+                    decvec=dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]]['dec0']
+                    distvec, pos0, pos1 = \
+                        agnkey.agnastrodef.crossmatch([ra], [dec], np.array(ravec, float), np.array(decvec, float), 5)
+                    if len(pos1) and zz in dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]].keys():
+                        print magvec[pos1][0], dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]][zz]
+                        print mag[ii]
+                        mag[ii]=magvec[pos1][0]+dict[dict.keys()[0]][dict[dict.keys()[0]].keys()[0]][zz]
+                    else:
+                        mag[ii]=9999
+                        print 'no zeropoint or not mag'
+                else:
+                    print 'aperture magnitude not found'
+                    mag[ii]=9999
+
+    setup={}
+    for _tel in set(tel):
+        for _fil in set(filt):
+            aaa=np.asarray((np.array(filt) == _fil) & (np.array(tel) == _tel))
+            if len(aaa):
+                if _tel not in setup:
+                    setup[_tel]={}
+                if _fil not in setup[_tel]:
+                    setup[_tel][_fil]={}
+
+                jd0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(jd))
+                mag0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(mag))
+                dmag0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(dmag))
+                date0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(date))
+                namefile0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(namefile))
+                z10 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(z1))
+                z20 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(z2))
+                magtype0 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(_magtype))
+                inds = np.argsort(jd0)
+                mag0 = np.take(mag0, inds)
+                dmag0 = np.take(dmag0, inds)
+                date0 = np.take(date0, inds)
+                namefile0 = np.take(namefile0, inds)
+                jd0 = np.take(jd0, inds)
+                z10 = np.take(z10, inds)
+                z20 = np.take(z20, inds)
+                magtype0 = np.take(magtype0, inds)
+                # z3=
+                magtype1, mag1, dmag1, jd1, date1, namefile1 = [], [], [], [], [], []
+                done = []
+                for i in range(0, len(jd0)):
+                    if i not in done:
+                        ww = np.asarray([j for j in range(len(jd0)) if
                                   (jd0[j] - jd0[i]) < _bin and (jd0[j] - jd0[i]) >= 0.0])  # abs(jd0[j]-jd0[i])<bin])
-                    for jj in ww: done.append(jj)
-                    if len(ww) >= 2:
-                        jd1.append(np.mean(jd0[ww]))
-                        if magtype == 'fit':
-                            mag1.append(np.mean(mag0[ww]))
-                        else:
-                            mag1.append(np.mean(mag0[ww]))
-                        try:
-                            dmag1.append(np.std(mag0[ww]) / np.sqrt(len(ww)))
-                        except:
-                            dmag1.append(0.0)
-                        magtype1.append(np.std(magtype0[ww]))
-                        namefile1.append(namefile0[ww])
-                        date1.append(date0[ww][0] + datetime.timedelta(np.mean(jd0[ww]) - jd0[ww][0]))
-                    elif len(ww) == 1:
-                        jd1.append(jd0[ww][0])
-                        mag1.append(mag0[ww][0])
-                        magtype1.append(magtype0[ww][0])
-                        dmag1.append(dmag0[ww][0])
-                        date1.append(date0[ww][0])
-                        namefile1.append(namefile0[ww][0])
-            setup[_tel][_fil]['mag'] = mag1
-            setup[_tel][_fil]['magtype'] = magtype1
-            setup[_tel][_fil]['dmag'] = dmag1
-            setup[_tel][_fil]['jd'] = list(np.array(jd1) - .5)
-            setup[_tel][_fil]['date'] = date1
-            setup[_tel][_fil]['namefile'] = namefile1
+                        for jj in ww: done.append(jj)
+                        if len(ww) >= 2:
+                            jd1.append(np.mean(jd0[ww]))
+                            if magtype == 'fit':
+                                mag1.append(np.mean(mag0[ww]))
+                            else:
+                                mag1.append(np.mean(mag0[ww]))
+                            try:
+                                dmag1.append(np.std(mag0[ww]) / np.sqrt(len(ww)))
+                            except:
+                                dmag1.append(0.0)
+                            magtype1.append(np.std(magtype0[ww]))
+                            namefile1.append(namefile0[ww])
+                            date1.append(date0[ww][0] + datetime.timedelta(np.mean(jd0[ww]) - jd0[ww][0]))
+                        elif len(ww) == 1:
+                            jd1.append(jd0[ww][0])
+                            mag1.append(mag0[ww][0])
+                            magtype1.append(magtype0[ww][0])
+                            dmag1.append(dmag0[ww][0])
+                            date1.append(date0[ww][0])
+                            namefile1.append(namefile0[ww][0])
+                setup[_tel][_fil]['mag'] = mag1
+                setup[_tel][_fil]['magtype'] = magtype1
+                setup[_tel][_fil]['dmag'] = dmag1
+                setup[_tel][_fil]['jd'] = list(np.array(jd1) - .5)
+                setup[_tel][_fil]['date'] = date1
+                setup[_tel][_fil]['namefile'] = namefile1
 
     if _show:
         plotfast(setup)
@@ -132,9 +159,10 @@ def run_getmag(imglist, _field, _output='', _interactive=False, _show=False, _bi
                 pass
 
     keytelescope = {'1m0-03': '3', '1m0-04': '4', '1m0-05': '5', '1m0-06': '6', '1m0-07': '7', '1m0-08': '8',
-                    '1m0-09': '9', '1m0-10': '10', \
-                    '1m0-11': '11', '1m0-12': '12', '1m0-13': '13', 'fts': '14', 'ftn': '15', 'other': '20'}
-    if _tel not in keytelescope.keys(): _tel = 'other'
+                    '1m0-09': '9', '1m0-10': '10', '1m0-11': '11', '1m0-12': '12', '1m0-13': '13', 'fts': '14',
+                    'ftn': '15', 'other': '20'}
+    if _tel not in keytelescope.keys():
+        _tel = 'other'
 
     linetot = {}
     if _output: ff = open(_output, 'w')
@@ -183,7 +211,6 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
     import glob
     #direc = agnkey.__path__[0]
     from numpy import where, array
-
 
     status = []
     if mode == 1:
@@ -491,9 +518,8 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
 
 ###################################################################
 
-
 def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
-            fix=True, database='dataredulco'):
+            fix=True, catalog='', database='dataredulco'):
     import agnkey
     import os
     import re
@@ -520,6 +546,11 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             gg = ' '
         else:
             gg = ' --fix '
+        if catalog:
+            cc=' --catalog '+catalog+' '
+        else:
+            cc=' '
+
         status = checkstage(img, 'psf')
         print status
         if status == 1: rr = '-r'
@@ -531,7 +562,7 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             else:
                 img0 = img
             command = 'agnpsf.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
-                treshold) + xwindow + gg
+                treshold) + xwindow + gg + cc
             print command
             os.system(command)
         elif status == 0:
@@ -546,6 +577,64 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             print 'status ' + str(status) + ': unknown status'
     ##################################################################
 
+###################################################################
+
+def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
+            fix=True, catalog='',database='dataredulco'):
+    import agnkey
+    import os
+    import re
+
+    for img in imglist:
+        if interactive:
+            ii = '-i'
+        else:
+            ii = ''
+        if show:
+            ss = '-s'
+        else:
+            ss = ''
+        if redo:
+            rr = '-r'
+        else:
+            rr = ''
+        if catalog:
+            cc=' --catalog '+catalog+' '
+        else:
+            cc=' '
+        if _fwhm:
+            ff = '-f ' + str(_fwhm) + ' '
+        else:
+            ff = ''
+        if fix:
+            gg = ' '
+        else:
+            gg = ' --fix '
+        status = checkstage(img, 'psf')
+        print status
+        if status == 1: rr = '-r'
+        if status >= 1:
+            ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
+            _dir = ggg[0]['wdirectory']
+            if ggg[0]['filetype'] == 3:
+                img0 = re.sub('.diff.fits', '.fits', img)
+            else:
+                img0 = img
+            command = 'agnpsf2.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
+                treshold) + xwindow + gg + cc
+            print command
+            os.system(command)
+        elif status == 0:
+            print 'status ' + str(status) + ': WCS stage not done'
+        elif status == -1:
+            print 'status ' + str(status) + ': sn2.fits file not found'
+        elif status == -2:
+            print 'status ' + str(status) + ': .fits file not found'
+        elif status == -4:
+            print 'status ' + str(status) + ': bad quality image'
+        else:
+            print 'status ' + str(status) + ': unknown status'
+    ##################################################################
 
 def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _recenter=False, _ref='', interactive=False,
             show=False, redo=False, dmax=51000, database='dataredulco'):
@@ -959,7 +1048,7 @@ def position(imglist, ra1, dec1, show=False):
                     pass
     else:
         for img in imglist:
-            dicti = agnkey.agnabsphotdef.makecatalogue([img])
+            dicti = agnkey.util.makecatalogue2([img])
             for i in dicti.keys():
                 for j in dicti[i].keys():
                     ra0 = dicti[i][j]['ra']

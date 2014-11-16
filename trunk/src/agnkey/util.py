@@ -93,11 +93,15 @@ def readlist(listfile):
     from pyfits import open as opn
     if '*' in listfile:
         imglist=glob.glob(listfile)
-    elif ',' in listfile: imglist = string.split(listfile,sep=',')
+    elif ',' in listfile:
+        imglist = string.split(listfile,sep=',')
     else:
-        try:            hdulist= opn(listfile)
-        except:           hdulist=[]
-        if hdulist:            imglist = [listfile]
+        try:
+            hdulist= opn(listfile)
+        except:
+            hdulist=[]
+        if hdulist:
+            imglist = [listfile]
         else:
            try:
               ff = open(listfile,'r')
@@ -116,8 +120,10 @@ def readlist(listfile):
                           correctcard(ff)
                           hdulist= opn(ff)
                           imglist.append(ff)
-                       except:                          pass
-           except:              sys.exit('\n##### Error ###\n file '+str(listfile)+' do not  exist\n')
+                       except:
+                           pass
+           except:
+               sys.exit('\n##### Error ###\n file '+str(listfile)+' do not  exist\n')
     if len(imglist)==0:
            sys.exit('\n##### Error ###\nIf "'+str(listfile)\
                                 +'" is an image, it is corrupted \n or is not a list of image\n')
@@ -707,8 +713,9 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
     iraf.set(stdimage='imt1024')
     hdr = agnkey.util.readhdr(fitstab)
     _filter = agnkey.util.readkey3(hdr,'filter')
-    column = agnkey.agnabsphotdef.makecatalogue([fitstab])[_filter][fitstab]
+    column = agnkey.util.makecatalogue2([fitstab])[_filter][fitstab]
 
+#    print column
     rasex = array(column['ra0'],float)
     decsex = array(column['dec0'],float)
 
@@ -716,7 +723,7 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
       hdr = agnkey.util.readhdr(fitstab2)
       _filter = agnkey.util.readkey3(hdr,'filter')
       _exptime = agnkey.util.readkey3(hdr,'exptime')
-      column = agnkey.agnabsphotdef.makecatalogue([fitstab2])[_filter][fitstab2]
+      column = agnkey.util.makecatalogue2([fitstab2])[_filter][fitstab2]
       rasex2 = array(column['ra0'],float)
       decsex2 = array(column['dec0'],float)
 
@@ -1284,52 +1291,58 @@ def getstatus(username,passwd,tracking_id):
 
 def downloadfloydsraw(JD,username,passwd):
     import agnkey
-    import os,string,re,sys
+    import os
+    import string
+    import re
+    import sys
     command = ['select * from obslog where tracknumber and filters="floyds" and windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
-    ll0={}
-    for jj in lista[0].keys():
-        ll0[jj] = []
-    for i in range(0,len(lista)):
+    if len(lista) == 0:
+        print 'no tracknumber for spectra '
+    else:
+        ll0={}
         for jj in lista[0].keys():
-            ll0[jj].append(lista[i][jj])
+            ll0[jj] = []
+        for i in range(0,len(lista)):
+            for jj in lista[0].keys():
+                ll0[jj].append(lista[i][jj])
 
-    for track in ll0['tracknumber']:
-        print track
-        _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-        print _dict
-        if 'state' in _dict.keys(): _status=_dict['state']
-        else:  _status = 'xxxx'
-        if 'requests' in _dict.keys():
-           _reqnumber = _dict['requests'].keys()[0]
-        else:
-           _reqnumber = ''
-        if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
-            for ii in  _dict['requests'].keys():
-                _tracknumber = str(ii).zfill(10)
-                try:
-                   _date = re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
-                   print _status,_reqnumber
-                   _tarfile = _reqnumber+'_'+str(_date)+'.tar.gz'
-                except:
-                   _tarfile = ''
-                directory = agnkey.util.workingdirectory + 'floydsraw/'
-                if _tracknumber != 'xxxx' and _tarfile:
-                    if not os.path.isfile(directory + _tarfile):
-                        line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
-                           '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
-                             _tarfile + ' --directory-prefix=' + directory
-                        print line
-                        os.system(line)
-                        if os.path.isfile(directory + _tarfile):
-                           agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
-                                                        connection='agnkey',namefile0='tracknumber')
-                    else:
-                        print 'file already there'
-                else:   print 'request number not defined'
-        if str(track) == '51565':
-           print _dict
-           raw_input('gogon')
+        for track in ll0['tracknumber']:
+            print track
+            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
+            print _dict
+            if 'state' in _dict.keys(): _status=_dict['state']
+            else:  _status = 'xxxx'
+            if 'requests' in _dict.keys():
+               _reqnumber = _dict['requests'].keys()[0]
+            else:
+               _reqnumber = ''
+            if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
+                for ii in  _dict['requests'].keys():
+                    _tracknumber = str(ii).zfill(10)
+                    try:
+                       _date = re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+                       print _status,_reqnumber
+                       _tarfile = _reqnumber+'_'+str(_date)+'.tar.gz'
+                    except:
+                       _tarfile = ''
+                    directory = agnkey.util.workingdirectory + 'floydsraw/'
+                    if _tracknumber != 'xxxx' and _tarfile:
+                        if not os.path.isfile(directory + _tarfile):
+                            line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
+                               '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
+                                 _tarfile + ' --directory-prefix=' + directory
+                            print line
+                            os.system(line)
+                            if os.path.isfile(directory + _tarfile):
+                               agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
+                                                            connection='agnkey',namefile0='tracknumber')
+                        else:
+                            print 'file already there'
+                    else:   print 'request number not defined'
+            if str(track) == '51565':
+               print _dict
+               raw_input('gogon')
 ##########################################################################################
 
 def makecatalogue(imglist):
@@ -1391,6 +1404,9 @@ def makecatalogue2(imglist):
         _exptime=agnkey.util.readkey3(hdr1,'exptime')
         _airmass=agnkey.util.readkey3(hdr1,'airmass')
         _telescope=agnkey.util.readkey3(hdr1,'telescop')
+        ZZ2=agnkey.util.readkey3(hdr1,'ZZ2')
+        ZZ3=agnkey.util.readkey3(hdr1,'ZZ3')
+        ZZ4=agnkey.util.readkey3(hdr1,'ZZ4')
         if _filter not in dicti: dicti[_filter]={}
         if img not in dicti[_filter]: dicti[_filter][img]={}
         for jj in hdr1:
@@ -1401,6 +1417,9 @@ def makecatalogue2(imglist):
         dicti[_filter][img]['exptime']=_exptime
         dicti[_filter][img]['airmass']=_airmass
         dicti[_filter][img]['telescope']=_telescope
+        dicti[_filter][img]['ZZ2']=ZZ2
+        dicti[_filter][img]['ZZ3']=ZZ3
+        dicti[_filter][img]['ZZ4']=ZZ4
 
         for col in tbdata.columns.names:
             dicti[_filter][img][col]=tbdata.field(col)
@@ -1410,7 +1429,8 @@ def makecatalogue2(imglist):
             for i in range(0,len(dicti[_filter][img]['ra'])):
 #                dicti[_filter][img]['ra0'][i]=float(iraf.real(dicti[_filter][img]['ra'][i]))*15
 #                dicti[_filter][img]['dec0'][i]=float(iraf.real(dicti[_filter][img]['dec'][i]))
-                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
+                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=\
+                    agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
     return dicti
 
 ##########################################################################################

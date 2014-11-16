@@ -34,7 +34,7 @@ if __name__ == "__main__":
                       help="-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag," +
                            'merge,diff,template,apmag] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
-                      help='-s stage [wcs,psf,psfmag,zcat,abscat,mag,getmag,merge,diff,' +
+                      help='-s stage [wcs,psf,psf2,psfmag,zcat,abscat,mag,getmag,merge,diff,' +
                            'makestamp,template,apmag,cosmic,idlstart] \t [%default]')
     parser.add_option("--RAS", dest="ras", default='', type="str",
                       help='-RAS  ra    \t [%default]')
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     if _type not in ['fit', 'ph', 'mag', 'appmagap1', 'appmagap2', 'appmagap3', 'flux1']:
         sys.argv.append('--help')
     if _stage:
-        if _stage not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
+        if _stage not in ['wcs', 'psf', 'psf2', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
                           'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart']:
             sys.argv.append('--help')
     if _bad:
@@ -209,7 +209,7 @@ if __name__ == "__main__":
         listepoch = [re.sub('-', '', str(i)) for i in
                      [start + datetime.timedelta(days=x) for x in range(0, 1 + (stop - start).days)]]
 
-    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart']:
+    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart']:
         if len(listepoch) == 1:
             lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs', str(listepoch[0]),
                                                     '', '*', _telescope)
@@ -254,10 +254,14 @@ if __name__ == "__main__":
                 else:
                     fields = [_field]
                 for ff in fields:
-                    agnkey.agnloopdef.run_getmag(ll['namefile'], _field, _output, _interactive, _show, _bin, _type)
+                    agnkey.agnloopdef.run_getmag(ll, _field, _output, _interactive, _show, _bin, _type,
+                                                 'dataredulco', _ra, _dec)
             elif _stage == 'psf':
                 agnkey.agnloopdef.run_psf(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
-                                          XX, _fix, 'dataredulco')
+                                          XX, _fix, _catalogue, 'dataredulco')
+            elif _stage == 'psf2':
+                agnkey.agnloopdef.run_psf2(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
+                                          XX, _fix, _catalogue, 'dataredulco')
             elif _stage == 'psfmag':
                 agnkey.agnloopdef.run_fit(ll['namefile'], _ras, _decs, _xord, _yord, _bkg, _size, _recenter, _ref,
                                           _interactive, _show, _redo, _dmax)
