@@ -139,12 +139,15 @@ if __name__ == "__main__":
     parser.add_option("-D", "--DEC", dest="dec", default='', type="str", help='-D dec   \t [%default]')
     parser.add_option("-v", "--verbose", action="store_true",
                       dest='verbose', default=False, help='verbose \t\t\t [%default]')
+    parser.add_option("-c", "--catalog", dest="catalog", default='', type='str',
+                      help='use input catalog  \t\t %default')
 
     option, args = parser.parse_args()
     if len(args) < 1: sys.argv.append('--help')
     _ra = option.ra
     _dec = option.dec
     _verbose  = option.verbose
+    _catalogue=option.catalog
 
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
@@ -177,61 +180,68 @@ if __name__ == "__main__":
         _filter = re.sub('p', '', _filter)
         _filter = re.sub('s', '', _filter)
 
-        _cat = ''
-        if _filter in ['u', 'g', 'r', 'i', 'z']:
-            _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/sloan/' + _object + '*')
-            if _catalogue:
-                _sloan = agnkey.agnastrodef.readtxt(_catalogue[0])
-                for _id in _sloan:
-                    try:
-                        _sloan[_id] = np.array(_sloan[_id], float)
-                    except:
-                        pass
+        if _catalogue:
+            _cat = agnkey.agnastrodef.readtxt(_catalogue)
+            for _id in _cat:
+                try:
+                    _cat[_id] = np.array(_cat[_id], float)
+                except:
+                    pass
+            print 'use catalogue from user' + _catalogue
+        else:
+            if _filter in ['u', 'g', 'r', 'i', 'z']:
+                _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/sloan/' + _object + '*')
+                if _catalogue:
+                    _sloan = agnkey.agnastrodef.readtxt(_catalogue[0])
+                    for _id in _sloan:
+                        try:
+                            _sloan[_id] = np.array(_sloan[_id], float)
+                        except:
+                            pass
 
-                print 'use catalogue from archive for object ' + str(_object)
-            else:
-                _sloan = ''
-            if not _sloan:
-                _sloan = vizq(_ra0, _dec0, 'sdss7', 20)
+                    print 'use catalogue from archive for object ' + str(_object)
+                else:
+                    _sloan = ''
+                if not _sloan:
+                    _sloan = vizq(_ra0, _dec0, 'sdss7', 20)
 
-            if _sloan:
-                _cat = _sloan
-            else:
-                if _filter in ['g', 'r', 'i']:
-                    _apass = vizq(_ra0, _dec0, 'apass', 20)
-                    if _apass:   _cat = _apass
-        elif _filter in ['U', 'B', 'V', 'R', 'I']:
-            _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _object + '*')
-            if _catalogue:
-                _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
-                print 'use catalogue from archive for object ' + str(_object)
-                for _id in _landolt:
-                    try:
-                        _landolt[_id] = np.array(_landolt[_id], float)
-                    except:
-                        pass
+                if _sloan:
+                    _cat = _sloan
+                else:
+                    if _filter in ['g', 'r', 'i']:
+                        _apass = vizq(_ra0, _dec0, 'apass', 20)
+                        if _apass:   _cat = _apass
+            elif _filter in ['U', 'B', 'V', 'R', 'I']:
+                _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _object + '*')
+                if _catalogue:
+                    _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
+                    print 'use catalogue from archive for object ' + str(_object)
+                    for _id in _landolt:
+                        try:
+                            _landolt[_id] = np.array(_landolt[_id], float)
+                        except:
+                            pass
 
-            else:
-                _landolt = ''
-            if not _landolt:
-                if _filter in ['B', 'V']:
-                    _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/apass/' + _object + '*')
-                    if _catalogue:
-                        _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
-                        print 'use catalogue from archive for object ' + str(_object)
-                        for _id in _landolt:
-                            try:
-                                _landolt[_id] = np.array(_landolt[_id], float)
-                            except:
-                                pass
-                    else:
-                        _landolt = ''
-                    if not _landolt:
-                        _landolt = vizq(_ra0, _dec0, 'apass', 20)
-            if _landolt:   _cat = _landolt
-#
-#        if catalog  find common stars with exstracted stars
-#
+                else:
+                    _landolt = ''
+                if not _landolt:
+                    if _filter in ['B', 'V']:
+                        _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/apass/' + _object + '*')
+                        if _catalogue:
+                            _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
+                            print 'use catalogue from archive for object ' + str(_object)
+                            for _id in _landolt:
+                                try:
+                                    _landolt[_id] = np.array(_landolt[_id], float)
+                                except:
+                                    pass
+                        else:
+                            _landolt = ''
+                        if not _landolt:
+                            _landolt = vizq(_ra0, _dec0, 'apass', 20)
+                if _landolt:
+                    _cat = _landolt
+
         if _cat:
             distvec, pos0, pos1 = crossmatch(_rasex, _decsex, _cat['ra'], _cat['dec'], 5)
         else:

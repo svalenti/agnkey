@@ -404,7 +404,7 @@ def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=Fa
             print 'status ' + str(status) + ': unknown status'
 
 
-def run_apmag(imglist, database='dataredulco', _ra='', _dec=''):
+def run_apmag(imglist, database='dataredulco', _ra='', _dec='', _catalog=''):
     import agnkey
     import os
     import re
@@ -420,9 +420,13 @@ def run_apmag(imglist, database='dataredulco', _ra='', _dec=''):
                 cord = ' --RA ' + str(_ra) + ' --DEC ' + str(_dec)
             else:
                 cord = ''
+            if _catalog:
+                cc=' --catalog '+str(_catalog)+' '
+            else:
+                cc=' '
             print _dir + img1
             if os.path.isfile(_dir + img1):
-                command = 'agnnewcalib.py ' + _dir + img1 + cord  # +' -v'
+                command = 'agnnewcalib.py ' + _dir + img1 + cord  + cc # +' -v'
                 print command
                 os.system(command)
             else:

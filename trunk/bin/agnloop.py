@@ -64,7 +64,7 @@ if __name__ == "__main__":
                       help='--field  [landolt,sloan,apass]  \t [%default]')
     parser.add_option("--ref", dest="ref", default='', type="str",
                       help='--ref  sn22_20130303_0111.sn2.fits get sn position from this file \t [%default]')
-    parser.add_option("--catalogue", dest="catalogue", default='', type="str",
+    parser.add_option("--catalog", dest="catalogue", default='', type="str",
                       help='--catalogue  sn09ip.cat    \t [%default]')
     parser.add_option("--calib", dest="calib", default='', type="str",
                       help='--calib  (sloan,natural,sloanprime)   \t [%default]')
@@ -270,7 +270,7 @@ if __name__ == "__main__":
             elif _stage == 'makestamp':
                 agnkey.agnloopdef.makestamp(ll['namefile'], 'dataredulco', _z1, _z2, _interactive, _redo, _output)
             elif _stage == 'apmag':
-                agnkey.agnloopdef.run_apmag(ll['namefile'], 'dataredulco',_ra,_dec)
+                agnkey.agnloopdef.run_apmag(ll['namefile'], 'dataredulco',_ra,_dec,_catalogue)
             elif _stage == 'cosmic':
                 agnkey.agnloopdef.run_cosmic(ll['namefile'], 'dataredulco', 4.5, 0.2, 4, _redo)
             elif _stage == 'idlstart':
