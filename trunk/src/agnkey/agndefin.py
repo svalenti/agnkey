@@ -260,6 +260,9 @@ def visibility(_ra0,_dec0,_plot=True,xx='300',yy='200'):
         dist= '%3.1f' % (np.mean(np.array(distance)))
         stringa=site+' '+str(dist)+" $^{o}$ "
         dates1=np.array(list(dates1)+list(dates))
+
+        lha=[abs(i) if abs(i)<=12 else abs(i-24) for i in lha]
+
         altitudegood=[altitude[x] if (lha[x] <= 4.8) else None for x in range(0,len(lha))]
         altitudebad=[altitude[x] if (lha[x] > 4.8) else None for x in range(0,len(lha))]
         if _plot:
