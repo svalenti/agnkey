@@ -82,6 +82,9 @@ else:                        _proposal=''
     ##########   instrument  #########
 if form.getlist('instrument'): _instrument=form.getlist('instrument')[0]
 else:                        _instrument=''
+    ##########   filetype  #########
+if form.getlist('filetype'): _filetype=form.getlist('filetype')[0]
+else:                        _filetype=''
     ##########   access  #########
 if form.getlist('access'): _access=form.getlist('access')[0]
 else:                        _access=''
@@ -450,11 +453,13 @@ elif _type=='spectrum':
     _output=''
     fileitem = form['file']
     if fileitem.filename:
-        open('../tmp/'+fileitem.filename, 'wb').write(fileitem.file.read())
-        print _output,_force,_access,_note,fileitem.filename
-        _note=agnkey.agndefin.uploadspectrum('../tmp/'+fileitem.filename,_output,_force,_access)
-        _note=re.sub('\n','<br><br>',_note)
-    else:  _note='no spectrum uploded'
+            open('../tmp/'+fileitem.filename, 'wb').write(fileitem.file.read())
+            print _output,_force,_access,_note,fileitem.filename,_filetype
+            _note=agnkey.agndefin.uploadspectrum('../tmp/'+fileitem.filename,_output,_force,_access,_filetype)
+            print _note
+            _note=re.sub('\n','<br><br>',_note)
+    else:  
+        _note='no spectrum uploded'
 
 ###############################################
 if outputformat=='agnpermission.cgi':

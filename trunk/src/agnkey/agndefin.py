@@ -649,111 +649,123 @@ def archivereducedspectrum(img):
 
 ########################################
 
-def uploadspectrum(img,_output,_force,_permission):
+def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
     import pyfits
     import agnkey
     import numpy as np
     import re,string,sys,os
-
-    note='input= '+img+'\n'
-    try:
-        hdr=pyfits.open(img)[0].header
-    except:      return 'problem reading file. Check that it is in a fits format  '
-    if 'TELID' in hdr:  _tel=hdr.get('TELID')
-    elif 'TELESCOP' in hdr:    _tel=hdr.get('TELESCOP')
-    else:                    _tel='other'
-    if not _tel: _tel='other'
-    _tel=re.sub(' ','',_tel)
-    note=note+'telescope= '+_tel+'\n'
-###################################### # gemini files in jerord format needs some trick
-    if 'gemini' in _tel.lower():      
-        data,hdr0 = pyfits.getdata(img, 'sci', header=True)
-        try:        hdr0.__delitem__('AIRMASS')
-        except:     hdr0.remove('AIRMASS') 
-        hed=['TELESCOP','OBSERVAT','RA','DEC','UT','ST','EXPTIME','MASKNAME',\
-             'GRATING','CENTWAVE','OBSMODE','GAIN','RDNOISE','MJD-OBS',\
-             'PIXSCALE','DATE-OBS','AIRMASS']
-        for jj in hed:
-            hdr0.update(jj,hdr[jj])
-        if 'south' in _tel.lower(): _tel='gs'
-        else: _tel='gn'
-        pyfits.writeto(re.sub('.fits','0.fits',img), np.float32(data), hdr0)
-        img=re.sub('.fits','0.fits',img)
-############################################# 
-
-    dictionary=archivereducedspectrum(img)
-    _grism=dictionary['grism']
-    _date=dictionary['dateobs']
-    _date=re.sub('-','',_date)
-    if 'T' in _date: string.split(_date,'T')[0]
-    _ut=dictionary['ut']
-    _object=dictionary['objname']
-    if not _output:
-            _output=str(_object)+'_'+str(_date)+'_'+str(_grism)+'_'+re.sub(':','',str(_ut))+'.fits'
-    _output=re.sub('/','_',_output)
-
-    if agnkey.util.host=='SVMAC':
-        directory='/Users/svalenti/redu2/AGNKEY/spectra/'+_date+'_'+_tel
-        directory1=re.sub('/Users/svalenti/redu2/','../',directory)
-    elif agnkey.util.host=='deneb':
-        directory='/home/cv21/AGNKEY_www/AGNKEY/spectra/'+_date+'_'+_tel
-        directory1=re.sub('/home/cv21/AGNKEY_www/','../',directory)
-
-    dictionary['directory']=directory+'/'
-    dictionary['namefile']=_output
-
-    note=note+'output= '+_output+'\n'
-    if not dictionary['objname']: note=note+'ERROR= OBJECT not defined '
-    else:                         note=note+'objname= '+str(dictionary['objname'])+'\n'
-    if not dictionary['directory']: note=note+'ERROR= directory not defined '
-    else:                         note=note+'directory= '+str(dictionary['directory'])+'\n'
-    if not dictionary['ra0']:     note=note+'ERROR= RA not defined \n'
-    else:                         note=note+'ra= '+str(dictionary['ra0'])+'\n'
-    if not dictionary['dec0']:    note=note+'ERROR= DEC not defined \n'
-    else:                         note=note+'dec= '+str(dictionary['dec0'])+'\n'
-    if not dictionary['targid']:  note=note+'ERROR= TARGID not defined (it will be automatic generated when RA,DEC and OBJECT are defined)\n'
-    else:                         note=note+'targid= '+str(dictionary['targid'])+'\n'
-    if not dictionary['dateobs']: note=note+'ERROR= DATE-OBS not defined \n'
-    else:                         note=note+'dateobs= '+str(dictionary['dateobs'])+'\n'
-
-    if 'ERROR' in note: 
-        return note
+    import tarfile
+    if _filetype=='tar':
+        tar=tarfile.open(img)
+        imglist=tarfile.TarFile.getnames(tar)
+#        for img in imglist:
+#            os.system('rm -rf '+img)
+        tar.extractall()
+        tar.close()
+#        os.system('tar -xf '+img)
     else:
-        if os.path.isdir(directory1): print 'directory there'
-        else:                        os.system('mkdir '+directory1)
-        if os.path.isfile(directory1+'/'+_output): 
-            note=note+'file already there'+'\n'
-            if _force=='force':
-                note=note+'replace file'+'\n'
-                os.system('rm '+directory1+'/'+_output)
-                os.system('cp '+img+' '+directory1+'/'+_output)
-        else:
-            os.system('cp '+img+' '+directory1+'/'+_output)
-        #if _tel in ['ftn','fts']:
-        #    datarawtable='datareduspectra'
-        #else:
+#        os.system('rm -rf '+img)
+        imglist = [img]
+#    print imglist
+    note = ''
+    for img in imglist:
+          note= note + 'input= '+img+'\n'
+          try:
+              hdr=pyfits.open(img)[0].header
+          except:
+              return 'problem '+img+'  reading file. Check that it is in a fits format  '
+          if 'TELID' in hdr:  _tel=hdr.get('TELID')
+          elif 'TELESCOP' in hdr:    _tel=hdr.get('TELESCOP')
+          else:                    _tel='other'
+          if not _tel: _tel='other'
+          _tel = re.sub(' ','',_tel)
+          note = note + 'telescope= ' + _tel + '\n'
+          ###################################### # gemini files in jerord format needs some trick
+          if 'gemini' in _tel.lower():
+              data,hdr0 = pyfits.getdata(img, 'sci', header=True)
+              try:        hdr0.__delitem__('AIRMASS')
+              except:     hdr0.remove('AIRMASS')
+              hed=['TELESCOP','OBSERVAT','RA','DEC','UT','ST','EXPTIME','MASKNAME',\
+                   'GRATING','CENTWAVE','OBSMODE','GAIN','RDNOISE','MJD-OBS',\
+                   'PIXSCALE','DATE-OBS','AIRMASS']
+              for jj in hed:
+                  hdr0.update(jj,hdr[jj])
+              if 'south' in _tel.lower(): _tel='gs'
+              else: _tel='gn'
+              pyfits.writeto(re.sub('.fits','0.fits',img), np.float32(data), hdr0)
+              img=re.sub('.fits','0.fits',img)
+          dictionary=archivereducedspectrum(img)
+          _grism=dictionary['grism']
+          _date=dictionary['dateobs']
+          _date=re.sub('-','',_date)
+          if 'T' in _date: string.split(_date,'T')[0]
+          _ut=dictionary['ut']
+          _object=dictionary['objname']
+          if not _output:
+                  _output=str(_object)+'_'+str(_date)+'_'+str(_grism)+'_'+re.sub(':','',str(_ut))+'.fits'
+          _output=re.sub('/','_',_output)
 
-        datarawtable='dataspectraexternal'
-        if datarawtable=='dataspectraexternal':
-            dictionary['access']=_permission
-            note=note+'acces= '+str(dictionary['access'])+'\n'
+          if agnkey.util.host=='SVMAC':
+              directory='/Users/svalenti/redu2/AGNKEY/spectra/'+_date+'_'+_tel
+              directory1=re.sub('/Users/svalenti/redu2/','../',directory)
+          elif agnkey.util.host=='deneb':
+              directory='/home/cv21/AGNKEY_www/AGNKEY/spectra/'+_date+'_'+_tel
+              directory1=re.sub('/home/cv21/AGNKEY_www/','../',directory)
 
-        note=note+'database= '+datarawtable+'\n'
-        if not agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,datarawtable,'namefile', string.split(_output,'/')[-1],column2='namefile'):
-            agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
-        else:
-            if _force=='update':
-                note=note+'update database'+'\n'
-                for voce in dictionary:
-                    if voce!='id' and voce!='namefile':
-                        agnkey.agnsqldef.updatevalue(datarawtable,voce,dictionary[voce],string.split(_output,'/')[-1])
-            elif _force=='force':
-                note=note+'replace line in the database'+'\n'
-                agnkey.agnsqldef.deleteredufromarchive(string.split(_output,'/')[-1],datarawtable,'namefile')
-                agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
-            else: note=note+'database not changed'+'\n'
-#        note=note+str(dictionary)
-        return note
+          dictionary['directory']=directory+'/'
+          dictionary['namefile']=_output
+
+          note=note+'output= '+_output+'\n'
+          if not dictionary['objname']: note=note+'ERROR= OBJECT not defined '
+          else:                         note=note+'objname= '+str(dictionary['objname'])+'\n'
+          if not dictionary['directory']: note=note+'ERROR= directory not defined '
+          else:                         note=note+'directory= '+str(dictionary['directory'])+'\n'
+          if not dictionary['ra0']:     note=note+'ERROR= RA not defined \n'
+          else:                         note=note+'ra= '+str(dictionary['ra0'])+'\n'
+          if not dictionary['dec0']:    note=note+'ERROR= DEC not defined \n'
+          else:                         note=note+'dec= '+str(dictionary['dec0'])+'\n'
+          if not dictionary['targid']:  note=note+'ERROR= TARGID not defined (it will be automatic generated when RA,DEC and OBJECT are defined)\n'
+          else:                         note=note+'targid= '+str(dictionary['targid'])+'\n'
+          if not dictionary['dateobs']: note=note+'ERROR= DATE-OBS not defined \n'
+          else:                         note=note+'dateobs= '+str(dictionary['dateobs'])+'\n'
+
+          if 'ERROR' in note:
+              return note
+          else:
+              if os.path.isdir(directory1): print 'directory there'
+              else:                        os.system('mkdir '+directory1)
+              if os.path.isfile(directory1+'/'+_output):
+                  note=note+'file already there'+'\n'
+                  if _force=='force':
+                      note=note+'replace file'+'\n'
+                      os.system('rm '+directory1+'/'+_output)
+                      os.system('cp '+img+' '+directory1+'/'+_output)
+              else:
+                  os.system('cp '+img+' '+directory1+'/'+_output)
+              #if _tel in ['ftn','fts']:
+              #    datarawtable='datareduspectra'
+              #else:
+
+              datarawtable='dataspectraexternal'
+              if datarawtable=='dataspectraexternal':
+                  dictionary['access']=_permission
+                  note=note+'acces= '+str(dictionary['access'])+'\n'
+
+              note=note+'database= '+datarawtable+'\n'
+              if not agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn,datarawtable,'namefile', string.split(_output,'/')[-1],column2='namefile'):
+                  agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
+              else:
+                  if _force=='update':
+                      note=note+'update database'+'\n'
+                      for voce in dictionary:
+                          if voce!='id' and voce!='namefile':
+                              agnkey.agnsqldef.updatevalue(datarawtable,voce,dictionary[voce],string.split(_output,'/')[-1])
+                  elif _force=='force':
+                      note=note+'replace line in the database'+'\n'
+                      agnkey.agnsqldef.deleteredufromarchive(string.split(_output,'/')[-1],datarawtable,'namefile')
+                      agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,datarawtable,dictionary)
+                  else: note=note+'database not changed'+'\n'
+    return note
 
 ########################################################################################
 def obsin(targid,_days=7):
