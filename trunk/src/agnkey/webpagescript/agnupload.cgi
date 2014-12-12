@@ -100,7 +100,12 @@ else:
         '<select name= "access" >'+\
         '<option  width=10 value="'+str(public)+'"> public  </option>'+\
         '<option  width=10 value="'+str(private)+'"> private </option>'+\
-        '</select> <h3>Fits file should have (at least) in the header the following keywords: <br></br> RA, DEC, DATE-OBS, OBJECT </h3>'+\
+        '</select><br>'+\
+        '<select name= "filetype" >'+\
+        '<option  width=10 value="fits"> fits  </option>'+\
+        '<option  width=10 value="tar"> tar </option>'+\
+        '</select></br>'+\
+        '<h3>Fits file should have (at least) in the header the following keywords: <br></br> RA, DEC, DATE-OBS, OBJECT </h3>'+\
         '<input type="submit" value="Submit">'+\
         '</form></center>'
 
