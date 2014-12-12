@@ -179,6 +179,7 @@ if __name__ == "__main__":
         #  download raw floyds
     _JDn = agnkey.agnsqldef.JDnow() - 10
     username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
+    print _JDn, username, passwd
     agnkey.util.downloadfloydsraw(_JDn, username, passwd)
 
 
