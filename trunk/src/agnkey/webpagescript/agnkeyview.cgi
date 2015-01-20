@@ -8,9 +8,10 @@ ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',\
                 'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
-                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
+                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu',\
+                'valenti-MacBook-Pro-2.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 else:
@@ -356,21 +357,45 @@ tdclose=""" </td>  """ #"
 #####################################################################
 form = cgi.FieldStorage()
 name= cgi
-SN = form.getlist('sn_name')
-SN_RA = form.getlist('SN_RA')
-SN_DEC = form.getlist('SN_DEC')
+
+    ##########   SN  #########
+if form.getlist('sn_name'):  
+    SN0 = form.getlist('sn_name')[0]
+else:                        
+    SN0 = ''
+    ##########   SN_RA  #########
+if form.getlist('SN_RA'): 
+    SN_RA = form.getlist('SN_RA')[0]
+else:                      
+    SN_RA = ''
+    ##########   SN_DEC  #########
+if form.getlist('SN_DEC'): 
+    SN_DEC = form.getlist('SN_DEC')[0]
+else:                       
+    SN_DEC = ''
+
+    ##########   targid  #########
+if form.getlist('targid'): 
+    _targid = form.getlist('targid')[0]
+else:                        
+    _targid = ''
+
+#SN = form.getlist('sn_name')
+#SN_RA = form.getlist('SN_RA')
+#SN_DEC = form.getlist('SN_DEC')
+
 d=(datetime.date.today()+datetime.timedelta(1)).strftime("%Y%m%d")
 _JDn=JDnow()
 
 ##############################################################################
-if len(SN)>0:    SN0=re.sub(' ','',SN[0])
-else:            SN0='1324+03'
-if len(SN_RA)>0:    SN_RA=SN_RA[0]
-else:               SN_RA=''    #'95.410237499999994'
-if len(SN_DEC)>0:    SN_DEC=SN_DEC[0]
-else:                SN_DEC=''  #'-59.7140611111111'
+#if len(SN)>0:    SN0=re.sub(' ','',SN[0])
+#else:            SN0=''
+#if len(SN_RA)>0:    SN_RA=SN_RA[0]
+#else:               SN_RA=''    #'95.410237499999994'
+#if len(SN_DEC)>0:    SN_DEC=SN_DEC[0]
+#else:                SN_DEC=''  #'-59.7140611111111'
 
-if len(SN)==0 and len(SN_RA)==0 and len(SN_DEC)==0:
+if len(SN0)==0 and len(SN_RA)==0 and len(SN_DEC)==0:
   try: 
     SN_RA=sys.argv[1]
     SN_DEC=sys.argv[2]
@@ -388,7 +413,8 @@ if len(SN)==0 and len(SN_RA)==0 and len(SN_DEC)==0:
 #    sys.exit()
 
 #####################################################
-if not SN_RA and not SN_DEC:     #  try to get coordinate from name
+if not _targid:       #  try to get coordinate from NED
+  if not SN_RA and not SN_DEC:     #  try to get coordinate from name
     if SN0:
         listac=agnkey.agnsqldef.getlike(agnkey.agnsqldef.conn, 'recobjects', 'name',SN0,'targid,name')
         allobj=''

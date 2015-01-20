@@ -7,7 +7,8 @@ hostname=gethostname()
 
 if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
                 'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
-                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu']:
+                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu',\
+                'valenti-MacBook-Pro-2.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
 else:
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -470,7 +471,10 @@ elif outputformat=='agnkeyview.cgi':
     line='<form id="myForm" action="agnkeyview.cgi" method="post">'+\
         '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\
         '<input type="hidden" name="SN_DEC" value="'+str(SN_DEC)+'">'+\
+        '<input type="hidden" name="targid" value="'+str(_targid)+'">'+\
         '<input type="hidden" name="sn_name" value='+str(SN)+'></form>'
+    line00=str(line00)+' '+str(SN_RA)+' '+str(SN_DEC)+' '+str(SN)+' '+str(_targid)
+
 elif outputformat=='agnschedule.cgi':
     line ='<form id="myForm" action="agnschedule.cgi" method="post">'
     for key in observations:
