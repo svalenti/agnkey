@@ -656,13 +656,13 @@ def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
     import re,string,sys,os
     import tarfile
     if _filetype=='tar':
+        os.system('tar -xf ../tmp/'+img)
         tar=tarfile.open(img)
         imglist=tarfile.TarFile.getnames(tar)
 #        for img in imglist:
 #            os.system('rm -rf '+img)
-        tar.extractall()
+        #tar.extractall()
         tar.close()
-#        os.system('tar -xf '+img)
     else:
 #        os.system('rm -rf '+img)
         imglist = [img]
@@ -1177,7 +1177,7 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
      query += '''AND p.targid=%s ''' % targid
 
      cursor = sqlquery(db,query)
-     if len(cursor)>1:
+     if len(cursor)>=1:
          if plottype == 'flot':
              lcdata = '[ '
              for row in cursor:

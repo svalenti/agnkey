@@ -87,7 +87,12 @@ if __name__ == "__main__":
         _catalogue2 = [_catalogue]
     for img in imglist:
         hdr = agnkey.util.readhdr(img)
-        _wcserr = agnkey.util.readkey3(hdr, 'wcserr')
+        if 'WCSERR' in hdr:
+            _wcserr = agnkey.util.readkey3(hdr, 'WCSERR')
+        elif 'WCS_ERR' in hdr:
+            _wcserr = agnkey.util.readkey3(hdr, 'WCS_ERR')
+        else:
+            _wcserr=10
         _astromet = agnkey.util.readkey3(hdr, 'ASTROMET')
         done = 0
         if float(_wcserr) == 0: done = 1
@@ -162,8 +167,13 @@ if __name__ == "__main__":
         hdr = agnkey.util.readhdr(img)
         _astromet = agnkey.util.readkey3(hdr, 'ASTROMET')
         try:
-            _WCSERR = agnkey.util.readkey3(hdr, 'wcserr')
-            print _WCSERR
+            if 'WCSERR' in hdr:
+                WCSERR = agnkey.util.readkey3(hdr, 'WCSERR')
+            elif 'WCS_ERR' in hdr:
+                WCSERR = agnkey.util.readkey3(hdr, 'WCS_ERR')
+            else:
+                WCSERR = 99
+            print WCSERR
             print _astromet
             if _astromet:
                 if float(string.split(_astromet)[0]) < 2 and float(string.split(_astromet)[1]) < 2:

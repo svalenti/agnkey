@@ -160,7 +160,7 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
 
     keytelescope = {'1m0-03': '3', '1m0-04': '4', '1m0-05': '5', '1m0-06': '6', '1m0-07': '7', '1m0-08': '8',
                     '1m0-09': '9', '1m0-10': '10', '1m0-11': '11', '1m0-12': '12', '1m0-13': '13', 'fts': '14',
-                    'ftn': '15', 'other': '20'}
+                    'ftn': '15', 'other': '20','2m0a':'14','2m0b':'15'}
     if _tel not in keytelescope.keys():
         _tel = 'other'
 
@@ -1673,7 +1673,10 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
                 'jd'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['jd']))
             mm = array(_setup[_tel][_fil][
                 'mag'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mag']))
-            plt.plot(jj, mm + shift, _symbol[ii], color=col, label=_tel + ' ' + _fil + ' ' + str(shift), markersize=5)
+            print _fil, shift
+            print mm
+            raw_input('dd')
+            plt.plot(jj, mm + shift, _symbol[ii], color=col, label=str(_tel) + ' ' + str(_fil) + ' ' + str(shift), markersize=5)
 
             jj1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['jd']))
             mm1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['mag']))
@@ -1688,7 +1691,7 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     plt.xlabel('JD')
     plt.ylabel('magnitude')
     plt.xlim(min(jd) - 5, max(jd) + 5)
-    plt.ylim(max(mag) + .5, min(mag) - .5)
+    #plt.ylim(max(mag) + .5, min(mag) - .5)
     yticklabels = plt.getp(plt.gca(), 'yticklabels')
     xticklabels = plt.getp(plt.gca(), 'xticklabels')
     plt.setp(xticklabels, fontsize='10')

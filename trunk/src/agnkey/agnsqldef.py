@@ -392,10 +392,16 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             import agnkey
             from agnkey.util import readkey3,readhdr
             hdr=readhdr(_dir+img)
+            if 'WCSERR' in hdr:
+               wcs='WCSERR'
+            elif 'WCS_ERR' in hdr:
+               wcs='WCS_ERR'
+            else:
+               wcs='WCSERR'
             _targid=agnkey.agnsqldef.targimg(_dir+img)
             dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                            'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
-                           'wcs':readkey3(hdr,'wcserr'),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
+                           'wcs':readkey3(hdr,wcs),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
             dictionary['namefile']=string.split(img,'/')[-1]
             #dictionary['wdirectory']='/science/supernova/data/lsc/'+readkey3(hdr,'date-night')+'/'
             dictionary['wdirectory']=agnkey.util.workingdirectoy+'lsc/'+readkey3(hdr,'date-night')+'/'
@@ -425,10 +431,16 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             import agnkey
             from agnkey.util import readkey3,readhdr
             hdr=readhdr(_dir+img)
+            if 'WCSERR' in hdr:
+               wcs='WCSERR'
+            elif 'WCS_ERR' in hdr:
+               wcs='WCS_ERR'
+            else:
+               wcs='WCSERR'
             _targid=agnkey.agnsqldef.targimg(_dir+img)
             dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
                            'telescope':readkey3(hdr,'TELID'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
-                           'wcs':readkey3(hdr,'wcserr'),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
+                           'wcs':readkey3(hdr,wcs),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
             dictionary['namefile']=string.split(img,'/')[-1]
             dictionary['wdirectory']=agnkey.util.workingdirectoy+'2mtel/'+readkey3(hdr,'date-night')+'/'
             dictionary['filetype']=filetype
