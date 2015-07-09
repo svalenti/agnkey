@@ -123,6 +123,11 @@ def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnk
          '<option value="60">60</option>'+\
          '<option value="30">30</option>'
     sss=sss+ '</select></div></td>'
+    sss=sss+'<td width=10> <div class="styled-select"> number of spectra : <select name="nexpfloyds'+'"  width:100px;>'+\
+         '<option  width=10 value="1"> 1</option>'+\
+         '<option  width=10 value="2"> 2</option>'+\
+         '<option  width=10 value="3"> 3</option>'+\
+         '<option  width=10 value="4"> 4</option>'+ '</select></div></td>'
     sss=sss+'</tr>'+\
          '</table>'+\
          '<table>'+\

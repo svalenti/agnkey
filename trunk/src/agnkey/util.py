@@ -1146,7 +1146,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
 
 
 def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,proposal,_airmass=2.0,
-                      _site='',_slit=1.6,_calibration='after'):
+                      _site='',_slit=1.6,_calibration='after',nexp = 1):
     ''' This definition will trigger new observations using the API Web Server
         - it takes most of the input by command line
         - some input have a default value (eg telclass,airmass,binx,biny
@@ -1184,7 +1184,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                       "spectra_lamp": "", "ag_mode": "OPTIONAL", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 3, "instrument_name": "2M0-FLOYDS-SCICAM",
-                      "type": "SPECTRUM", "exposure_count": 1, "ag_exp_time": 10.0,
+                      "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 4, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
@@ -1197,7 +1197,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     elif _calibration=='after':
         _molecules= [{"exposure_time": _exp,  "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
-                      "type": "SPECTRUM", "exposure_count": 1, "ag_exp_time": 10.0,
+                      "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 2, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
@@ -1210,7 +1210,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     else:
         _molecules= [{"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
-                      "type": "SPECTRUM", "exposure_count": 1, "ag_exp_time": 10.0,
+                      "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}]
 
     user_request =  {"group_id":_name,

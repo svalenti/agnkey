@@ -5,7 +5,7 @@ from socket import gethostname, gethostbyname,gethostname
 ip = gethostbyname(gethostname()) 
 hostname=gethostname()
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',\
                 'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
                 'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu',\
                 'valenti-MacBook-Pro-2.local']:
@@ -92,6 +92,9 @@ else:                        _access=''
     ##########   expfloyds  #########
 if form.getlist('expfloyds'): _expfloyds=form.getlist('expfloyds')[0]
 else:                        _expfloyds=''
+    ##########   nexpfloyds  #########
+if form.getlist('nexpfloyds'): _nexpfloyds = form.getlist('nexpfloyds')[0]
+else:                        _nexpfloyds = 1
     ##########   slit  #########
 if form.getlist('slit'): _slit=form.getlist('slit')[0]
 else:                        _slit=''
@@ -434,7 +437,7 @@ elif _type=='triggerfloyds':
 ############################################################
 #
     for mm in range(0,len(utstart)):
-        logfile=agnkey.util.sendfloydstrigger(str(SN),_expfloyds,str(SN_RA),str(SN_DEC),str(utstart[mm]),str(utend[mm]),_user0,passwd,_proposal,str(_airmass),_site,_slit,'after')
+        logfile=agnkey.util.sendfloydstrigger(str(SN),_expfloyds,str(SN_RA),str(SN_DEC),str(utstart[mm]),str(utend[mm]),_user0,passwd,_proposal,str(_airmass),_site,_slit,'after', _nexpfloyds )
 #
         line00= line00+'<p> '+logfile+' '+str(_targid)+' </p>'
         _nexp2='1'
