@@ -9,7 +9,7 @@ if host in ['deneb']:
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',
+elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2','papc-astro-2.st-and.ac.uk',
               'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
               'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu','dhcp43028.physics.ucdavis.edu']:
    host = 'SVMAC'

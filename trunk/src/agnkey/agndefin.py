@@ -170,7 +170,6 @@ def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnk
 
 ################################################################################
 def visibility(_ra0,_dec0,_plot=True,xx='300',yy='200'):
-#def visibility(_ra0,_dec0,_plot=True):
   from datetime import datetime, timedelta
   import matplotlib
   from matplotlib.dates import DateFormatter, MinuteLocator
@@ -203,8 +202,6 @@ def visibility(_ra0,_dec0,_plot=True,xx='300',yy='200'):
     plt.figure(num=1, figsize=(10, 7))     
     plt.clf()
     ax=plt.axes([.1,.25,.6,.7])
-#    plt.ion() 
-#    fig, ax = plt.subplots() 
     ax.plot([utnow,utnow],[0.1,90],'r--',label='Now')
 
   ii=0
@@ -296,9 +293,6 @@ def visibility(_ra0,_dec0,_plot=True,xx='300',yy='200'):
     html = '<img width="'+xx+'" height="'+yy+'" alt="sample" src="data:image/png;base64,{0}">'.format(data_uri)
     return html
 
-#    plt.show()
-#  return dates,altitude
-
 ################################################################################
 def visibilityiair(_ra0,_dec0,_plot=True,xx='300',yy='200'):
   from datetime import datetime, timedelta
@@ -333,8 +327,6 @@ def visibilityiair(_ra0,_dec0,_plot=True,xx='300',yy='200'):
     plt.figure(num=1, figsize=(float(xx)/50, float(yy)/50))     
     plt.clf()
     ax=plt.axes([.1,.25,.6,.7])
-#    plt.ion() 
-#    fig, ax = plt.subplots() 
     ax.plot([utnow,utnow],[0.1,90],'r--',label='Now')
 
   ii=0
@@ -432,8 +424,6 @@ def visibilityiair(_ra0,_dec0,_plot=True,xx='300',yy='200'):
     html = '<img width="'+xx+'" height="'+yy+'" alt="sample" src="data:image/png;base64,{0}">'.format(data_uri)
     return html
 
-#    plt.show()
-#  return dates,altitude
 
 
 ##############################
