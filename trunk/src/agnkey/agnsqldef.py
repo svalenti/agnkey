@@ -106,7 +106,7 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"<="+"'"+value2+"' and "+column+">="+"'"+value1+"'")
          else:
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"="+"'"+value1+"'")
-      elif telescope in ['lsc','elp','cpt','coj','1m0','kb','fts','ftn','fl']:
+      elif telescope in ['lsc','elp','cpt','coj','1m0','kb','fts','ftn','fl','fs']:
          if value2:
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"<="+"'"+value2+"' and "+column+">="+"'"+value1+"' and namefile like '%"+telescope+"%'")
          else:

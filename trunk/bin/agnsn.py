@@ -132,10 +132,13 @@ if __name__ == "__main__":
                     pixelscale = agnkey.util.readkey3(hdr2, 'CCDSCALE')
 
                 if _instrument in ['fs01', 'fs02', 'fs03', 'em03', 'em01']:
-                    fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / (
-                    pixelscale * agnkey.util.readkey3(hdr2, 'CCDXBIN'))
-                else:
-                    fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / pixelscale
+                    if 'CCDXBIN' in hdr2:
+                        fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / (pixelscale * agnkey.util.readkey3(hdr2, 'CCDXBIN'))
+                    elif 'CCDSUM' in hdr2:
+                        fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / (
+                        pixelscale * int(string.split(agnkey.util.readkey3(hdr2, 'CCDSUM'))[0]))
+                    else:
+                        fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / (pixelscale)
                 if not apco0:
                     print '\n### warning: apco not found'
                     apco0 = 0

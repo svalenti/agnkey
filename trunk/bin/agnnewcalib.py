@@ -189,28 +189,34 @@ if __name__ == "__main__":
                     pass
             print 'use catalogue from user' + _catalogue
         else:
+            _cat = ''
+            print 'no catalog provided '
             if _filter in ['u', 'g', 'r', 'i', 'z']:
                 _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/sloan/' + _object + '*')
                 if _catalogue:
+                    print 'use catalogue from archive for object ' + str(_object)
                     _sloan = agnkey.agnastrodef.readtxt(_catalogue[0])
                     for _id in _sloan:
                         try:
                             _sloan[_id] = np.array(_sloan[_id], float)
                         except:
                             pass
-
-                    print 'use catalogue from archive for object ' + str(_object)
-                else:
-                    _sloan = ''
-                if not _sloan:
-                    _sloan = vizq(_ra0, _dec0, 'sdss7', 20)
-
-                if _sloan:
                     _cat = _sloan
                 else:
-                    if _filter in ['g', 'r', 'i']:
-                        _apass = vizq(_ra0, _dec0, 'apass', 20)
-                        if _apass:   _cat = _apass
+                    _sloan = vizq(_ra0, _dec0, 'sdss7', 20)
+                    if _sloan['id'].size == 0:
+                        print 'sloan catalog NOT found'
+                        if _filter in ['g', 'r', 'i']:
+                            _apass = vizq(_ra0, _dec0, 'apass', 20)
+                            if _apass['id'].size == 0:
+                                print 'apass catalog NOT found'
+                            else:
+                                print 'apass catalog found with vizq'
+                                _cat = _apass
+                    else:
+                        print 'sloan catalog found with vizq'
+                        _cat = _sloan
+
             elif _filter in ['U', 'B', 'V', 'R', 'I']:
                 _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _object + '*')
                 if _catalogue:
@@ -221,7 +227,6 @@ if __name__ == "__main__":
                             _landolt[_id] = np.array(_landolt[_id], float)
                         except:
                             pass
-
                 else:
                     _landolt = ''
                 if not _landolt:
@@ -265,7 +270,6 @@ if __name__ == "__main__":
                 _show = False
 
             data2, std2, ZZ2 = agnkey.agnabsphotdef.zeronew(ZZ2, maxiter=10, nn=2, verbose=_verbose, show=_show)
-            print 'here'
 ############################       compute zero point with aperture 3
             xx3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
@@ -277,7 +281,6 @@ if __name__ == "__main__":
                                 np.array(_cat[_filter + 'err'])[pos1])
             ZZ3 = np.array(xx3 - yy3)
             data3, std3, ZZ3 = agnkey.agnabsphotdef.zeronew(ZZ3, maxiter=10, nn=2, verbose=_verbose, show=_show)
-            print 'here'
 ############################       compute zero point with aperture 4
             xx4 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
@@ -535,7 +538,6 @@ if __name__ == "__main__":
             else:
                 print 'ra and dec not defined'
 #            raw_input('go on')
-
 
             #'appmagap1':[float(mag1)+ZZ0,''],'appmagap2':[float(mag2)+ZZ0,''],'appmagap3':[float(mag3)+ZZ0,''],\
             #'dappmagap1':[float(dmag1),''],'dappmagap2':[float(dmag2),''],'dappmagap3':[float(dmag3),''],\

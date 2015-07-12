@@ -107,7 +107,7 @@ if __name__ == "__main__":
     _bad = option.bad
     if _normalize not in ['i', 't']:
         sys.argv.append('--help')
-    if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb', 'fl']:
+    if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb', 'fl','fs']:
         sys.argv.append('--help')
     if option.force == None:
         _redo = False
