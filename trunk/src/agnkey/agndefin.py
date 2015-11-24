@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/dark/usr/anaconda/bin/python
+#/usr/bin/env python
 import sys,os,cgi,string,glob
 
 #sys.path.append( '/Users/svalenti/Sites/lib/python2.7/site-packages')
@@ -706,6 +707,10 @@ def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
           elif agnkey.util.host=='deneb':
               directory='/home/cv21/AGNKEY_www/AGNKEY/spectra/'+_date+'_'+_tel
               directory1=re.sub('/home/cv21/AGNKEY_www/','../',directory)
+          elif agnkey.util.host=='dark':
+              directory='/home/valenti/AGNKEY/spectra/'+_date+'_'+_tel
+              directory1=re.sub('/home/valenti/','../',directory)
+
 
           dictionary['directory']=directory+'/'
           dictionary['namefile']=_output

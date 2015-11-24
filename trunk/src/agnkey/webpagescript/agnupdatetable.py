@@ -1,8 +1,12 @@
-#!/usr/bin/env python 
-    
+#!/dark/usr/anaconda/bin/python                                                                                                                               
+#/usr/bin/env python                                                                                                                                          
+
 import sys,os,cgi,string,glob,re
-from socket import gethostname, gethostbyname,gethostname
-ip = gethostbyname(gethostname()) 
+os.environ['HOME']='../tmp/'
+
+from socket import gethostname, gethostbyname
+ip = gethostbyname(gethostname())
+import urllib,urllib2
 hostname=gethostname()
 
 if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',\
@@ -10,9 +14,13 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
                 'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu',\
                 'valenti-MacBook-Pro-2.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+    location='SV'
+elif hostname in ['dark']:
+    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    location='SV'
 else:
+    location='deneb'
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
-
 
 os.environ['HOME']='../tmp/'
 import agnkey

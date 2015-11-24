@@ -1,4 +1,5 @@
-#!/usr/bin/env python                      
+#!/dark/usr/anaconda/bin/python
+#/usr/bin/env python                      
 
 import sys,os,cgi,string,glob
 os.environ['HOME']='../tmp/'
@@ -14,6 +15,9 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
                 'valenti-MacBook-Pro-2.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
+elif hostname in ['dark']:
+    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    location='dark'
 else:
     location='deneb'
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
@@ -43,10 +47,16 @@ hostname=gethostname()
 base_url=hostname
 #dhcp43019.physics.ucdavis.edu
 
+
 try:
-    os.system('rm ../tmp/*.txt')
-    os.system('rm ../tmp/*.png')
-except: pass
+    txt = glob.glob('../tmp/*.txt')
+    if len(txt):
+        os.system('rm ../tmp/*.txt')
+    png = glob.glob('../tmp/*.png')
+    if len(png):
+        os.system('rm ../tmp/*.png')
+except: 
+    pass
 
 #############################################################
 
@@ -484,12 +494,12 @@ print '''
 <title>AGNKEY</title>
 <base href='%s'>
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,800,300,600,400italic,300italic' rel='stylesheet' type='text/css'>
-<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../flot/excanvas.min.js"></script><![endif]-->
-<script language="javascript" type="text/javascript" src="../flot/jquery.js"></script>
-<script language="javascript" type="text/javascript" src="../flot/jquery.flot.js"></script>
-<script language="javascript" type="text/javascript" src="../flot/jquery.flot.errorbars.js"></script>
-<script language="javascript" type="text/javascript" src="../flot/jquery.flot.selection.js"></script>
-<script language="javascript" type="text/javascript" src="../flot/jquery.flot.navigate.js"></script>
+<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="../../flot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="../../flot/jquery.js"></script>
+<script language="javascript" type="text/javascript" src="../../flot/jquery.flot.js"></script>
+<script language="javascript" type="text/javascript" src="../../flot/jquery.flot.errorbars.js"></script>
+<script language="javascript" type="text/javascript" src="../../flot/jquery.flot.selection.js"></script>
+<script language="javascript" type="text/javascript" src="../../flot/jquery.flot.navigate.js"></script>
 <script language="javascript" type="text/javascript">
   function loadIframe(obj) {
     document.getElementById('div_loadinggif').style.display = "none";
@@ -639,12 +649,14 @@ else:
     wwimages=[]
 
 #############################  png files
+#print agnkey.util.workingdirectory,ll0['namefile'][0],ll0['wdirectory'][0],base_url,hostname
+#print re.sub(agnkey.util.workingdirectory,'',ll0['wdirectory'][0])+re.sub('.fits','.png',ll0['namefile'][0])
 if len(wwimages)>0:
-   listpng=array(['/agnecho/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+re.sub('.fits','.png',v) for k,v in  zip(ll0['wdirectory'],ll0['namefile'])])[wwimages]
+   listpng=array(['../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+re.sub('.fits','.png',v) for k,v in  zip(ll0['wdirectory'],ll0['namefile'])])[wwimages]
 else:  listpng=[]
 
 if len(lista):
-    llimage=['wget --user='+str(_user)+' --password=xxxx '+'http://deneb.st-and.ac.uk/agnecho/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
+    llimage=['wget --user='+str(_user)+' --password=xxxx '+'http://dark.physics.ucdavis.edu/~valenti/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
 else: llimage=[]
 
 webp=''
@@ -727,6 +739,9 @@ if ll22e:
       if location=='deneb':
           directory=re.sub(agnkey.util.workingdirectory,'http://'+base_url+'/AGNKEY/',ll22e['directory'][i])
           directory2='../AGNKEY/'+re.sub('/home/cv21/AGNKEY_www/AGNKEY/','',ll22e['directory'][i])
+      elif location=='dark':
+          directory=re.sub(agnkey.util.workingdirectory,'http://dark.physics.ucdavis.edu/~valenti/AGNKEY/',ll22e['directory'][i])
+          directory2='../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll22e['directory'][i])
       else:
           directory='../AGNKEY/'+re.sub('/Users/svalenti/redu2/AGNKEY/','',ll22e['directory'][i])
           directory2='../AGNKEY/'+re.sub('/Users/svalenti/redu2/AGNKEY/','',ll22e['directory'][i])

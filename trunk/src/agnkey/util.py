@@ -17,6 +17,12 @@ elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','val
    execdirectory = '/Users/svalenti/bin/'
    rawdata = '/archive/engineering/'
    realpass = 'configure'
+elif host in ['dark']:
+   host = 'dark'
+   workingdirectory = '/dark/valenti/AGNKEY/'
+   execdirectory = '/home/valenti/bin/'
+   rawdata = '/archive/engineering/'
+   realpass = 'configure'
 else:
    sys.exit('system '+str(host)+' not recognize')
 

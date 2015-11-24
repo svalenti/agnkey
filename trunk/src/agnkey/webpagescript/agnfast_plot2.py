@@ -1,16 +1,25 @@
-#!/usr/bin/env python    
+#!/dark/usr/anaconda/bin/python                                                                                                                               
+#/usr/bin/env python                                                                                                                                          
+
 import sys,os,cgi,string,glob
+os.environ['HOME']='../tmp/'
+
 from socket import gethostname, gethostbyname
 ip = gethostbyname(gethostname())
 import urllib,urllib2
 hostname=gethostname()
-os.environ['HOME']='../tmp/'
 
-if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu',\
-                'svalenti-lcogt.local','svalenti-lcogt.lco.gtn',\
-                'valenti-mbp-2.lco.gtn', 'valenti-mbp-2.attlocal.net']:
+if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2',\
+                'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn',\
+                'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu',\
+                'valenti-MacBook-Pro-2.local']:
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
+    location='SV'
+elif hostname in ['dark']:
+    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    location='dark'
 else:
+    location='deneb'
     sys.path.append('/home/cv21/lib/python2.7/site-packages/')
 
 from numpy import array
@@ -28,10 +37,11 @@ directory = form.getlist('directory')
 
 if not SN:
     SN=['ttMrk1048_20140907_None_2014-09-07.fits']
-    directory=['/Users/svalenti/Sites/AGNKEY/test/']
+    directory=['/home/valenti/public_html/AGNKEY/test/']
 
 print "Content-Type: text/html\n"
 print '<html><body>'
+#print str(directory[0])+str(SN[0])
 
 fi=str(directory[0])+str(SN[0])
 
