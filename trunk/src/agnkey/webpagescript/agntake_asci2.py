@@ -16,7 +16,7 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 elif hostname in ['dark']:
-    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    sys.path.append('/dark/hal/lib/python2.7/site-packages/')
     location='dark'
 else:
     location='deneb'

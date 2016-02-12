@@ -16,7 +16,7 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 elif hostname in ['dark']:
-    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    sys.path.append('/dark/hal/lib/python2.7/site-packages/')
     location='SV'
 else:
     location='deneb'
@@ -239,6 +239,13 @@ elif _type=='catalogue':
 
     dictionary1={'targid':int(_targid),'note':str(_key)+' '+str(_note),'dateobs':_date, 'users':_user,'command':'update','tables':'lsc_sn_pos'}
     agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
+
+elif _type=='markasbad':
+    agnkey.agnsqldef.updatevalue('datarawfloyds',_key,_note,_id,connection='agnkey',namefile0='id')
+    print _date,_note,_key,_user,_targid
+    dictionary1={'targid':int(_targid),'note':str(_key)+' '+str(_note),'dateobs':_date, 'users':_user,'command':'update','tables':'lsc_sn_pos'}
+    agnkey.agnsqldef.insert_values(agnkey.agnsqldef.conn,'userslog',dictionary1)
+
     
 elif _type=='catalogue2':
     agnkey.agnsqldef.updatevalue('lsc_sn_pos',_key,_note,_id,connection='agnkey',namefile0='id')
@@ -306,10 +313,12 @@ elif _type=='trigger':
     elif _ntriggers=='8':
         utstart=[datenow,datenow+datetime.timedelta(1),\
                  datenow+datetime.timedelta(2),datenow+datetime.timedelta(3),\
-                 datenow+datetime.timedelta(4),datenow+datetime.timedelta(5)]
+                 datenow+datetime.timedelta(4),datenow+datetime.timedelta(5),\
+                 datenow+datetime.timedelta(6)]
         utend=[datenow+datetime.timedelta(1),datenow+datetime.timedelta(2),\
                datenow+datetime.timedelta(3),datenow+datetime.timedelta(4),\
-               datenow+datetime.timedelta(5),datenow+datetime.timedelta(6)]
+               datenow+datetime.timedelta(5),datenow+datetime.timedelta(6),\
+               datenow+datetime.timedelta(7)]
     elif _ntriggers=='9':
         utstart=[datenow]
         utend=[datenow+datetime.timedelta(.3333)]
@@ -354,6 +363,13 @@ elif _type=='trigger':
                datenow+datetime.timedelta(14),datenow+datetime.timedelta(16),\
                datenow+datetime.timedelta(18),datenow+datetime.timedelta(20),\
                datenow+datetime.timedelta(22),datenow+datetime.timedelta(24)]
+    elif _ntriggers=='15':
+        delta = .33333333
+        utstart = [datenow]
+        utend   = [datenow+datetime.timedelta(delta)]
+        for kk in range(1,21):
+            utstart.append(datenow+datetime.timedelta(delta*kk))
+            utend.append(datenow+datetime.timedelta(delta*(kk+1)))
 
     proposals=agnkey.util.readpass['proposal']
     users=agnkey.util.readpass['users']
@@ -478,6 +494,8 @@ if outputformat=='agnpermission.cgi':
     line ='<form id="myForm" action="agnpermission.cgi" method="post"></form>'
 elif outputformat=='agncatalogue.cgi':
     line='<form id="myForm" action="agncatalogue.cgi" method="post"></form>'
+elif outputformat=='agnmissing.cgi':
+    line='<form id="myForm" action="agnmissing.cgi" method="post"></form>'
 elif outputformat=='agnkeyview.cgi':
     line='<form id="myForm" action="agnkeyview.cgi" method="post">'+\
         '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\

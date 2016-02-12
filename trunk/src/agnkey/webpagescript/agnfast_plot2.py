@@ -16,7 +16,7 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 elif hostname in ['dark']:
-    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    sys.path.append('/dark/hal/lib/python2.7/site-packages/')
     location='dark'
 else:
     location='deneb'
@@ -37,7 +37,7 @@ directory = form.getlist('directory')
 
 if not SN:
     SN=['ttMrk1048_20140907_None_2014-09-07.fits']
-    directory=['/home/valenti/public_html/AGNKEY/test/']
+    directory=['/dark/hal/public_html/AGNKEY/test/']
 
 print "Content-Type: text/html\n"
 print '<html><body>'

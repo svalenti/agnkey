@@ -16,7 +16,7 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 elif hostname in ['dark']:
-    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    sys.path.append('/dark/hal/lib/python2.7/site-packages/')
     location='dark'
 else:
     location='deneb'
@@ -101,6 +101,10 @@ print '<br></br>'
 print '<a href="agnpermission.cgi"> permission </a>'
 print '<br></br>'
 print '<a href="agnupload.cgi"> upload spectrum  </a>'
+print '<br></br>'
+print '<a href="agnmissing.cgi"> Floyds inbox </a>'
+print '<br></br>'
+print '<a href="agnlastobs.cgi"> Last week </a>'
 print '<br></br>'
 print '''</div>'''
 

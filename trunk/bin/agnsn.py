@@ -116,7 +116,9 @@ if __name__ == "__main__":
             if not os.path.exists(psfimage + '.fits'):
                 sys.exit('missing psf file')
 
-            if redo:   skip = 0
+            if redo:   
+                skip = 0
+            ####################################################################################
 
             if skip == 0:
                 iraf.set(stdimage='imt2048')
@@ -139,6 +141,8 @@ if __name__ == "__main__":
                         pixelscale * int(string.split(agnkey.util.readkey3(hdr2, 'CCDSUM'))[0]))
                     else:
                         fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / (pixelscale)
+                else:
+                    fwhm0 = agnkey.util.readkey3(hdr2, 'PSF_FWHM') / pixelscale
                 if not apco0:
                     print '\n### warning: apco not found'
                     apco0 = 0

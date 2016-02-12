@@ -16,7 +16,7 @@ if hostname in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','v
     sys.path.append('/Users/svalenti/lib/python2.7/site-packages/')
     location='SV'
 elif hostname in ['dark']:
-    sys.path.append('/home/valenti/lib/python2.7/site-packages/')
+    sys.path.append('/dark/hal/lib/python2.7/site-packages/')
     location='dark'
 else:
     location='deneb'
@@ -528,7 +528,6 @@ try:
     url=os.environ["REQUEST_URI"] 
 except:
     url='http://deneb.st-and.ac.uk/agnecho/cgi-bin'
-
 print '''
 <div id="container" style="width:1300px">
 <div align="center"  leftmargin="10" id="header" style="background-color:#FFA500;">
@@ -552,6 +551,10 @@ print '<br></br>'
 print '<a href="agnpermission.cgi"> permission  </a>'
 print '<br></br>'
 print '<a href="agnupload.cgi"> upload spectrum  </a>'
+print '<br></br>'
+print '<a href="agnmissing.cgi"> Floyds inbox </a>'
+print '<br></br>'
+print '<a href="agnlastobs.cgi"> Last week </a>'
 print '<br></br>'
 print '<br></br>'
 print '<a href="'+url+'#rawspectra"> raw spectra</a>'
@@ -653,10 +656,11 @@ else:
 #print re.sub(agnkey.util.workingdirectory,'',ll0['wdirectory'][0])+re.sub('.fits','.png',ll0['namefile'][0])
 if len(wwimages)>0:
    listpng=array(['../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+re.sub('.fits','.png',v) for k,v in  zip(ll0['wdirectory'],ll0['namefile'])])[wwimages]
-else:  listpng=[]
+else:  
+    listpng=[]
 
 if len(lista):
-    llimage=['wget --user='+str(_user)+' --password=xxxx '+'http://dark.physics.ucdavis.edu/~valenti/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
+    llimage=['wget --user='+str(_user)+' --password=xxxx '+'http://dark.physics.ucdavis.edu/~hal/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',k)+v for k,v in  zip(ll0['wdirectory'],ll0['namefile'])]
 else: llimage=[]
 
 webp=''
@@ -740,7 +744,7 @@ if ll22e:
           directory=re.sub(agnkey.util.workingdirectory,'http://'+base_url+'/AGNKEY/',ll22e['directory'][i])
           directory2='../AGNKEY/'+re.sub('/home/cv21/AGNKEY_www/AGNKEY/','',ll22e['directory'][i])
       elif location=='dark':
-          directory=re.sub(agnkey.util.workingdirectory,'http://dark.physics.ucdavis.edu/~valenti/AGNKEY/',ll22e['directory'][i])
+          directory=re.sub(agnkey.util.workingdirectory,'http://dark.physics.ucdavis.edu/~hal/AGNKEY/',ll22e['directory'][i])
           directory2='../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll22e['directory'][i])
       else:
           directory='../AGNKEY/'+re.sub('/Users/svalenti/redu2/AGNKEY/','',ll22e['directory'][i])
@@ -793,11 +797,11 @@ if ll2:
     for i in range(0,len(ll2['objname'])):
         obj=ll2['objname'][i]
         tel=ll2['telescope'][i]
-        jjd=ll2['jd'][i]
+        jjd=ll2['mjd'][i]
         ddat[jjd]=ll2['dateobs'][i]
         note[jjd]=ll2['note'][i]
-        imm[jjd]='http://'+base_url+'/AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll2['directory'][i])+'/'+ll2['namefile'][i]
-
+        imm[jjd]='../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll2['directory'][i])+ll2['namefile'][i]
+#        imm[jjd]='../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll22e['directory']
         if jjd not in riga:
             riga[jjd]={}
             coordinate[jjd]=str(ll2['ra0'][i])+' '+str(ll2['dec0'][i])

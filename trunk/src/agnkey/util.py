@@ -27,7 +27,7 @@ else:
    sys.exit('system '+str(host)+' not recognize')
 
 instrument0 = {'sbig' : ['kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
-             'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10'],
+               'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
 
@@ -1301,7 +1301,8 @@ def downloadfloydsraw(JD,username,passwd):
     import string
     import re
     import sys
-    command = ['select * from obslog where tracknumber and filters="floyds" and windowstart >'+str(JD)]
+    import datetime
+    command = ['select * from obslog where tracknumber and windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
     if len(lista) == 0:
         print 'no tracknumber for spectra '
@@ -1313,85 +1314,220 @@ def downloadfloydsraw(JD,username,passwd):
             for jj in lista[0].keys():
                 ll0[jj].append(lista[i][jj])
 
-        for track in ll0['tracknumber']:
-            print track
+        for kk,track in enumerate(ll0['tracknumber']):
             _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-            print _dict
-            if 'state' in _dict.keys(): _status=_dict['state']
-            else:  _status = 'xxxx'
+
+            #################   update status
+            if 'state' in _dict.keys(): 
+                _status=_dict['state']
+                if ll0['status'][kk]!=_status:
+                    print ll0['status'][kk],_status
+                    print 'update status'
+                    agnkey.agnsqldef.updatevalue('obslog', 'status', _status, track,
+                                                 connection='agnkey',namefile0='tracknumber')
+            else:
+                _status = 'NULL'
+
+            #################   update reqnumber
             if 'requests' in _dict.keys():
-               _reqnumber = _dict['requests'].keys()[0]
+                _reqnumber = _dict['requests'].keys()[0]
+                if str(ll0['reqnumber'][kk]).zfill(10)!= _reqnumber:
+                    print str(ll0['reqnumber'][kk]).zfill(10), _reqnumber
+                    print 'update reqnumber'
+                    agnkey.agnsqldef.updatevalue('obslog', 'reqnumber', _reqnumber, track,
+                                                 connection='agnkey',namefile0='tracknumber')
             else:
                _reqnumber = ''
-            if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
-                for ii in  _dict['requests'].keys():
-                    _tracknumber = str(ii).zfill(10)
-                    try:
-                       _date = re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
-                       print _status,_reqnumber
-                       _tarfile = _reqnumber+'_'+str(_date)+'.tar.gz'
-                    except:
-                       _tarfile = ''
-                    directory = agnkey.util.workingdirectory + 'floydsraw/'
-                    if _tracknumber != 'xxxx' and _tarfile:
-                        if not os.path.isfile(directory + _tarfile):
-                            line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
-                               '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
-                                 _tarfile + ' --directory-prefix=' + directory
-                            print line
-                            os.system(line)
-                            if os.path.isfile(directory + _tarfile):
-                               agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
-                                                            connection='agnkey',namefile0='tracknumber')
-                        else:
-                            print 'file already there'
-                    else:   print 'request number not defined'
-            if str(track) == '51565':
-               print _dict
-               raw_input('gogon')
+
+            if ll0['filters'][kk]=='floyds':
+                 ###########   tar file if it is a spectrum 
+                 if ll0['tarfile'][kk]:
+                     print 'tarfile already there: %s ' % (ll0['tarfile'][kk])
+                 else:
+                   print kk,track,_status,_reqnumber
+                   if _reqnumber and _status in ['COMPLETED']:
+                     aa=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(-1)).isoformat()
+                     bb=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(0)).isoformat()
+                     cc=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(1)).isoformat()
+                     aa = re.sub('-','',string.split(aa,'T')[0])
+                     bb = re.sub('-','',string.split(bb,'T')[0])
+                     cc = re.sub('-','',string.split(cc,'T')[0])
+                     directory = agnkey.util.workingdirectory + 'floydsraw/'
+                     dd=[aa,bb,cc]
+                     print track,kk,ll0['tarfile'][kk]
+                     print _reqnumber
+                     print dd
+                     for name in dd:
+                         _tarfile = _reqnumber+'_'+name+'.tar.gz'
+                         if os.path.isfile(directory + _tarfile):                        
+                                 print 'file  %s already there' % (_tarfile)
+                                 print 'UPDATE'
+                                 agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
+                                                              connection='agnkey',namefile0='tracknumber')
+                                 break
+                         else:
+                                 line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
+                                     '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
+                                     _tarfile + ' --directory-prefix=' + directory
+                                 print line      
+                                 os.system(line)
+                                 if os.path.isfile(directory + _tarfile):                        
+                                     print 'file  %s already there' % (_tarfile)
+                                     print 'UPDATE'
+                                     agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
+                                                                  connection='agnkey',namefile0='tracknumber')
+                                     break
+
+                                
+
+############################################################################
+
+#def downloadfloydsraw(JD,username,passwd):
+#    import agnkey
+#    import os
+#    import string
+#    import re
+#    import sys
+#    command = ['select * from obslog where tracknumber and filters="floyds" and windowstart >'+str(JD)]
+#    lista=agnkey.agnsqldef.query(command)
+#    if len(lista) == 0:
+#        print 'no tracknumber for spectra '
+#    else:
+#        ll0={}
+#        for jj in lista[0].keys():
+#            ll0[jj] = []
+#        for i in range(0,len(lista)):
+#            for jj in lista[0].keys():
+#                ll0[jj].append(lista[i][jj])
+#
+#        for track in ll0['tracknumber']:
+#            print track
+#            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
+#            print _dict
+#            if 'state' in _dict.keys(): _status=_dict['state']
+#            else:  _status = 'xxxx'
+#            if 'requests' in _dict.keys():
+#               _reqnumber = _dict['requests'].keys()[0]
+#            else:
+#               _reqnumber = ''
+#            if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
+#                for ii in  _dict['requests'].keys():
+#                    _tracknumber = str(ii).zfill(10)
+#                    try:
+#                       _date = re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
+#                       print _status,_reqnumber
+#                       _tarfile = _reqnumber+'_'+str(_date)+'.tar.gz'
+#                    except:
+#                       _tarfile = ''
+#                    directory = agnkey.util.workingdirectory + 'floydsraw/'
+#                    if _tracknumber != 'xxxx' and _tarfile:
+#                        if not os.path.isfile(directory + _tarfile):
+#                            line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
+#                               '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
+#                                 _tarfile + ' --directory-prefix=' + directory
+#                            print line
+#                            os.system(line)
+#                            if os.path.isfile(directory + _tarfile):
+#                               agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
+#                                                            connection='agnkey',namefile0='tracknumber')
+#                        else:
+#                            print 'file already there'
+#                    else:   print 'request number not defined'
+#            if str(track) == '51565':
+#               print _dict
+#               raw_input('gogon')
 ##########################################################################################
+
 
 def makecatalogue(imglist):
     import pyfits
     import agnkey
-
-    filters = {}
-    dicti = {}
+    from numpy import array, zeros
+    filters={}
+    dicti={}
     for img in imglist:
         t = pyfits.open(img)
         tbdata = t[1].data
-        hdr1 = t[0].header
-        _filter = agnkey.util.readkey3(hdr1, 'filter')
-        _exptime = agnkey.util.readkey3(hdr1, 'exptime')
-        _airmass = agnkey.util.readkey3(hdr1, 'airmass')
-        _telescope = agnkey.util.readkey3(hdr1, 'telescop')
-        _psfmag1 = agnkey.util.readkey3(hdr1, 'PSFMAG1')
-        _psfdmag1 = agnkey.util.readkey3(hdr1, 'PSFDMAG1')
-        _apmag1 = agnkey.util.readkey3(hdr1, 'APMAG1')
-        print img
-        print _filter
-        print _psfmag1
-        print _apmag1
-        if _filter not in dicti:
-            dicti[_filter] = {}
-        if img not in dicti[_filter]:
-            dicti[_filter][img] = {}
+        hdr1=t[0].header
+        hdr2=t[1].header
+        _filter=agnkey.util.readkey3(hdr1,'filter')
+        _exptime=agnkey.util.readkey3(hdr1,'exptime')
+        _airmass=agnkey.util.readkey3(hdr1,'airmass')
+        _telescope=agnkey.util.readkey3(hdr1,'telescop')
+        if _filter not in dicti: dicti[_filter]={}
+        if img not in dicti[_filter]: dicti[_filter][img]={}
         for jj in hdr1:
-            if jj[0:2] == 'ZP':
-                dicti[_filter][img][jj] = agnkey.util.readkey3(hdr1, jj)
-        dicti[_filter][img]['JD'] = agnkey.util.readkey3(hdr1, 'JD')
-        dicti[_filter][img]['exptime'] = _exptime
-        dicti[_filter][img]['airmass'] = _airmass
-        dicti[_filter][img]['telescope'] = _telescope
-        try:
-            dicti[_filter][img]['PSFMAG1'] = float(_psfmag1)
-            dicti[_filter][img]['APMAG1'] = float(_apmag1)
-            dicti[_filter][img]['PSFDMAG1'] = float(_psfdmag1)
-        except:
-            dicti[_filter][img]['PSFMAG1'] = 9999.
-            dicti[_filter][img]['APMAG1'] = 9999.
-            dicti[_filter][img]['PSFDMAG1'] = 0.0
+            if jj[0:2]=='ZP':
+                dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
+
+#######################
+#       early data may have JD instead of mjd in the fits table
+#
+        if 'MJD' in hdr1.keys():
+              dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'MJD')
+        else:
+              dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'JD')
+        dicti[_filter][img]['JD']=dicti[_filter][img]['mjd']
+#######################
+
+        dicti[_filter][img]['exptime']=_exptime
+        dicti[_filter][img]['airmass']=_airmass
+        dicti[_filter][img]['telescope']=_telescope
+        
+        for col in tbdata.columns.names:
+            dicti[_filter][img][col]=tbdata.field(col)
+        if 'ra0' not in tbdata.columns.names:
+            dicti[_filter][img]['ra0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+            dicti[_filter][img]['dec0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
+            for i in range(0,len(dicti[_filter][img]['ra'])):
+                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
     return dicti
+
+######################################################################################################
+
+#def makecatalogue(imglist):
+#    import pyfits
+#    import agnkey
+#    filters = {}
+#    dicti = {}
+#    for img in imglist:
+#        t = pyfits.open(img)
+#        tbdata = t[1].data
+#        hdr1 = t[0].header
+#        _filter = agnkey.util.readkey3(hdr1, 'filter')
+#        _exptime = agnkey.util.readkey3(hdr1, 'exptime')
+#        _airmass = agnkey.util.readkey3(hdr1, 'airmass')
+#        _telescope = agnkey.util.readkey3(hdr1, 'telescop')
+#        _psfmag1 = agnkey.util.readkey3(hdr1, 'PSFMAG1')
+#        _psfdmag1 = agnkey.util.readkey3(hdr1, 'PSFDMAG1')
+#        _apmag1 = agnkey.util.readkey3(hdr1, 'APMAG1')
+#        print img
+#        print _filter
+#        print _psfmag1
+#        print _apmag1
+#        if _filter not in dicti:
+#            dicti[_filter] = {}
+#        if img not in dicti[_filter]:
+#            dicti[_filter][img] = {}
+#        for jj in hdr1:
+#            if jj[0:2] == 'ZP':
+#                dicti[_filter][img][jj] = agnkey.util.readkey3(hdr1, jj)
+#        dicti[_filter][img]['JD'] = agnkey.util.readkey3(hdr1, 'JD')
+#        dicti[_filter][img]['exptime'] = _exptime
+#        dicti[_filter][img]['airmass'] = _airmass
+#        dicti[_filter][img]['telescope'] = _telescope
+#        try:
+#            dicti[_filter][img]['PSFMAG1'] = float(_psfmag1)
+#            dicti[_filter][img]['APMAG1'] = float(_apmag1)
+#            dicti[_filter][img]['PSFDMAG1'] = float(_psfdmag1)
+#        except:
+#            dicti[_filter][img]['PSFMAG1'] = 9999.
+#            dicti[_filter][img]['APMAG1'] = 9999.
+#            dicti[_filter][img]['PSFDMAG1'] = 0.0
+#    return dicti
 
 ################################################################################
 

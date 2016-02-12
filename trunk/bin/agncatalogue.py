@@ -4,8 +4,10 @@ usage = "%prog image [options] "
 
 import os
 import string
+import numpy as np
 from optparse import OptionParser
 import time
+import re
 import agnkey
 
 if __name__ == "__main__":
@@ -36,7 +38,7 @@ if __name__ == "__main__":
     _exzp = option.exzp
     _interactive = option.interactive
     _color = option.color
-    dicti = agnkey.agnabsphotdef.makecatalogue(lista)
+    dicti = agnkey.util.makecatalogue(lista)
     namemag = {'fit': ['smagf', 'smagerrf'], 'ph': ['magp3', 'merrp3']}
     allfilters = ''
     for fil in dicti:     allfilters = allfilters + filters1[fil]
@@ -45,7 +47,7 @@ if __name__ == "__main__":
 
     if _exzp:
         lista2 = agnkey.util.readlist(_exzp)
-        dicti2 = agnkey.agnabsphotdef.makecatalogue(lista2)
+        dicti2 = agnkey.util.makecatalogue(lista2)
         for _filter2 in dicti2:
             img2 = dicti2[_filter2].keys()[0]
             for jj in dicti2[_filter2][img2].keys():
@@ -102,15 +104,16 @@ if __name__ == "__main__":
                             colorescelto = vv[0].upper()
                 if colorescelto:
                     print 'use ' + _filter + ' with color ' + colorescelto
-                    filtvec = compress(array(colore) == colorescelto, filtvec)
-                    jdvec = compress(array(colore) == colorescelto, jdvec)
-                    secondimage = compress(array(colore) == colorescelto, secondimage)
-                    colore = compress(array(colore) == colorescelto, colore)
+                    filtvec = np.compress(np.array(colore) == colorescelto, filtvec)
+                    jdvec = np.compress(np.array(colore) == colorescelto, jdvec)
+                    secondimage = np.compress(np.array(colore) == colorescelto, secondimage)
+                    colore = np.compress(np.array(colore) == colorescelto, colore)
 
-                dicti[_filter][img]['secondimg'] = secondimage[argmin(jdvec)]  # the closest image
-                dicti[_filter][img]['secondfilt'] = filtvec[argmin(jdvec)]  # the closest image
+                dicti[_filter][img]['secondimg'] = secondimage[np.argmin(jdvec)]  # the closest image
+                dicti[_filter][img]['secondfilt'] = filtvec[np.argmin(jdvec)]  # the closest image
                 _filter2 = dicti[_filter][img]['secondfilt']
-                col = colore[argmin(jdvec)]
+                col = colore[np.argmin(jdvec)]
+                print dicti[_filter][img].keys()
                 ra0 = dicti[_filter][img]['ra0']
                 dec0 = dicti[_filter][img]['dec0']
                 ra = dicti[_filter][img]['ra']
@@ -123,15 +126,15 @@ if __name__ == "__main__":
                     kk = agnkey.sites.extintion('southafrica')
                 elif dicti[_filter][img]['telescope'] in ['ftn']:
                     kk = agnkey.sites.extintion('mauna')
-                elif dicti[_filter][img]['telescope'] in ['1m0-11', 'coj', 'fts']:
+                elif dicti[_filter][img]['telescope'] in ['1m0-03','1m0-11', 'coj', 'fts']:
                     kk = agnkey.sites.extintion('siding')
                 else:
                     print dicti[_filter][img]['telescope']
-                    sys.exit('problem with dicti 1')
+                    #sys.exit('problem with dicti 1')
                 mag0 = dicti[_filter][img][namemag[_typemag][0]] - kk[filters1[_filter]] * dicti[_filter][img][
                     'airmass']
                 dmag0 = dicti[_filter][img][namemag[_typemag][1]]
-
+            
                 # img 2  ###############
                 img2 = dicti[_filter][img]['secondimg']
                 ra1 = dicti[_filter2][img2]['ra0']
@@ -145,7 +148,7 @@ if __name__ == "__main__":
                     kk = agnkey.sites.extintion('southafrica')
                 elif dicti[_filter2][img2]['telescope'] in ['ftn']:
                     kk = agnkey.sites.extintion('mauna')
-                elif dicti[_filter][img]['telescope'] in ['1m0-11', 'coj', 'fts']:
+                elif dicti[_filter2][img2]['telescope'] in ['1m0-03','1m0-11', 'coj', 'fts']:
                     kk = agnkey.sites.extintion('siding')
                 else:
                     print dicti[_filter2][img2]
@@ -161,7 +164,7 @@ if __name__ == "__main__":
                     print img, img2, _filter, _filter2, 2.5 * math.log10(dicti[_filter2][img2]['exptime']), \
                         kk[filters1[_filter2]] * dicti[_filter2][img2]['airmass']
 
-                distvec, pos0, pos1 = agnkey.agnastrodef.crossmatch(array(ra0), array(dec0), array(ra1), array(dec1),
+                distvec, pos0, pos1 = agnkey.agnastrodef.crossmatch(np.array(ra0), np.array(dec0), np.array(ra1), np.array(dec1),
                                                                     10)
                 mag0cut = mag0[pos0]
                 mag1cut = mag1[pos1]
@@ -171,7 +174,7 @@ if __name__ == "__main__":
                 dec0cut = dec0[pos0]
                 racut = ra[pos0]
                 deccut = dec[pos0]
-                ww = asarray([i for i in range(len(mag0cut)) if (abs(float(mag0cut[i])) < 99 and
+                ww = np.asarray([i for i in range(len(mag0cut)) if (abs(float(mag0cut[i])) < 99 and
                                                                  abs(float(mag1cut[i])) < 99    )])
                 if len(ww) > 0:
                     mag0cut, mag1cut, dmag0cut, dmag1cut, ra0cut, dec0cut, racut, deccut = \
@@ -199,7 +202,7 @@ if __name__ == "__main__":
                     DZ2 = 0.0
                     M1, M2 = agnkey.agnabsphotdef.finalmag(Z1, Z2, C1, C2, mag0cut, mag1cut)
                     dc1, dc2, dz1, dz2, dm1, dm2 = agnkey.agnabsphotdef.erroremag(Z1, Z2, M1, M2, C1, C2, 0)
-                    DM11 = sqrt((dm1 * dmag0cut) ** 2 + (dz1 * DZ1) ** 2 + (dm2 * dmag1cut) ** 2 + (dz2 * DZ2) ** 2)
+                    DM11 = np.sqrt((dm1 * dmag0cut) ** 2 + (dz1 * DZ1) ** 2 + (dm2 * dmag1cut) ** 2 + (dz2 * DZ2) ** 2)
 
                     if _interactive:
                         print '\n####  example computation '
@@ -219,7 +222,7 @@ if __name__ == "__main__":
                     DZ1 = 0.0
                     DZ2 = 0.0
                     dc1, dc2, dz1, dz2, dm1, dm2 = agnkey.agnabsphotdef.erroremag(Z1, Z2, mag0cut, mag1cut, C1, C2, 1)
-                    DM22 = sqrt((dm1 * dmag0cut) ** 2 + (dz1 * DZ1) ** 2 + (dm2 * dmag1cut) ** 2 + (dz2 * DZ2) ** 2)
+                    DM22 = np.sqrt((dm1 * dmag0cut) ** 2 + (dz1 * DZ1) ** 2 + (dm2 * dmag1cut) ** 2 + (dz2 * DZ2) ** 2)
 
                     if _interactive:
                         print '\n####  example computation '

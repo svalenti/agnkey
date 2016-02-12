@@ -472,6 +472,7 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
     import sys
     from pyraf import iraf
 
+    iraf.imred(_doprint=0)
     iraf.specred(_doprint=0)
     direc = agnkey.__path__[0]
     import os, string, glob

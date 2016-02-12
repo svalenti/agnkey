@@ -77,7 +77,7 @@ print '<a href="agnupload.cgi"> upload spectrum  </a>'
 print '<br></br>'
 print '<a href="agnmissing.cgi"> Floyds inbox </a>'
 print '<br></br>'
-print '<a href="agnlasobs.cgi"> Last week </a>'
+print '<a href="agnlastobs.cgi"> Last week </a>'
 print '<br></br>'
 print '''</div>'''
 print '''<div  align="center"   id="content" style="margin-left:150px;background-color:FFFFEF;width:1150px;float:left;">'''
@@ -86,32 +86,38 @@ command9=["select groupname from userstab where user='"+str(_user)+"'"]
 bb=agnkey.agnsqldef.query(command9)
 if len(bb)>0:
   if int(bb[0]['groupname'])==1:
-    command9=["select * from lsc_sn_pos where objtype!='STD' and objtype!='test'"]
-    aa=agnkey.agnsqldef.query(command9)
-    print '<table  border="1">'
-    line0=''
-    for key in ['name','redshift','ra','dec','type','targid']:
-      line0=line0+'<td>'+str(key)+'</td>'
-    print '<tr>'+line0+'</tr>'
-    for i in range(0,len(aa)):
-      line=''
-      for key in ['redshift','ra_sn','dec_sn','objtype','targid']:
-        line= line+'<td>'+str(aa[i][key])+'<br>'+agnkey.agndefin.objectinfo(aa[i],_user,key,'agncatalogue.cgi')+'</td>'
-      print '<tr><td>'+aa[i]['name']+'</td>'+line+'</tr>'
-    print '</table>'
+    command = ["select d.directory,d.namefile  from datarawfloyds as d  inner join dataspectraexternal as r on  r.original like  concat('%',left(d.namefile,30),'%') where d.type = 'SPECTRUM' group by d.id"]
+    data = agnkey.agnsqldef.query(command)
+    ll={}
+    for key in data[0]:
+        ll[key] = []
+    for jj in data:
+        for key in jj:
+            ll[key].append(jj[key])
+            
+    command1 = ["select d.id, d.targid, d.directory, d.namefile, d.type, r.name  from datarawfloyds as d  join recobjects as r where d.status is NULL and r.targid=d.targid and d.type ='SPECTRUM'"]
+    data1 = agnkey.agnsqldef.query(command1)
+    ll1={}
+    for key in data1[0]:
+        ll1[key] = []
+    for jj in data1:
+        for key in jj:
+            ll1[key].append(jj[key])
 
-    command9=["select * from lsc_sn_pos where objtype='test'"]
-    aa=agnkey.agnsqldef.query(command9)
+    print '<p> number of FLOYDS spectra %s </p>' %  str(len(ll1['namefile']))
+    print '<p> number of FLOYDS spectra NOT reduced %s </p>' %  str(len(ll1['namefile'])-len(ll['namefile']))
     print '<table  border="1">'
-    line0=''
-    for key in ['name','redshift','ra','dec','type','targid']:
-      line0=line0+'<td>'+str(key)+'</td>'
-    print '<tr>'+line0+'</tr>'
-    for i in range(0,len(aa)):
-      line=''
-      for key in ['redshift','ra_sn','dec_sn','objtype','targid']:
-        line= line+'<td>'+str(aa[i][key])+'<br>'+agnkey.agndefin.objectinfo(aa[i],_user,key,'agncatalogue.cgi')+'</td>'
-      print '<tr><td>'+aa[i]['name']+'</td>'+line+'</tr>'
+    for jj,spectrum in enumerate(ll1['namefile']):
+        line0=''
+        if spectrum not in ll['namefile']:
+            nnn = '../../AGNKEY/'+re.sub(agnkey.util.workingdirectory,'',ll1['directory'][jj])+str(re.sub(".fits",".png",spectrum))
+            jjj=agnkey.agndefin.grafico1(nnn,'50','300')+'</p>'
+            line0=line0+'<td>'+str(ll1['name'][jj])+'</td>'
+            line0=line0+'<td>'+str(spectrum)+'</td>'
+            line0=line0+'<td>'+jjj+'</td>'
+            line0=line0+'<td> '+ agnkey.agndefin.markasbad(str(ll1['id'][jj]),str(ll1['targid'][jj]),_user,'status','agnmissing.cgi')+'</td>'
+            print '<tr>'+line0+'</tr>'
+
     print '</table>'
   else:
     print '<h3> sorry you dont have access to this page <h3>'
