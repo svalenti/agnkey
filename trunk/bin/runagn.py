@@ -196,8 +196,12 @@ if __name__ == "__main__":
     else:
         tt = '  -T ' + _telescope + ' '
     print '\n####  compute  astrometry, when missing '
-    os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
     #  compute astrometry when tim astrometry failed
+    os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
+
+    #  try again or set to bad image
+    os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
+
     print '\n####  compute  psf, when missing '
     os.system('agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
 

@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser.add_option("-c", "--catalogue", dest="catalogue", default='inst', type="str",
                       help='reference catalogue: usnoa2, usnob1, 2mass,sloan,inst(selected by instrument) \t[%default]')
     parser.add_option("-m", "--method", dest="method", default='iraf', type="str",
-                      help='method to query the catalogue: iraf, vizir  \t[%default]')
+                      help='method to query the catalogue: iraf, vizir, astrometry  \t[%default]')
     parser.add_option("-n", "--number1", dest="number1", default=100, type="int",
                       help='number stars iteraction 1 \t [%default]')
     parser.add_option("-N", "--number2", dest="number2", default=100, type="int",
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     option, args = parser.parse_args()
     _method = option.method
-    if _method not in ['iraf', 'vizir']:
+    if _method not in ['iraf', 'vizir','astrometry']:
         sys.argv.append('--help')
     if len(args) < 1:
         sys.argv.append('--help')

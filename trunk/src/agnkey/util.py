@@ -9,7 +9,7 @@ if host in ['deneb']:
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-elif host in ['engs-MacBook-Pro-4.local','valenti-macbook.physics.ucsb.edu','valenti-mbp-2','papc-astro-2.st-and.ac.uk',
+elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2','papc-astro-2.st-and.ac.uk',
               'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
               'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu','dhcp43028.physics.ucdavis.edu']:
    host = 'SVMAC'
@@ -396,6 +396,7 @@ def display_image(img,frame,_z1,_z2,scale,_xcen=0.5,_ycen=0.5,_xsize=1,_ysize=1,
        from pyraf import iraf
        iraf.images(_doprint=0)
        iraf.tv(_doprint=0)
+       iraf.set(stdimage='imt1024')
        import string
        if _z2:
           try:
@@ -1111,13 +1112,14 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                                                     "type": "SIDEREAL"}} ]}]
        }
 
-############################################################################################################
+    #################################################################
 
     json_user_request = json.dumps(user_request)
     params = urllib.urlencode({'username': username ,'password': passwd, 'proposal': proposal, 'request_data' : json_user_request})
 #    conn = httplib.HTTPSConnection("test.lcogt.net")
     conn = httplib.HTTPSConnection("lcogt.net")
-    conn.request("POST", "/observe/service/request/submit", params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    conn.request("POST", "/observe/service/request/submit", params, headers)
     response = conn.getresponse().read()
 
     python_dict = json.loads(response)
@@ -1152,7 +1154,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
 
 
 def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,proposal,_airmass=2.0,
-                      _site='',_slit=1.6,_calibration='after',nexp = 1):
+                      _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs'):
     ''' This definition will trigger new observations using the API Web Server
         - it takes most of the input by command line
         - some input have a default value (eg telclass,airmass,binx,biny
@@ -1183,6 +1185,13 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
        _location = {"telescope_class": "2m0"}
     slitvec={ '1.6': "SLIT_1.6AS", '2.0': "SLIT_2.0AS", '0.9': "SLIT_0.9AS", '6.0': "SLIT_6.0AS", '1.2': "SLIT_1.2AS"}
 
+    if _type == 'wcs':
+       ac_mode =  "WCS"
+       _radius = 0.0 
+    else:
+       ac_mode =  "BRIGHTEST"
+       _radius = 4.0 
+
     if _calibration == 'all':
         _molecules = [{"exposure_time": 20.0, "spectra_slit": slitvec[_slit], "ag_filter": "",
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
@@ -1190,6 +1199,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                       "spectra_lamp": "", "ag_mode": "OPTIONAL", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 3, "instrument_name": "2M0-FLOYDS-SCICAM",
+                      "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
@@ -1203,6 +1213,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     elif _calibration=='after':
         _molecules= [{"exposure_time": _exp,  "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
+                      "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
                      {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
@@ -1216,6 +1227,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     else:
         _molecules= [{"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
                       "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
+                      "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}]
 
@@ -1238,17 +1250,17 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                                                     "name": _name, "coordinate_system": "ICRS", "type": "SIDEREAL",
                                                     "proper_motion_dec": 0.0}  } ]}]}
 
-########################################################
+    ########################################################
     json_user_request = json.dumps(user_request)
     params = urllib.urlencode({'username': username ,'password': passwd, 'proposal': proposal,
                                'request_data' : json_user_request})
-###############################################################################################################
-#                                            triggering at the moment to the test scheduler
-#                                            comment this line and un-comment next line if you want to schedule for real observations
-#    conn = httplib.HTTPSConnection("test.lcogt.net")
+    #######################################################################################
+    #             triggering at the moment to the test scheduler
+    #             comment this line and un-comment next line if you want to schedule for real observations
+    #conn = httplib.HTTPSConnection("test.lcogt.net")
     conn = httplib.HTTPSConnection("lcogt.net")
-################################################################################################################
-    conn.request("POST", "/observe/service/request/submit", params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    conn.request("POST", "/observe/service/request/submit", params, headers)
     response = conn.getresponse().read()
 
     python_dict = json.loads(response)
@@ -1257,8 +1269,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     else:
        tracking_number=str('0')
 
-###################################################################################################
-
+    #######################################################################
     _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
     _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
     input_datesub = JDnow(verbose=False)
@@ -1287,8 +1298,8 @@ def getstatus(username,passwd,tracking_id):
     import json
     params = urllib.urlencode({'username': username ,'password': passwd})
     conn = httplib.HTTPSConnection("lcogt.net")
-    #print "/observe/service/request/get/userrequeststatus/" + tracking_id
-    conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded'}
+    conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params, headers)
     response = conn.getresponse().read()
     python_dict = json.loads(response)
     return python_dict
@@ -1301,8 +1312,10 @@ def downloadfloydsraw(JD,username,passwd):
     import string
     import re
     import sys
+    import glob
     import datetime
-    command = ['select * from obslog where tracknumber and windowstart >'+str(JD)]
+    command = ['select t.*,l.filters  from triggerslog as t join triggers as l where t.triggerid=l.id and t.tracknumber and t.windowstart >'+str(JD)]
+#    command = ['select * from triggerslog where tracknumber and windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
     if len(lista) == 0:
         print 'no tracknumber for spectra '
@@ -1323,7 +1336,7 @@ def downloadfloydsraw(JD,username,passwd):
                 if ll0['status'][kk]!=_status:
                     print ll0['status'][kk],_status
                     print 'update status'
-                    agnkey.agnsqldef.updatevalue('obslog', 'status', _status, track,
+                    agnkey.agnsqldef.updatevalue('triggerslog', 'status', _status, track,
                                                  connection='agnkey',namefile0='tracknumber')
             else:
                 _status = 'NULL'
@@ -1334,7 +1347,7 @@ def downloadfloydsraw(JD,username,passwd):
                 if str(ll0['reqnumber'][kk]).zfill(10)!= _reqnumber:
                     print str(ll0['reqnumber'][kk]).zfill(10), _reqnumber
                     print 'update reqnumber'
-                    agnkey.agnsqldef.updatevalue('obslog', 'reqnumber', _reqnumber, track,
+                    agnkey.agnsqldef.updatevalue('triggerslog', 'reqnumber', _reqnumber, track,
                                                  connection='agnkey',namefile0='tracknumber')
             else:
                _reqnumber = ''
@@ -1365,7 +1378,7 @@ def downloadfloydsraw(JD,username,passwd):
                          if os.path.isfile(directory + _tarfile):                        
                                  print 'file  %s already there' % (_tarfile)
                                  print 'UPDATE'
-                                 agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
+                                 agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
                                                               connection='agnkey',namefile0='tracknumber')
                                  break
                          else:
@@ -1374,12 +1387,42 @@ def downloadfloydsraw(JD,username,passwd):
                                      _tarfile + ' --directory-prefix=' + directory
                                  print line      
                                  os.system(line)
-                                 if os.path.isfile(directory + _tarfile):                        
-                                     print 'file  %s already there' % (_tarfile)
-                                     print 'UPDATE'
-                                     agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
-                                                                  connection='agnkey',namefile0='tracknumber')
-                                     break
+                                 if os.path.isfile(directory + _tarfile):
+                                    ##############   unzip the tar file in floydsraw2    ###########################
+                                    os.chdir('/dark/hal/AGNKEY/tmp/')
+                                    os.system('cp '+directory + _tarfile + ' /dark/hal/AGNKEY/tmp/ ')
+                                    os.system('tar -zxvf '+_tarfile)
+                                    epoch = re.sub('.tar.gz','',string.split(_tarfile,'_')[1])
+
+                                    imglist=glob.glob('ogg*.fits')
+                                    for img in imglist:
+                                       dire = '/dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]
+                                       if not os.path.isdir(dire):
+                                          os.mkdir(dire)
+                                          os.mkdir(dire+'/raw/')
+                                       os.system('mv '+img+\
+                                                 ' /dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]+'/raw/')
+                                    imglist=glob.glob('coj*.fits')
+                                    for img in imglist:
+                                       dire = '/dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]
+                                       if not os.path.isdir(dire):
+                                          os.mkdir(dire)
+                                          os.mkdir(dire+'/raw/')
+                                       os.system('mv '+img+\
+                                                 ' /dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]+'/raw/')
+
+                                    os.system('rm -rf /dark/hal/AGNKEY/tmp/*')
+
+                                    ##### ingest raw data in the database
+                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site ogg')
+                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site coj')
+                                    #########################################################3
+                                    print 'file  %s already there' % (_tarfile)
+                                    print 'UPDATE'
+                                    agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
+                                                                 connection='agnkey',namefile0='tracknumber')
+
+                                    break
 
                                 
 
@@ -1576,3 +1619,8 @@ def makecatalogue2(imglist):
     return dicti
 
 ##########################################################################################
+
+def jd2date(inputjd):
+   import datetime
+   jd0 = 2451544.5 # On Jan 1, 2000 00:00:00
+   return datetime.datetime(2000,01,01,00,00,00)+datetime.timedelta(days=inputjd-jd0)

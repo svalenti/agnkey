@@ -264,10 +264,9 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
     os.system(command)
 
 
-def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalogue='', database='dataredulco'):
+def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalogue='', database='dataredulco',mode='sv'):
     import agnkey
-    import os, string, glob, re  # MySQLdb,
-    # direc=agnkey.__path__[0]
+    import os, string, glob, re
     direc = ''
     for img in imglist:
         status = checkstage(img, 'wcs')
@@ -307,11 +306,16 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
                     _catalogue = []
                 if len(_catalogue) > 0: cc = ' -c ' + re.sub(agnkey.__path__[0] + '/standard/cat/', '', _catalogue[0])
             #               ############################
+            if mode =='sv':
+                command = 'agnastro.py ' + _dir + img + ' ' + rr + ' ' + ii + ' -m  vizir --xshift ' + str(
+                    _xshift) + ' --yshift ' + str(_yshift) + cc  #+' '+ff+' '+cc+' -t '+_type+' '+ss
+                print command
+                os.system(command)
+            elif mode=='astrometry':
+                agnkey.agnastrodef.run_astrometry(_dir + img, True,redo)
+            else:
+                print str(mode)+' not defined'
 
-            command = 'agnastro.py ' + _dir + img + ' ' + rr + ' ' + ii + ' -m  vizir --xshift ' + str(
-                _xshift) + ' --yshift ' + str(_yshift) + cc  #+' '+ff+' '+cc+' -t '+_type+' '+ss
-            print command
-            os.system(command)
         elif status == 0:
             print 'status ' + str(status) + ': WCS stage not done'
         elif status == -1:
@@ -1206,6 +1210,7 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
             _dir = ggg[0]['wdirectory']
             _filter = ggg[0]['filter']
             _exptime = ggg[0]['exptime']
+            iraf.set(stdimage='imt8192')
             if _z1 != None and _z2 != None:
                 iraf.display(_dir + img, 1, fill=True, Stdout=1, zscale='no', zrange='no', z1=_z1, z2=_z2)
             else:
@@ -1370,6 +1375,7 @@ def checkclean(imglist, force=True, database='dataredulco'):
     for img in imglist:
         ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
         _dir = ggg[0]['wdirectory']
+        iraf.set(stdimage='imt8192')
         imgclean = re.sub('.fits', '.clean.fits', img)
         if os.path.isfile(_dir + imgclean):
             iraf.display(_dir + img, 1, fill=True, Stdout=1)
@@ -1413,6 +1419,7 @@ def checkfast(imglist, force=True, database='dataredulco'):
     for img in imglist:
         status = checkstage(img, 'wcs')
         if status >= 0 or force == False:
+            iraf.set(stdimage='imt8192')
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             _dir = ggg[0]['wdirectory']
             iraf.display(_dir + img, 1, fill=True, Stdout=1)
@@ -1533,6 +1540,7 @@ def checkquality(imglist, database='dataredulco'):
             else:
                 _dir = ggg[0]['wdirectory']
                 if os.path.isfile(_dir + img):
+                    iraf.set(stdimage='imt8192')
                     iraf.display(_dir + img, 1, fill=True, Stdout=1)
                     aa = raw_input('>>>good image [y/[n]] ? ')
                     if not aa: aa = 'n'

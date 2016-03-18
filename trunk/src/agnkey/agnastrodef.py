@@ -1291,3 +1291,100 @@ def finewcs(img):
 #        catvec=agnkey.agnastrodef.querycatalogue('2mass',img,'vizir')
 #        vector=[str(k)+' '+str(v) for k,v in  zip(catvec['x'],catvec['y'])]
 #        iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=206,txsize=4)
+######################################################################################################
+
+def run_astrometry(im, clobber=True,redo=False):
+    import agnkey
+    import os
+    import shutil
+    import numpy as np
+    import string
+    print 'astrometry for image ' + str(im)
+    # Run astrometry.net
+    hdr = agnkey.util.readhdr(im)
+    if 'WCSERR' in hdr:
+        _wcserr = hdr['WCSERR']
+    elif 'WCS_ERR' in hdr:
+        _wcserr = hdr['WCS_ERR']
+    else:
+        _wcserr = agnkey.util.readkey3(hdr, 'wcserr')
+
+    done = 0
+    if float(_wcserr) == 0: 
+        done = 1
+    print redo
+    if redo: 
+        done = 0
+    if done:
+        print 'already done'
+    else:
+        ra = agnkey.util.readkey3(hdr,'RA')
+        dec = agnkey.util.readkey3(hdr,'DEC')
+        #    ra = pyfits.getval(im, 'RA')
+        #    dec = pyfits.getval(im, 'DEC')
+        cmd = 'solve-field --crpix-center --no-verify --no-fits2fits --no-tweak -l 30 '
+        cmd += '--backend-config '+ str(agnkey.__path__[0]) + '/standard/astrometry/backend.cfg '
+        cmd += ' --radius 1.0 --ra %s --dec %s --guess-scale ' % (ra, dec)
+        cmd += '--scale-units arcsecperpix --scale-low 0.1 --scale-high .7 '
+        cmd += '--no-plots -N tmpwcs.fits '
+        if clobber: cmd += '--overwrite '
+        cmd += '--solved none --match none --rdls none --wcs none --corr none '
+        cmd += ' --downsample 4 '
+        cmd += '%s' % im
+        print cmd
+        os.system(cmd)
+        basename = im[:-5]
+        if os.path.exists(basename + '.axy'):
+            os.remove(basename + '.axy')
+        else:
+            print 'axy files do not exist'
+        if os.path.exists(basename + '-indx.xyls'):
+            os.remove(basename + '-indx.xyls')
+        if os.path.exists('tmpwcs.fits'):
+            hdrt = agnkey.util.readhdr('tmpwcs.fits')
+            _instrume = agnkey.util.readkey3(hdrt,'instrume')
+            sexvec = agnkey.agnastrodef.sextractor('tmpwcs.fits')
+            xpix,ypix,fw,cl,cm,ell,bkg,fl = sexvec
+            if len(fw)>1:
+                if 'kb' in _instrume:
+                    fwhm = np.median(np.array(fw))*.68*2.35*0.467
+                elif 'fl' in _instrume:
+                    fwhm = np.median(np.array(fw))*.68*2.35*0.467          #  need to check
+                elif 'fs' in _instrume:
+                    fwhm = np.median(np.array(fw))*.68*2.35*0.30
+                elif 'em' in _instrume:
+                    fwhm = np.median(np.array(fw))*.68*2.35*0.278
+                else:
+                    fwhm = 5
+            else:
+                fwhm = 5
+            astrostring = '1  1  1'
+            dictionary = {'ASTROMET': [astrostring, 'rmsx rmsy nstars'],
+                    'PSF_FWHM': [fwhm, 'FHWM (arcsec) - computed with sectractor'],
+                    'CTYPE1'  : [ 'RA---TAN', 'TAN (gnomic) projection'],
+                    'CTYPE2'  : ['DEC--TAN' , 'TAN (gnomic) projection'],
+                    'WCSAXES' : [ hdrt['WCSAXES'] , 'no comment'],
+                    'EQUINOX' : [ hdrt['EQUINOX'] , 'Equatorial coordinates definition (yr)'],
+                    'LONPOLE' : [ hdrt['LONPOLE'] , 'no comment'],
+                    'LATPOLE' : [ hdrt['LATPOLE'] , 'no comment'],
+                    'CRVAL1'  : [ hdrt['CRVAL1']  , 'RA  of reference point'],
+                    'CRVAL2'  : [ hdrt['CRVAL2'] , 'DEC of reference point'],
+                    'CRPIX1'  : [ hdrt['CRPIX1']     , 'X reference pixel'],
+                    'CRPIX2'  : [ hdrt['CRPIX2']     , 'Y reference pixel'],
+                    'CUNIT1'  : ['deg     ' , 'X pixel scale units'],
+                    'CUNIT2'  : ['deg     ' , 'Y pixel scale units'],
+                    'CD1_1'   : [ hdrt['CD1_1'] , 'Transformation matrix'],
+                    'CD1_2'   : [ hdrt['CD1_2'] , 'no comment'],
+                    'CD2_1'   : [ hdrt['CD2_1'] , 'no comment'],
+                    'CD2_2'   : [ hdrt['CD2_2'] , 'no comment'],
+                    'IMAGEW'  : [ hdrt['IMAGEW']  , 'Image width,  in pixels.'],
+                    'IMAGEH'  : [ hdrt['IMAGEH']  , 'Image height, in pixels.']}
+            if 'WCS_ERR' in hdr:
+                dictionary['WCS_ERR'] = [0, '']
+            if 'WCSERR' in hdr:
+                dictionary['WCSERR'] = [0, '']
+            agnkey.util.updateheader(im, 0, dictionary)
+            agnkey.agnsqldef.updatevalue('dataredulco', 'WCS', 0, string.split(im, '/')[-1])
+        else:
+            print 'tmpwcs.fits files do not exist'
+###################################################################

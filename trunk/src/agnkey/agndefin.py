@@ -153,7 +153,7 @@ def triggerfloyds(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnk
          '<option value="5"> 1 in the next 6 days</option>'+\
          '<option value="6"> 2 in the next 6 days </option>'+\
          '<option value="7"> 3 in the next 6 days</option>'+\
-         '<option value="8"> 6 in the next 6 days </option>'+\
+         '<option value="8"> 7 in the next 7 days </option>'+\
          '<option value="9"> 1 observation in the next 8h </option>'+\
          '<option value="10"> 3 observations in the next 12h </option>'+\
          '<option value="11"> 1 observations in the next 1h </option>'+\
@@ -491,6 +491,19 @@ def markasbad(_id,_targid,_user,_key,_form):
         '<input type="submit" value="mark as bad"></form>'
     return line
 
+
+def stopobservation(_id,_targid,_user,_key,_form):
+    line='<form action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
+        '<input type="hidden" name="id" value="'+str(_id)+'">'+\
+        '<input type="hidden" name="key" value="'+str(_key)+'">'+\
+        '<input type="hidden" name="note" value="0">'+\
+        '<input type="hidden" name="targid" value="'+str(_targid)+'">'+\
+        '<input type="hidden" name="user" value="'+str(_user)+'">'+\
+        '<input type="hidden" name="type" value="stopobservation">'+\
+        '<input type="hidden" name="outputformat" value="'+str(_form)+'">'+\
+        '<input type="submit" value="stop observations"></form>'
+    return line
+
 ###################################################################################3
 
 def objectinfo(obj,_user,_key,_form):
@@ -670,14 +683,9 @@ def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
         os.system('tar -xf ../tmp/'+img)
         tar=tarfile.open(img)
         imglist=tarfile.TarFile.getnames(tar)
-#        for img in imglist:
-#            os.system('rm -rf '+img)
-        #tar.extractall()
         tar.close()
     else:
-#        os.system('rm -rf '+img)
         imglist = [img]
-#    print imglist
     note = ''
     for img in imglist:
           note= note + 'input= '+img+'\n'
@@ -832,7 +840,8 @@ def obsin(targid,_days=7):
                 else:
                     _status=''
 #                if _status=='PENDING': _status=''
-
+                _date1 = agnkey.util.jd2date(ll0['windowend'][i])
+                _date0 = agnkey.util.jd2date(ll0['windowstart'][i])
                 if ll0['tarfile'][i]:  
                     _tarfile=ll0['tarfile'][i]
                 else:
@@ -841,19 +850,6 @@ def obsin(targid,_days=7):
                     _reqnumber=ll0['reqnumber'][i]
                 else:
                     _reqnumber=''
-#                if _status and _tarfile and _reqnumber:
-#                    pass
-#                else:
-#                    _dict=agnkey.util.getstatus(username,passwd,str(ll0['tracknumber'][i]).zfill(10))
-#                    if 'state' in _dict.keys(): _status=_dict['state']
-#                    else:  _status='xxxx'
-#                    if 'requests' in _dict.keys(): 
-#                        _reqnumber=_dict['requests'].keys()[0]
-#                    else: 
-#                        _reqnumber=''
-#                    if _status in ['UNSCHEDULABLE','COMPLETED','CANCELED']:
-#                        agnkey.agnsqldef.updatevalue('obslog','status',_status,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-##                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',str(_reqnumber),str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                 if 'floyds' in ll0['filters'][i]:
                   if _reqnumber:
                     if not _tarfile:
@@ -865,21 +861,33 @@ def obsin(targid,_days=7):
                             _tarfile=''
                     if _tarfile:
                         lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
-                            '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
+                              '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+
                     else:
                         lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+#                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+'</td><td>'+str(_date0)+'</td><td>'+\
+
                   else:
                       lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                          str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                            str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                            str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+#                            str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+'</td><td>'+str(_date0)+'</td><td>'+\
                 else:
                     lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                        str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+#                        str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+\
+
 
     if ll1:
         for i in range(0,len(ll1['name'])):
             if float(ll1['tracknumber'][i])>1:
+                _date1 = agnkey.util.jd2date(ll1['windowend'][i])
+                _date0 = agnkey.util.jd2date(ll1['windowstart'][i])
                 if ll1['status'][i]:  
                     _status=ll1['status'][i]
                 else:
@@ -892,41 +900,166 @@ def obsin(targid,_days=7):
                     _reqnumber=ll1['reqnumber'][i]
                 else:
                     _reqnumber=''
-#                if _status and _tarfile and _reqnumber:
-#                    pass
-#                else:
-#                    _dict=agnkey.util.getstatus(username,passwd,str(ll1['tracknumber'][i]).zfill(10))
-#                    if 'state' in _dict.keys(): _status=_dict['state']
-#                    else:  _status='xxxx'
-#                    if 'requests' in _dict.keys(): 
-#                        _reqnumber=_dict['requests'].keys()
-#                    else:
-#                        _reqnumber=''
-#                    if _status in ['UNSCHEDULABLE','COMPLETED']:
-#                        agnkey.agnsqldef.updatevalue('obslog','status',_status,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
-#
-#                    agnkey.agnsqldef.updatevalue('obslog','reqnumber',str(_reqnumber),str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                 if 'floyds' in ll1['filters'][i]:
                    if _reqnumber:
-#                            if not _tarfile:
-#                                try:
-#                                    _date=re.sub('-','',_dict['requests'][str(ii)]['schedule'][0]['frames'][0]['day_obs'])
-#                                    _tarfile=_req_number+'_'+str(_date)+'.tar.gz'
-#                                except: 
-#                                    _tarfile=''
                             if _tarfile:
                                 agnkey.agnsqldef.updatevalue('obslog','tarfile',_tarfile,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                                 lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
-                                    str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+\
-                                    '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+\
+                                      '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                                      #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+
+
                             else:
                                 lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
-                                    str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                                      #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+
                    else:
                        pass
                 else:
-                    lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+str(ll1['windowstart'][i])+\
-                        '</td><td>'+str(ll1['windowend'][i])+'</td><td>'+str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                    lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                    #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+\
+    return lll0,lll1
+
+##########################################################################################
+
+########################################################################################
+def obsin2(targid,_days=7):
+    import agnkey
+    import datetime
+    import time
+    import re
+    def JDnow(datenow='',verbose=False):
+        _JD0=2455927.5
+        if not datenow:
+            datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
+            (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        if verbose: print 'JD= '+str(_JDtoday)
+        return _JDtoday
+
+
+    _JDn=JDnow()
+
+    command='select l.name, l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, g.windowstart, g.windowend, g.tracknumber, '+\
+        'g.reqnumber, g.tarfile, g.status from triggers as o join triggerslog as g join lsc_sn_pos as l '+\
+        'where o.id = g.triggerid and g.windowend > '+str(_JDn)+' and l.targid=o.targid and l.targid="'+str(targid)+'"'
+    command1='select l.name,l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, g.windowstart, g.windowend, g.tracknumber, '+\
+        'g.reqnumber, g.tarfile, g.status from triggers as o join triggerslog as g join lsc_sn_pos as l '+\
+        'where o.id = g.triggerid and g.windowend > '+str(_JDn-float(_days))+'and g.windowend < '+\
+        str(_JDn)+' and l.targid=o.targid and l.targid="'+str(targid)+'"'
+
+    aa=agnkey.agnsqldef.query([command])
+    cc=agnkey.agnsqldef.query([command1])
+    ll0={}
+    if aa:
+        for i in aa[0].keys(): ll0[i]=[]
+        for jj in range(0,len(aa)):
+            for kk in aa[0].keys():
+                ll0[kk].append(aa[jj][kk])
+    ll1={}
+    if cc:
+        for i in cc[0].keys(): ll1[i]=[]
+        for jj in range(0,len(cc)):
+            for kk in cc[0].keys():
+                ll1[kk].append(cc[jj][kk])
+
+    readpass=agnkey.util.readpasswd(agnkey.util.workingdirectory,agnkey.util.realpass)
+    username,passwd=readpass['odinuser'],readpass['odinpasswd']
+    lll0=''
+    lll1=''
+    if ll0:
+        ccc='BGCOLOR="#CCFF66"'
+        for i in range(0,len(ll0['name'])):
+            if float(ll0['tracknumber'][i])>=0:
+                _date1 = agnkey.util.jd2date(ll0['windowend'][i])
+                _date0 = agnkey.util.jd2date(ll0['windowstart'][i])
+                if ll0['status'][i]:  
+                    _status=ll0['status'][i]
+                else:
+                    _status=''
+#                if _status=='PENDING': _status=''
+
+                if ll0['tarfile'][i]:  
+                    _tarfile=ll0['tarfile'][i]
+                else:
+                    _tarfile=''
+                if ll0['reqnumber'][i]:  
+                    _reqnumber=ll0['reqnumber'][i]
+                else:
+                    _reqnumber=''
+                if 'floyds' in ll0['filters'][i]:
+                  if _reqnumber:
+                    if not _tarfile:
+                        try:
+                            _date=re.sub('-','',_dict['requests'][ll0['tracknumber'][i]]['schedule'][0]['frames'][0]['day_obs'])
+                            _tarfile=_reqnumber+'_'+str(_date)+'.tar.gz'
+                            agnkey.agnsqldef.updatevalue('triggerslog','tarfile',_tarfile,str(ll0['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
+                        except:
+                            _tarfile=''
+                    if _tarfile:
+                        lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
+                              '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                              #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
+                    else:
+                        lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+#                              str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
+                  else:
+                      lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                            str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                            str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                            #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
+                else:
+                    lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                          #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
+
+    if ll1:
+        for i in range(0,len(ll1['name'])):
+            if float(ll1['tracknumber'][i])>=0:
+                _date1 = agnkey.util.jd2date(ll1['windowend'][i])
+                _date0 = agnkey.util.jd2date(ll1['windowstart'][i])
+                if ll1['status'][i]:  
+                    _status=ll1['status'][i]
+                else:
+                    _status=''
+                if ll1['tarfile'][i]:  
+                    _tarfile=ll1['tarfile'][i]
+                else:
+                    _tarfile=''
+                if ll1['reqnumber'][i]:  
+                    _reqnumber=ll1['reqnumber'][i]
+                else:
+                    _reqnumber=''
+                if 'floyds' in ll1['filters'][i]:
+                   if _reqnumber:
+                            if _tarfile:
+                                agnkey.agnsqldef.updatevalue('triggerslog','tarfile',_tarfile,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
+                                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+\
+                                      '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
+                                #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+\
+                            else:
+                                lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                                      #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+\
+                   else:
+                       pass
+                else:
+                    lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
+                    #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+\
     return lll0,lll1
 
 ##########################################################################################
@@ -1234,4 +1367,147 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
      maxmag = 0
  return (lcdata, mint, maxt, minmag, maxmag)
 
+
 ########################################################################################################################
+def triggercadence(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
+    sss='<form style="background-color:white" action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
+        '<p> <h3 style="background-color:white"> TRIGER NEW OBSERVATION (ONLY TESTING, NOT READY)  <input type="submit" value="Send"> </h3></p>'+\
+        '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\
+        '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\
+        '<input type="hidden" name="SN_DEC" value="'+str(SN_DEC)+'">'+\
+        '<input type="hidden" name="targid" value="'+str(_targid)+'">'
+    for key in observations:
+        if 'xxx' in key:
+            sss=sss+'<input type="hidden" name="'+str(key)+'" value="'+str(observations[key])+'">'        
+    sss=sss+'<input type="hidden" name="type" value="triggercadence">'+\
+         '<input type="hidden" name="outputformat" value="'+str(_form)+'">'+\
+         '<table>'+\
+         '<tr heigh=10><td> U </td><td> B </td><td> V </td><td> R </td><td> I </td><td> u </td><td> g </td><td> r </td><td> i </td><td> z </td></tr><tr>'
+    for i in 'UBVRIugriz':
+        if i in ['B','V','g','r','i']:
+            sss=sss+'<td heigh=10> <input type="checkbox" name="'+str(i)+'" value="'+str(i)+'" checked></td>'
+        else:
+            sss=sss+'<td> <input type="checkbox" name="'+str(i)+'" value="'+str(i)+'" ></td>'
+    sss=sss+'<td heigh=10 > select filters  </td></tr><tr>'
+    for i in 'UBVRIugriz':
+        sss=sss+ '<td heigh=10><select name="n'+str(i)+'">'
+        sss=sss+ '<option value="2"> 2</option>  <option value="1">1</option> <option value="3">3</option><option value="5">5</option> <option value="10">10</option>'
+        sss=sss+ '</select></td>'
+    sss=sss+ '<td> number of exposure </td></tr><tr>'
+    for i in 'UBVRIugriz':
+        sss=sss+ '<td width=10><div class="styled-select"><select name="exp'+str(i)+'"  width:100px;>'+\
+             '<option  width=10 value="120"> 120</option>'+\
+             '<option value="15">15</option>'+\
+             '<option value="30">30</option>'+\
+             '<option value="45">45</option>'+\
+             '<option value="60">60</option>'+\
+             '<option value="90">90</option>'+\
+             '<option value="120">120</option>'+\
+             '<option value="150">150</option>'+\
+             '<option value="180">180</option>'+\
+             '<option value="200">200</option>'+\
+             '<option value="240">240</option>'+\
+             '<option value="300">300</option>'+\
+             '<option value="360">360</option>'+\
+             '<option value="400">400</option>'+\
+             '<option value="600">600</option>'
+        sss=sss+ '</select></div></td>'
+    sss=sss+ '<td>exposure time </td>'+\
+         '</tr>'+\
+         '</table>'+\
+         '<table>'+\
+         '<tr><td> site: <select name="site">'+\
+         '<option value="any"> any</option>  <option value="lsc">lsc</option>'+\
+         '<option value="elp">elp</option>   <option value="coj">coj</option> <option value="cpt">cpt</option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> cadence [days]: </a>'+\
+         '<input name="cadence" size="4" maxlength="4" type="text" />'+\
+         '<tr><td> airmass limit: </a> <select name="airmass">'+\
+         '<option value=2> 2 </option> '+\
+         '<option value=2.5> 2.5 </option> '+\
+         ' <option value=1.2> 1.2 </option>'+\
+         '<option value=1.5> 1.5 </option>'+\
+         ' <option value=3> 3 </option>'+\
+         ' <option value=4> 4 </option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> proposal: <select name="proposal">'
+    for kk in proposal:
+             sss=sss+'<option value="'+kk+'"> '+kk+' </option> '
+    sss=sss+'</select></td></tr>'+\
+         '<tr><td> instrument  <select name="instrument">'+\
+         '<option value="sbig"> sbig </option>  <option value="sinistro">sinistro</option>'+\
+         '<option value="spectral">spectral</option>'+\
+         '<option value="ONEOF">ONEOF</option>'+\
+         '</table>'+\
+         '</form>'
+    return sss
+
+#################################
+######################################################################################################
+def triggerfloydscadence(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
+    sss='<form style="background-color:white " action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
+        '<p> <h3 style="background-color:white "> TRIGER NEW OBSERVATION (ONLY TESTING, NOT READY)   <input type="submit" value="Send"> </h3></p>'+\
+        '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\
+        '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\
+        '<input type="hidden" name="SN_DEC" value="'+str(SN_DEC)+'">'+\
+        '<input type="hidden" name="targid" value="'+str(_targetid)+'">'
+    for key in observations:
+        if 'xxx' in key:
+            sss=sss+'<input type="hidden" name="'+str(key)+'" value="'+str(observations[key])+'">'        
+    sss=sss+'<input type="hidden" name="type" value="triggerfloydscadence">'+\
+         '<input type="hidden" name="outputformat" value="'+str(_form)+'">'
+    sss=sss+ '<td width=10> <div class="styled-select">exposure time: <select name="expfloyds'+'"  width:100px;>'+\
+         '<option  width=10 value="300"> 300</option>'+\
+         '<option value="600">600</option>'+\
+         '<option value="900">900</option>'+\
+         '<option value="1200">1200</option>'+\
+         '<option value="1500">1500</option>'+\
+         '<option value="1800">1800</option>'+\
+         '<option value="2700">2700</option>'+\
+         '<option value="3600">3600</option>'+\
+         '<option value="60">60</option>'+\
+         '<option value="30">30</option>'
+    sss=sss+ '</select></div></td>'
+    sss=sss+'<td width=10> <div class="styled-select"> number of spectra : <select name="nexpfloyds'+'"  width:100px;>'+\
+         '<option  width=10 value="1"> 1</option>'+\
+         '<option  width=10 value="2"> 2</option>'+\
+         '<option  width=10 value="3"> 3</option>'+\
+         '<option  width=10 value="4"> 4</option>'+ '</select></div></td>'
+    sss=sss+'</tr>'+\
+         '</table>'+\
+         '<table>'+\
+         '<tr><td> site: <select name="site">'+\
+         '<option value="any"> any</option>'+\
+         '<option value="ogg">FTN</option>'+\
+         '<option value="coj">FTS</option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> slit: <select name="slit">'+\
+         '<option value="default">default </option>'+\
+         '<option value="1.2">1.2</option>'+\
+         '<option value="1.6">1.6</option>'+\
+         '<option value="2.0">2.0</option>'+\
+         '<option value="6.0">6.0</option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> cadence [days]: </a>'+\
+         '<input name="cadence" size="4" maxlength="4" type="text" />'+\
+         '<tr><td> airmass limit: </a> <select name="airmass">'+\
+         '<option value=2> 2 </option>'+\
+         '<option value=1.2> 1.2 </option>'+\
+         '<option value=1.5> 1.5 </option>'+\
+         '<option value=2.5> 2.5 </option>'+\
+         ' <option value=3> 3 </option>'+\
+         ' <option value=4> 4 </option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> mode: </a> <select name="acmode">'+\
+         '<option value="wcs" > wcs </option>'+\
+         ' <option value="brightest" > brightest </option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> proposal: <select name="proposal">'
+    for kk in proposal:
+             sss=sss+'<option value="'+kk+'"> '+kk+' </option> '
+    sss=sss+'</select></td></tr>'+\
+         '</table>'+\
+         '</form>'
+    return sss         
+
+################################################################################

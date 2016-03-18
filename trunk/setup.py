@@ -69,7 +69,7 @@ setup(
     requires = ['numpy','pyfits','pyraf','matplotlib','MySQLdb','ephem'],
     packages = ['agnkey'],
     package_dir = {'':'src'},
-    package_data = {'agnkey' : ["standard/astrometry/*cat", "standard/*txt", "standard/stdlist/*txt",
+    package_data = {'agnkey' : ["standard/astrometry/*cat","standard/astrometry/*cfg", "standard/*txt", "standard/stdlist/*txt",
                                  "standard/cat/*dat", "standard/cat/*cat", 'webpagescript/*',
                                  "standard/cat/sloan/*cat", "standard/cat/landolt/*cat",
                                  "standard/cat/sloan/*cat", "standard/cat/apass/*cat",

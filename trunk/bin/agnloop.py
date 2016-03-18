@@ -77,6 +77,8 @@ if __name__ == "__main__":
                       help='x shift in the guess astrometry \t [%default]')
     parser.add_option("--fwhm", dest="fwhm", default='', type="str",
                       help='fwhm (in pixel)  \t [%default]')
+    parser.add_option("--mode", dest="mode", default='sv', type="str",
+                      help='mode for wcs (sv,astrometry)  \t [%default]')
     parser.add_option("--combine", dest="combine", default=1e-10, type="float",
                       help='range to combine (in days)  \t [%default]')
     parser.add_option("--datamax", dest="dmax", default=51000, type="float",
@@ -103,6 +105,7 @@ if __name__ == "__main__":
     _telescope = option.telescope
     _normalize = option.normalize
     _type = option.type
+    _mode = option.mode
     _stage = option.stage
     _bad = option.bad
     if _normalize not in ['i', 't']:
@@ -266,7 +269,7 @@ if __name__ == "__main__":
                 agnkey.agnloopdef.run_fit(ll['namefile'], _ras, _decs, _xord, _yord, _bkg, _size, _recenter, _ref,
                                           _interactive, _show, _redo, _dmax)
             elif _stage == 'wcs':
-                agnkey.agnloopdef.run_wcs(ll['namefile'], _interactive, _redo, _xshift, _yshift, _catalogue)
+                agnkey.agnloopdef.run_wcs(ll['namefile'], _interactive, _redo, _xshift, _yshift, _catalogue,'dataredulco',_mode)
             elif _stage == 'makestamp':
                 agnkey.agnloopdef.makestamp(ll['namefile'], 'dataredulco', _z1, _z2, _interactive, _redo, _output)
             elif _stage == 'apmag':
