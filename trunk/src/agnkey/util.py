@@ -1255,32 +1255,34 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     response = conn.getresponse().read()
 
     python_dict = json.loads(response)
-    if 'id' in python_dict:
-       tracking_number = str(python_dict['id'])
-    else:
-       tracking_number = str('0')
-
-    _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
-    _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
-    input_datesub = JDnow(verbose=False)
-    input_str_smjd = JDnow(_start,verbose=False)
-    input_str_emjd = JDnow(_end,verbose=False)
-    _seeing = 9999
-    _sky = 9999
-    _instrument = telclass
-    priority = 1
 
     try:
-       lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd) + '   ' + str(_site)+\
-                 ' ' + ','.join(filtervec)+' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
-                 str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' '+str(_seeing) + ' ' + str(_sky) + \
-                 ' '+str(_instrument) + ' '+str(priority) + ' '+str(tracking_number) + '  0'
+       if 'id' in python_dict:
+          tracking_number = str(python_dict['id'])
+       else:
+          tracking_number = str('0')
+       _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+       _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+       input_datesub = JDnow(verbose=False)
+       input_str_smjd = JDnow(_start,verbose=False)
+       input_str_emjd = JDnow(_end,verbose=False)
+       _seeing = 9999
+       _sky = 9999
+       _instrument = telclass
+       priority = 1
+       try:
+          lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd) + '   ' + str(_site)+\
+                    ' ' + ','.join(filtervec)+' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                    str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' '+str(_seeing) + ' ' + str(_sky) + \
+                    ' '+str(_instrument) + ' '+str(priority) + ' '+str(tracking_number) + '  0'
+       except:
+          lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' ' + str(input_str_emjd) + '   ' + str(_site) + \
+                    ' ' + ','.join(filtervec) + ' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                    str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' ' + str(_seeing) + ' ' + str(_sky) + \
+                    ' ' + str(_instrument) + ' ' + str(priority) + ' 0  0'
+       return lineout
     except:
-       lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' ' + str(input_str_emjd) + '   ' + str(_site) + \
-                 ' ' + ','.join(filtervec) + ' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
-                 str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' ' + str(_seeing) + ' ' + str(_sky) + \
-                 ' ' + str(_instrument) + ' ' + str(priority) + ' 0  0'
-    return lineout
+       return python_dict
 
 ################################################################################
 
@@ -1396,31 +1398,34 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     response = conn.getresponse().read()
 
     python_dict = json.loads(response)
-    if 'id' in python_dict:
-       tracking_number=str(python_dict['id'])
-    else:
-       tracking_number=str('0')
-
-    #######################################################################
-    _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
-    _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
-    input_datesub = JDnow(verbose=False)
-    input_str_smjd = JDnow(_start,verbose=False)
-    input_str_emjd = JDnow(_end,verbose=False)
-    _seeing = 9999
-    _sky = 9999
-    _instrument = '2m0'
-    priority = 1
 
     try:
-       lineout = str(input_datesub)+' '+str(input_str_smjd)+' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
-                 str(_slit) + ' ' + str(_exp) + '   ' + str(_airmass) + '   ' + str(proposal) + ' '+str(username) + \
-                 ' ' + str(_seeing) + ' ' + str(_sky) + ' ' + str(priority) + ' ' + str(tracking_number) + '  0'
+        if 'id' in python_dict:
+           tracking_number=str(python_dict['id'])
+        else:
+           tracking_number=str('0')
+        
+        _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+        _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+        input_datesub = JDnow(verbose=False)
+        input_str_smjd = JDnow(_start,verbose=False)
+        input_str_emjd = JDnow(_end,verbose=False)
+        _seeing = 9999
+        _sky = 9999
+        _instrument = '2m0'
+        priority = 1
+        
+        try:
+           lineout = str(input_datesub)+' '+str(input_str_smjd)+' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' ' + str(_exp) + '   ' + str(_airmass) + '   ' + str(proposal) + ' '+str(username) + \
+                     ' ' + str(_seeing) + ' ' + str(_sky) + ' ' + str(priority) + ' ' + str(tracking_number) + '  0'
+        except:
+           lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' '+str(_exp)+'   '+ str(_airmass)+'   ' + str(proposal) + ' ' + str(username) + ' ' + \
+                     str(_seeing) + ' '+str(_sky) + ' ' + str(priority) + ' 0  0'
+        return lineout
     except:
-       lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
-                 str(_slit) + ' '+str(_exp)+'   '+ str(_airmass)+'   ' + str(proposal) + ' ' + str(username) + ' ' + \
-                 str(_seeing) + ' '+str(_sky) + ' ' + str(priority) + ' 0  0'
-    return lineout
+       return python_dict
 
 ####################################################################################################3
 
