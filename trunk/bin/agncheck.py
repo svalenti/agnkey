@@ -58,8 +58,8 @@ if __name__ == "__main__":
     else:
         _redo = True
     if _stage:
-        if _stage not in ['checkfast', 'checkwcs', 'checkpsf', 'checkmag', 'checkquality', 'checkpos', 'checkcat',
-                          'checkmissing', 'checkfvd', 'checkclean']: sys.argv.append('--help')
+        if _stage not in ['checkfast', 'checkwcs', 'checkpsf', 'checkmag', 'checkdiff', 'checkquality', 
+                          'checkpos', 'checkcat', 'checkmissing', 'checkfvd', 'checkclean']: sys.argv.append('--help')
     if _bad:
         if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality']:
             sys.argv.append('--help')
@@ -122,6 +122,8 @@ if __name__ == "__main__":
                 agnkey.agnloopdef.checkfilevsdatabase(ll)
             elif _stage == 'checkclean':
                 agnkey.agnloopdef.checkclean(ll['namefile'])
+            elif _stage == 'checkdiff':
+                agnkey.agnloopdef.checkdiff(ll['namefile'])
             else:
                 print _stage + ' not defined'
     else:

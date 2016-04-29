@@ -621,9 +621,9 @@ def archivereducedspectrum(img):
     if ':' in str(_ra):      _ra,_dec=deg2HMS(_ra,_dec)
 
     # JD
-    if 'MJD' in hdr: _jd=hdr.get('MJD')+0.5
-    elif 'MJD-OBS' in hdr: _jd=hdr.get('MJD-OBS')+0.5
-    elif 'JD' in hdr: _jd=hdr.get('JD')
+    if 'MJD' in hdr: _mjd=hdr.get('MJD')
+    elif 'MJD-OBS' in hdr: _mjd=hdr.get('MJD-OBS')
+    elif 'JD' in hdr: _mjd=hdr.get('JD') - 2400000.5
     elif 'DATE-OBS' in hdr: 
         dd=''
         try:
@@ -632,9 +632,9 @@ def archivereducedspectrum(img):
             try:
                 dd=datetime.datetime.strptime(hdr.get('DATE-OBS')[0:-6],'%Y-%m-%dT%H:%M')
             except: pass
-        if dd:     _jd=agnkey.agnsqldef.JDnow(dd,False)
-        else:      _jd=''
-    else:    _jd=''
+        if dd:     _mjd=agnkey.agnsqldef.JDnow(dd,False)  - 2400000.5
+        else:      _mjd=''
+    else:    _mjd=''
 
     
     if 'GRISM' in hdr:
@@ -645,7 +645,7 @@ def archivereducedspectrum(img):
         _grism='grism'
 
     if _telescope in ['fts','ftn']:
-        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':float(hdr.get('MJD'))+0.5,\
+        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'mjd':float(hdr.get('MJD-OBS')),\
                     'telescope':_telescope,'airmass':hdr.get('airmass'),'objname':_object,'ut':_ut,\
                     'instrument':hdr.get('instrume'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('APERWID'),\
                     'targid':_targid,'grism':_grism, 'original':hdr.get('arcfile'),'PROPID':hdr.get('PROPID'),\
@@ -654,13 +654,13 @@ def archivereducedspectrum(img):
     elif 'gemini' in _telescope.lower():
         if 'south' in _telescope.lower(): _telescope='gs'
         else: _telescope='gn'
-        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':_jd,\
+        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'mjd':_mjd,\
                     'telescope':_telescope,'airmass':hdr.get('AIRMASS'),'objname':_object,'ut':_ut,\
                     'instrument':hdr.get('INSTRUME'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':_grism,\
                     'original':hdr.get('arcfile')}
 
     else:
-        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'jd':_jd,\
+        dictionary={'dateobs':_dateobs,'exptime':hdr.get('exptime'), 'filter':hdr.get('filter'),'mjd':_mjd,\
                     'telescope':_telescope,'airmass':hdr.get('airmass'),'objname':_object,'ut':_ut,\
                     'instrument':hdr.get('instrume'),'ra0':_ra,'dec0':_dec,'slit':hdr.get('slit'),'targid':_targid,'grism':_grism,\
                     'original':hdr.get('arcfile'),'observer':hdr.get('observer')}
@@ -1260,7 +1260,7 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
 
 #################################################################################
 
-def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
+def load_lc_data(db,targid,plottype='flot',magtype='psfmag',_ft=1):
  filtclr=get_filtclr()
  if magtype in  ['psfmag','apmag','appmagap1','appmagap2','appmagap3','mag']: 
      if magtype=='psfmag':
@@ -1277,7 +1277,7 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
       dmagtype='dmag'
 
      invert=False
-     query = '''SELECT %s, ((jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
+     query = '''SELECT %s, ((mjd+2400000.5)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
      query += '''FROM dataredulco '''
      query += '''WHERE %s is not null and targid=%s ''' % (magtype,targid)
      query += ''' and %s !=  9999   ''' % magtype
@@ -1287,7 +1287,7 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
          if magtype=='mag':
              magtype='psfmag'
              dmagtype='psfdmag'
-             query = '''SELECT %s, ((jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
+             query = '''SELECT %s, ((mjd+2400000.5)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago ''' % magtype
              query += '''FROM dataredulco '''
              query += '''WHERE %s is not null and targid=%s ''' % (magtype,targid)
              query += ''' and %s !=  9999   ''' % magtype
@@ -1309,16 +1309,11 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
 
      minmag = min(psfmag)
      maxmag = max(psfmag)
-     #maxmag = min(psfmag)
-     #minmag = max(psfmag)
-
-#     interval =  maxmag-minmag
-#     maxmag = maxmag+0.15*interval
-#     minmag = minmag-0.15*interval
 
      query  = '''SELECT distinct p.filter, p.telescope, p.instrument '''
      query += '''FROM dataredulco as p '''
      query += '''WHERE p.%s is not null ''' % magtype
+     query += ''' and p.filetype = %s ''' % str(_ft)
      query += ''' and %s !=  9999   '''  %  magtype
      query += '''AND p.targid=%s ''' % targid
 
@@ -1335,10 +1330,11 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag'):
                  lcdata += ''' points: {show: true, fill: true, fillColor: "%s", type: "o", radius: 2, errorbars: "y", yerr: {show:true, upperCap: "-", lowerCap: "-", radius: 2} }, ''' %clr
                  lcdata += ''' color: "%s", ''' %clr
                  lcdata += ''' data: [ ''' 
-                 query =  '''SELECT ((p.jd+2400000)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago, '''
+                 query =  '''SELECT ((p.mjd+2400000.5)-(to_days(now())+1721059.5+hour(curtime())/24+minute(curtime())/60/24)) as daysago, '''
                  query += '''p.%s, p.%s  ''' % (magtype,dmagtype)
                  query += '''FROM dataredulco as p '''
                  query += '''WHERE p.%s is not null ''' % magtype
+                 query += ''' and p.filetype = %s ''' % str(_ft)
                  query += ''' and p.%s !=  9999   '''  % magtype
                  query += '''AND p.targid=%s ''' %targid
                  query += '''AND p.filter='%s' ''' %row['filter']

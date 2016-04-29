@@ -1,3 +1,6 @@
+import agnkey
+import numpy as np
+
 def xpa(arg):
     import subprocess
     subproc = subprocess.Popen('xpaset -p ds9 '+arg,shell=True)
@@ -8,7 +11,7 @@ def vizq(_ra,_dec,catalogue,radius):
     _site='vizier.u-strasbg.fr'
 #    _site='vizier.cfa.harvard.edu'
     cat={'usnoa2':['I/252/out','USNO-A2.0','Rmag'],\
-         '2mass':['II/246/out','2MASS','Jmag'],\
+         '2mass':['II/246/out','2MASS','Jmag,prox'],\
          'usnob1':['I/284/out','USNO-B1.0','R2mag'],\
          'apass':['I/322A/out','UCAC4','rmag,UCAC4'],\
          'sdss7':['II/294/sdss7','rmag','rmag']}
@@ -21,14 +24,25 @@ def vizq(_ra,_dec,catalogue,radius):
     for i in aa:
         if i and i[0]!='#':   bb.append(i)
     _ra,_dec,_name,_mag=[],[],[],[]
+    _dist=[]
     for ii in bb[3:]:
         aa=ii.split('\t')
         _ra.append(re.sub(' ',':',aa[0]))
         _dec.append(re.sub(' ',':',aa[1]))
         _name.append(aa[2])
-        try:       _mag.append(float(aa[3]))
-        except:    _mag.append(float(9999))
-    return {'ra':_ra,'dec':_dec,'id':_name,'mag':_mag}
+        try:       
+            _mag.append(float(aa[3]))
+        except:    
+            _mag.append(float(9999))
+            
+        if catalogue == '2mass':
+            _dist.append(float(aa[4]))
+
+    dict = {'ra':_ra,'dec':_dec,'id':_name,'mag':_mag}
+    if catalogue == '2mass':
+        dict['dist'] = _dist
+    return dict
+
 
 def wcsstart(img,CRPIX1='',CRPIX2=''):
     from numpy import pi, sin, cos 
@@ -36,12 +50,30 @@ def wcsstart(img,CRPIX1='',CRPIX2=''):
     from agnkey.util import updateheader,readhdr,readkey3
     hdr=readhdr(img)
     _instrume=readkey3(hdr,'instrume')
-    _RA=readkey3(hdr,'RA')
-    _DEC=readkey3(hdr,'DEC')
-    _xdimen=readkey3(hdr,'NAXIS1')
-    _ydimen=readkey3(hdr,'NAXIS2')
-    _CCDXBIN=readkey3(hdr,'CCDXBIN')
-    if _instrume in ['kb05','kb70','kb71','kb73','kb75','kb77','kb78','kb79']:
+    _RA = readkey3(hdr,'RA')
+    _DEC = readkey3(hdr,'DEC')
+    _xdimen = readkey3(hdr,'NAXIS1')
+    _ydimen = readkey3(hdr,'NAXIS2')
+    _CCDXBIN = readkey3(hdr,'CCDXBIN')
+    if _instrume in ['kb74','kb76']:
+        angle =readkey3(hdr,'ROLLERDR')#posang)
+        theta =(angle*pi/180.)
+        CDELT0 =0.000129722   # 1.3042840792028E-4   8.43604528922325E-5  #6.6888889999999995e-05
+        CD1_1 =(-1)*CDELT0*cos(theta)
+        CD2_2 =(-1)*CDELT0*cos(theta)
+        CD1_2 =abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
+        CD2_1 =(-1)*abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
+        if not CRPIX1:        
+            CRPIX1 = readkey3(hdr,'ROTCENTX')
+        else: 
+            CRPIX1 = 1000.+CRPIX1
+        if not CRPIX2:        
+            CRPIX2 = readkey3(hdr,'ROTCENTY')
+        else: 
+            CRPIX2 = 1000.+CRPIX2
+        CDELT1 = 2
+        CDELT2 = 2
+    elif 'kb' in _instrume:
         angle=readkey3(hdr,'ROLLERDR')#posang)
         theta=(angle*pi/180.)
         CDELT0=0.000129722   # 1.3042840792028E-4   8.43604528922325E-5  #6.6888889999999995e-05
@@ -55,42 +87,30 @@ def wcsstart(img,CRPIX1='',CRPIX2=''):
         else: CRPIX2= 1000.+CRPIX2
         CDELT1=2
         CDELT2=2
-    elif _instrume in ['kb74','kb76']:
-        angle=readkey3(hdr,'ROLLERDR')#posang)
-        theta=(angle*pi/180.)
-        CDELT0=0.000129722   # 1.3042840792028E-4   8.43604528922325E-5  #6.6888889999999995e-05
-        CD1_1=(-1)*CDELT0*cos(theta)
-        CD2_2=(-1)*CDELT0*cos(theta)
-        CD1_2=abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
-        CD2_1=(-1)*abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
-        if not CRPIX1:        CRPIX1= readkey3(hdr,'ROTCENTX')
-        else: CRPIX1= 1000.+CRPIX1
-        if not CRPIX2:        CRPIX2= readkey3(hdr,'ROTCENTY')
-        else: CRPIX2= 1000.+CRPIX2
-        CDELT1=2
-        CDELT2=2
-    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+    elif 'fl' in _instrume: 
         angle=readkey3(hdr,'ROLLERDR')#posang)
         theta=(angle*pi/180.)
         pixscale=float(readkey3(hdr,'PIXSCALE'))
         CDELT0=pixscale/3600.
-#        CDELT0=0.000129722   # 1.3042840792028E-4   8.43604528922325E-5  #6.6888889999999995e-05
-#        CDELT0=0.0001057   # 1.3042840792028E-4   8.43604528922325E-5  #6.6888889999999995e-05
         CD1_1=CDELT0*cos(theta)
         CD1_2=CDELT0*sin(theta)
         CD2_1=CDELT0*sin(theta)
         CD2_2=(-1)*CDELT0*cos(theta)
-#        CD1_1=(-1)*CDELT0*cos(theta)
-#        CD2_2=(-1)*CDELT0*cos(theta)
-#        CD1_2=abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
-#        CD2_1=(-1)*abs(CDELT0)*(abs(CDELT0)/CDELT0)*sin(theta)
-        if not CRPIX1:        CRPIX1= 2115.
-        else: CRPIX1= 2115.+CRPIX1
-        if not CRPIX2:        CRPIX2= 2115.
-        else: CRPIX2= 2115.+CRPIX2
+        if 'SITEID' in hdr:
+            if hdr['SITEID'] in ['elp']:
+                CD1_1 = (-1) * CD1_1
+                CD2_2 = (-1) * CD2_2
+        if not CRPIX1:        
+            CRPIX1= _xdimen/2
+        else: 
+            CRPIX1= _xdimen/2 + CRPIX1
+        if not CRPIX2:        
+            CRPIX2= _ydimen/2
+        else: 
+            CRPIX2= _ydimen/2.+CRPIX2
         CDELT1=2
         CDELT2=2
-    elif _instrume in ['fs01','fs02']:
+    elif 'fs' in _instrume:
         angle=readkey3(hdr,'ROTSKYPA')#posang)
         theta=(angle*pi/180.)
  #       pixscale=0.30*_CCDXBIN
@@ -1100,7 +1120,10 @@ def sextractor(img):
         from iraf import proto
         from numpy import compress,array,asarray
         import pyfits
-        
+        import tempfile
+        temp_file0 = next(tempfile._get_candidate_names())
+        temp_file1 = next(tempfile._get_candidate_names())
+
         hd = pyfits.getheader(img)
         if hd.get('SATURATE'):    _saturation=hd.get('SATURATE')
         else:                     _saturation=45000
@@ -1112,19 +1135,19 @@ def sextractor(img):
         else: _ydim=4010
 
         #_saturation=45000
-        namesex=defsex('default.sex')
+        namesex=defsex(temp_file0,temp_file1)
         os.system('sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex')
-        print 'sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex'
+        #print 'sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex'
         delete(namesex)
         delete('_logsex')
-        xpix=iraf.proto.fields('detections.cat',fields='2',Stdout=1)
-        ypix=iraf.proto.fields('detections.cat',fields='3',Stdout=1)
-        cm=iraf.proto.fields('detections.cat',fields='4',Stdout=1)
-        cl=iraf.proto.fields('detections.cat',fields='7',Stdout=1)
-        fw=iraf.proto.fields('detections.cat',fields='8',Stdout=1)
-        ell=iraf.proto.fields('detections.cat',fields='9',Stdout=1)
-        bkg=iraf.proto.fields('detections.cat',fields='10',Stdout=1)
-        fl=iraf.proto.fields('detections.cat',fields='6',Stdout=1)
+        xpix=iraf.proto.fields(temp_file1,fields='2',Stdout=1)
+        ypix=iraf.proto.fields(temp_file1,fields='3',Stdout=1)
+        cm=iraf.proto.fields(temp_file1,fields='4',Stdout=1)
+        cl=iraf.proto.fields(temp_file1,fields='7',Stdout=1)
+        fw=iraf.proto.fields(temp_file1,fields='8',Stdout=1)
+        ell=iraf.proto.fields(temp_file1,fields='9',Stdout=1)
+        bkg=iraf.proto.fields(temp_file1,fields='10',Stdout=1)
+        fl=iraf.proto.fields(temp_file1,fields='6',Stdout=1)
 
         fl=compress((array(xpix)!=''),array(fl,float))
         cl=compress((array(xpix)!=''),array(cl,float))
@@ -1136,7 +1159,6 @@ def sextractor(img):
         xpix=compress((array(xpix)!=''),array(xpix,float))
 
         try:
-            print len(fl),_xdim,_ydim
             ww=asarray([i for i in range(len(xpix)) if ((xpix[i]<_xdim) or (ypix[i]<_ydim))])
             cl,cm,fw,ell,xpix,ypix,bkg,fl=cl[ww],cm[ww],fw[ww],ell[ww],xpix[ww],ypix[ww],bkg[ww],fl[ww]
 
@@ -1160,7 +1182,7 @@ def sextractor(img):
         except: 
             xpix,ypix,fw,cl,cm,ell=[],[],[],[],[],[]
             print '\n### ERROR Filtering the sextractor detections, please check that sextractor is working ......'
-        delete('detections.cat')
+        delete(temp_file1)
         return xpix,ypix,fw,cl,cm,ell,bkg,fl
 
 #############################################################################################################
@@ -1174,11 +1196,9 @@ def readapass(_ra,_dec,radius=30,field=''):
     vector={}
     column={}
     yyy[0]=re.sub('J2000','',yyy[0])
-    print  yyy[0]
     for i in range(0,len(string.split(yyy[0]))):
         if string.split(yyy[0])[i] in ['#RAdeg', 'DECdeg', 'B', 'V', 'Pg', 'Pr', 'Pi', 'eB', 'eV', 'eg', 'er', 'ei']:
             column[i]=string.split(yyy[0])[i]
-    print column
     zzz=[]
     for j in yyy:
         if j[0]!='#':
@@ -1203,7 +1223,6 @@ def readapass(_ra,_dec,radius=30,field=''):
     header=header+'# END CATALOG HEADER\n#\n'
     ff.write(header)
     m=1
-    print column2.keys()
     for i in range(0,len(column2[column2.keys()[0]])):
         ff.write('%14s %14s  %3s  ' % (str(column2['#RAdeg'][i]),str(column2['DECdeg'][i]),str(m)))
         m=m+1
@@ -1249,9 +1268,6 @@ def finewcs(img):
     if len(pos0)>20:    _order=4
     elif len(pos0)>10:  _order=3
     else:               _order=2
-
-    print _order
-    print len(pos0)
 
     xxx=np.array(bbb[1])[pos1]
     yyy=np.array(bbb[2])[pos1]
@@ -1299,6 +1315,9 @@ def run_astrometry(im, clobber=True,redo=False):
     import shutil
     import numpy as np
     import string
+    import tempfile
+    temp_name = next(tempfile._get_candidate_names())
+    temp_name = temp_name + '.fits'
     print 'astrometry for image ' + str(im)
     # Run astrometry.net
     hdr = agnkey.util.readhdr(im)
@@ -1312,7 +1331,7 @@ def run_astrometry(im, clobber=True,redo=False):
     done = 0
     if float(_wcserr) == 0: 
         done = 1
-    print redo
+
     if redo: 
         done = 0
     if done:
@@ -1326,7 +1345,7 @@ def run_astrometry(im, clobber=True,redo=False):
         cmd += '--backend-config '+ str(agnkey.__path__[0]) + '/standard/astrometry/backend.cfg '
         cmd += ' --radius 1.0 --ra %s --dec %s --guess-scale ' % (ra, dec)
         cmd += '--scale-units arcsecperpix --scale-low 0.1 --scale-high .7 '
-        cmd += '--no-plots -N tmpwcs.fits '
+        cmd += '--no-plots -N '+temp_name+' '
         if clobber: cmd += '--overwrite '
         cmd += '--solved none --match none --rdls none --wcs none --corr none '
         cmd += ' --downsample 4 '
@@ -1340,10 +1359,10 @@ def run_astrometry(im, clobber=True,redo=False):
             print 'axy files do not exist'
         if os.path.exists(basename + '-indx.xyls'):
             os.remove(basename + '-indx.xyls')
-        if os.path.exists('tmpwcs.fits'):
-            hdrt = agnkey.util.readhdr('tmpwcs.fits')
+        if os.path.exists(temp_name):
+            hdrt = agnkey.util.readhdr(temp_name)
             _instrume = agnkey.util.readkey3(hdrt,'instrume')
-            sexvec = agnkey.agnastrodef.sextractor('tmpwcs.fits')
+            sexvec = agnkey.agnastrodef.sextractor(temp_name)
             xpix,ypix,fw,cl,cm,ell,bkg,fl = sexvec
             if len(fw)>1:
                 if 'kb' in _instrume:
@@ -1385,6 +1404,44 @@ def run_astrometry(im, clobber=True,redo=False):
                 dictionary['WCSERR'] = [0, '']
             agnkey.util.updateheader(im, 0, dictionary)
             agnkey.agnsqldef.updatevalue('dataredulco', 'WCS', 0, string.split(im, '/')[-1])
+            os.remove(temp_name)
         else:
-            print 'tmpwcs.fits files do not exist'
+            print temp_name+' files do not exist'
 ###################################################################
+###################################################################
+
+def starsfields(img,distance=10,magnitude=20):
+    from astropy.io import fits as pyfits
+    from astropy import wcs as pywcs
+
+    hdr0 = pyfits.getheader(img)
+    wcs1 = pywcs.WCS(hdr0)
+    _ra,_dec = hdr0['RA'],hdr0['DEC']
+    _ra,_dec = agnkey.agnabsphotdef.deg2HMS(_ra,_dec)
+    dictionary = agnkey.agnastrodef.vizq(_ra,_dec,'2mass',30)
+    dictionary['ra0']=[]
+    dictionary['dec0']=[]
+    for jj,kk in enumerate(dictionary['ra']):
+        coord = agnkey.agnabsphotdef.deg2HMS(dictionary['ra'][jj],dictionary['dec'][jj])
+        dictionary['ra0'].append(coord[0])
+        dictionary['dec0'].append(coord[1])
+
+    sky = zip(dictionary['ra0'],dictionary['dec0'])
+    pix0 = wcs1.wcs_world2pix(sky, 1)
+    xx10,yy10 = zip(*pix0)
+    xx10 = np.array(xx10)
+    yy10 = np.array(yy10)
+    _mag = np.array(dictionary['mag'])
+
+    _dist = np.array(dictionary['dist'])
+    ww = np.where((xx10>10)&(yy10>10)&(xx10 < hdr0['NAXIS1']-10 ) &\
+                  (yy10<hdr0['NAXIS2']-10) & (_dist>distance) & (_mag < magnitude) )
+    _mag = np.array(dictionary['mag'])[ww]
+    _ra1 = np.array(dictionary['ra0'])[ww]
+    _dec1 = np.array(dictionary['dec0'])[ww]
+    xx11 = xx10[ww]
+    yy11 = yy10[ww]
+    _dist = _dist[ww]
+    return _ra1,_dec1,xx11,yy11,_mag,_dist
+
+######################################################################

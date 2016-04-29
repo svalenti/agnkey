@@ -8,6 +8,7 @@ import sites
 import agnloopdef 
 import cosmics 
 import agndefin
+import zscale
 
 __version__ = "unknown"
 try:

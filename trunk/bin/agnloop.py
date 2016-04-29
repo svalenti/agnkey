@@ -9,7 +9,19 @@ from numpy import take, argsort, asarray, array
 from optparse import OptionParser
 import datetime
 import agnkey
+from multiprocessing import Pool
 
+def multi_run_makestamp(args):
+    return agnkey.agnloopdef.makestamp(*args)
+
+def multi_run_apmag(args):
+    return agnkey.agnloopdef.run_apmag(*args)
+
+def multi_run_cosmic(args):
+    return agnkey.agnloopdef.run_cosmic(*args)
+
+def multi_run_diff(args):
+    return agnkey.agnloopdef.run_diff(*args)
 # ####################################################################################
 
 if __name__ == "__main__":
@@ -32,7 +44,7 @@ if __name__ == "__main__":
     parser.add_option("-F", "--force", dest="force", action="store_true")
     parser.add_option("-b", "--bad", dest="bad", default='', type="str",
                       help="-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag," +
-                           'merge,diff,template,apmag] \t [%default]')
+                           'merge,diff,template,apmag,update] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
                       help='-s stage [wcs,psf,psf2,psfmag,zcat,abscat,mag,getmag,merge,diff,' +
                            'makestamp,template,apmag,cosmic,idlstart] \t [%default]')
@@ -99,6 +111,27 @@ if __name__ == "__main__":
                       help='z1 \t [%default]')
     parser.add_option("--z2", dest="z2", default=None, type="int",
                       help='z2 \t [%default]')
+    parser.add_option("--bgo", dest="bgo", default=3, type=float,
+                      help=' bgo parameter for hotpants  \t [%default]')
+    parser.add_option("-p", "--psf", dest="psf", default='', type=str, 
+                      help='psf image for template \t\t\t %default')
+    parser.add_option("--mag", dest="mag", type=float, default=0, 
+                      help='mag to subtract from template image \t\t [%default]')
+    parser.add_option("--uncleaned", dest="clean", action='store_false', default=True, 
+                      help='do not use cosmic ray cleaned image as template \t\t [%default]')
+    parser.add_option("--subtract-mag-from-header", action='store_true',\
+                      help='automatically subtract mag from header of template image \t\t [%default]')
+    parser.add_option("--fixpix", dest="fixpix", action="store_true", default=False,
+                      help='Run fixpix on the images before doing image subtraction')
+    parser.add_option("--multicore", dest="multicore", default=4, type=int,
+                      help='--multicore numbers of cores   \t [%default]')
+    parser.add_option("--header", dest="header", default='', type=str, 
+                      help='header image \t\t\t %default')
+    parser.add_option("--column", dest="column", default='', type=str, 
+                      help='column database \t\t\t %default')
+    parser.add_option("--table", dest="table", default='dataredulco', type=str, 
+                      help='table database \t\t\t %default')
+
 
     option, args = parser.parse_args()
     # _instrument=option.instrument
@@ -106,8 +139,19 @@ if __name__ == "__main__":
     _normalize = option.normalize
     _type = option.type
     _mode = option.mode
+    _column = option.column
+    _header = option.header
+    _table = option.table
+    _multicore = option.multicore
     _stage = option.stage
     _bad = option.bad
+    _clean = option.clean
+    _subtract_mag_from_header = option.subtract_mag_from_header
+    _fixpix = option.fixpix
+    _mag = option.mag
+    _psf = option.psf
+    _bgo = option.bgo
+
     if _normalize not in ['i', 't']:
         sys.argv.append('--help')
     if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb', 'fl','fs']:
@@ -120,11 +164,11 @@ if __name__ == "__main__":
         _recenter = True
     else:
         _recenter = False
-    if _type not in ['fit', 'ph', 'mag', 'appmagap1', 'appmagap2', 'appmagap3', 'flux1']:
+    if _type not in ['fit', 'ph', 'mag', 'appmagap1', 'appmagap2', 'appmagap3', 'flux1','flux2','flux3']:
         sys.argv.append('--help')
     if _stage:
         if _stage not in ['wcs', 'psf', 'psf2', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
-                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart']:
+                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update']:
             sys.argv.append('--help')
     if _bad:
         if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag']:
@@ -212,12 +256,12 @@ if __name__ == "__main__":
         listepoch = [re.sub('-', '', str(i)) for i in
                      [start + datetime.timedelta(days=x) for x in range(0, 1 + (stop - start).days)]]
 
-    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart']:
+    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart','diff','update']:
         if len(listepoch) == 1:
-            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs', str(listepoch[0]),
+            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(listepoch[0]),
                                                     '', '*', _telescope)
         else:
-            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs', str(listepoch[0]),
+            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(listepoch[0]),
                                                     str(listepoch[-1]), '*', _telescope)
         if lista:
             ll0 = {}
@@ -226,7 +270,7 @@ if __name__ == "__main__":
             for i in range(0, len(lista)):
                 for jj in lista[0].keys():
                     ll0[jj].append(lista[i][jj])
-            inds = argsort(ll0['jd'])  # sort by jd
+            inds = argsort(ll0['mjd'])  # sort by jd
             for i in ll0.keys():
                 ll0[i] = take(ll0[i], inds)
             ll0['ra'] = ll0['ra0'][:]
@@ -251,33 +295,168 @@ if __name__ == "__main__":
             # ####################################
             if _stage == 'local':  # calibrate local sequence from .cat files
                 agnkey.agnloopdef.run_local(ll['namefile'], _field, _interactive)
+
             elif _stage == 'getmag':  # get final magnitude from mysql
                 if not _field:
                     sys.exit('use option --field landolt or sloan')
                 else:
                     fields = [_field]
                 for ff in fields:
-                    agnkey.agnloopdef.run_getmag(ll, _field, _output, _interactive, _show, _bin, _type,
-                                                 'dataredulco', _ra, _dec)
+                    setup = agnkey.agnloopdef.run_getmag(ll, _field, _output, _interactive, _show, _bin, _type,
+                                                         _table, _ra, _dec)
+
             elif _stage == 'psf':
                 agnkey.agnloopdef.run_psf(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
-                                          XX, _fix, _catalogue, 'dataredulco')
+                                          XX, _fix, _catalogue, _table)
+
             elif _stage == 'psf2':
                 agnkey.agnloopdef.run_psf2(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
-                                          XX, _fix, _catalogue, 'dataredulco')
+                                           XX, _fix, _catalogue, _table)
+
             elif _stage == 'psfmag':
                 agnkey.agnloopdef.run_fit(ll['namefile'], _ras, _decs, _xord, _yord, _bkg, _size, _recenter, _ref,
                                           _interactive, _show, _redo, _dmax)
+
             elif _stage == 'wcs':
-                agnkey.agnloopdef.run_wcs(ll['namefile'], _interactive, _redo, _xshift, _yshift, _catalogue,'dataredulco',_mode)
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                agnkey.agnloopdef.run_wcs(listfile, _interactive, _redo, _xshift, _yshift, _catalogue,_table,_mode)
+
             elif _stage == 'makestamp':
-                agnkey.agnloopdef.makestamp(ll['namefile'], 'dataredulco', _z1, _z2, _interactive, _redo, _output)
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                if _show:
+                    p = Pool(1)
+                else:
+                    p = Pool(_multicore)
+                inp = [([i],_table,_z1, _z2, _interactive,_redo,_output) for i in listfile]
+                p.imap_unordered(multi_run_makestamp, inp)
+                p.close()
+                p.join()
+#                agnkey.agnloopdef.makestamp(listfile, _table, _z1, _z2, _interactive, _redo, _output)
+
             elif _stage == 'apmag':
-                agnkey.agnloopdef.run_apmag(ll['namefile'], 'dataredulco',_ra,_dec,_catalogue)
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                listfile = [re.sub('.fits', '.sn2.fits',i) for i in listfile]
+                if _show:
+                    p = Pool(1)
+                else:
+                    p = Pool(_multicore)
+                inp = [([i],_table,_ra, _dec, _catalogue,_show) for i in listfile]
+                p.map(multi_run_apmag, inp)
+                p.close()
+                p.join()
+#                agnkey.agnloopdef.run_apmag(ll['namefile'], _table,_ra,_dec,_catalogue,_show)
+
             elif _stage == 'cosmic':
-                agnkey.agnloopdef.run_cosmic(ll['namefile'], 'dataredulco', 4.5, 0.2, 4, _redo)
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+
+                p = Pool(_multicore)
+                inp = [([i], _table,4.5, 0.2, 4,_redo) for i in listfile]
+                p.map(multi_run_cosmic, inp)
+                p.close()
+                p.join()
+                #agnkey.agnloopdef.run_cosmic(listfile, _table, 4.5, 0.2, 4, _redo)
+
             elif _stage == 'idlstart':
-                agnkey.agnloopdef.run_idlstart(ll['namefile'], 'dataredulco', _redo)
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                agnkey.agnloopdef.run_idlstart(listfile, _table, _redo)
+
+            elif _stage == 'update':
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                agnkey.agnloopdef.updatefromheader(listfile,_header, _column, _table)
+
+            elif _stage == 'diff':  # difference images using hotpants
+                        if not _name:
+                            sys.exit('you need to select one object: use option -n/--name')
+                        if _tempdate:
+                            lista1 = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs',
+                                                                     str(_tempdate), '', '*', _telescope)
+                        else:
+                            lista1 = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs',
+                                                                     '20120101', '20150101', '*', _telescope)
+                        if lista1:
+                            ll00 = {}
+                            for jj in lista1[0].keys():
+                                ll00[jj] = []
+                            for i in range(0, len(lista1)):
+                                for jj in lista1[0].keys():
+                                    ll00[jj].append(lista1[i][jj])
+                            inds = argsort(ll00['mjd'])  #  sort by jd
+                            for i in ll00.keys():
+                                ll00[i] = take(ll00[i], inds)
+                            lltemp = agnkey.agnloopdef.filtralist(ll00, _filter, _id, _name, _ra, _dec, _bad, 4)
+                        else:
+                            sys.exit('template not found')
+
+                        imglisttar = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                        imglisttemp = [k + v for k, v in zip(lltemp['wdirectory'], lltemp['namefile'])]
+##################################
+#################    adding here the split by filter to be able to run multicore
+##################################
+                        listatar = {}
+                        # divide targets by filter and targetid
+                        for img in imglisttar:
+                            hdr = agnkey.util.readhdr(img)
+                            try:
+                                _targetid = agnkey.agnsqldef.targimg(img)
+                            except:
+                                _targetid = 1
+                        
+                            _filt = agnkey.util.readkey3(hdr, 'filter')
+                            _filter = agnkey.sites.filterst1(agnkey.util.readkey3(hdr, 'telescop'))[_filt]
+                        
+                            _obj = agnkey.util.readkey3(hdr, 'object')
+                            if _filter not in listatar:
+                                listatar[_filter] = {}
+                            if _targetid not in listatar[_filter]:
+                                listatar[_filter][_targetid] = []
+                            listatar[_filter][_targetid].append(img)
+                        
+                        # divide template by filter and targetid
+                        listatemp = {}
+                        for img in imglisttemp:
+                            hdr = agnkey.util.readhdr(img)
+                            try:
+                                _targetid = agnkey.agnsqldef.targimg(img)
+                            except:
+                                _targetid = 1
+                            _filt = agnkey.util.readkey3(hdr, 'filter')
+                            _filter = agnkey.sites.filterst1(agnkey.util.readkey3(hdr, 'telescop'))[_filt]
+                        
+                            _obj = agnkey.util.readkey3(hdr, 'object')
+                            if _filter not in listatemp:
+                                listatemp[_filter] = {}
+                            if _targetid not in listatemp[_filter]:
+                                listatemp[_filter][_targetid] = []
+                            listatemp[_filter][_targetid].append(img)
+                        inp = []
+                        for f in listatar:
+                            for o in listatar[f]:
+                                if f in listatemp:
+                                    if o in listatemp[f]:
+                                        imglist1 = listatar[f][o]
+                                        imglist2 = listatemp[f][o]
+                                        inp = list(inp)+list([(array([i]),array(imglist2[0:1]),
+                                                               _show, _redo,_normalize) for i in imglist1])
+
+                        if len(inp):
+
+                            if _show:
+                                p = Pool(1)
+                            else:
+                                p = Pool(_multicore)
+                            p.map(multi_run_diff, inp)
+                            p.close()
+                            p.join()
+                        else:
+                            sys.exit('no data selected ')
+##################################
+##################################
+#                        agnkey.agnloopdef.run_diff(array(listtar), array(listtemp), _show, _redo, _normalize)
+#                        if len(listtemp) == 0 or len(listtar) == 0:
+#                            sys.exit('no data selected ')
+
+
+
 
         else:
             print '\n### no data selected'
@@ -285,7 +464,7 @@ if __name__ == "__main__":
     else:
         for epo in listepoch:
             print '\n#### ' + str(epo)
-            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs', str(epo), '', '*',
+            lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(epo), '', '*',
                                                     _telescope)
             if lista:
                 ll0 = {}
@@ -295,12 +474,11 @@ if __name__ == "__main__":
                     for jj in lista[0].keys():
                         ll0[jj].append(lista[i][jj])
 
-                inds = argsort(ll0['jd'])  # sort by jd
+                inds = argsort(ll0['mjd'])  # sort by jd
                 for i in ll0.keys():
                     ll0[i] = take(ll0[i], inds)
                 ll0['ra'] = ll0['ra0'][:]
                 ll0['dec'] = ll0['dec0'][:]
-                print _filter, _id, _name, _ra, _dec
                 ll = agnkey.agnloopdef.filtralist(ll0, _filter, _id, _name, _ra, _dec, _bad, _filetype)
                 if len(ll['namefile']) > 0:
                     for i in range(0, len(ll['namefile'])):
@@ -311,9 +489,9 @@ if __name__ == "__main__":
                     print '\n###  total number = ' + str(len(ll['namefile']))
                 if _stage and len(ll['namefile']) > 0:
                     print '##' * 50
-                    print _stage
                     ll3 = {}
-                    for ii in ll.keys():       ll3[ii] = ll[ii]
+                    for ii in ll.keys():       
+                        ll3[ii] = ll[ii]
                     if _stage == 'zcat':
                         if not _field:
                             if _filter in ['U', 'B', 'V', 'R', 'I', 'landolt']:
@@ -326,16 +504,14 @@ if __name__ == "__main__":
                                 _field = 'sloan'
 
                         if _field == 'apass':
-                            print  'HERE'
                             ww0 = asarray([i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['V', 'B'])])
                             ww1 = asarray(
                                 [i for i in range(len(ll3['filter'])) if (ll['filter'][i] in ['gp', 'rp', 'ip'])])
                             _color = ''
                             if len(ww0) >= 1:
                                 _color = 'BV'
-                                print _color, _calib, _field
                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww0], _fix, _type, _field, _catalogue,
-                                                           _color, _interactive, _redo, _show, _cutmag, 'dataredulco',
+                                                           _color, _interactive, _redo, _show, _cutmag, _table,
                                                            _calib)
 
                             if len(ww1) >= 1:
@@ -343,9 +519,8 @@ if __name__ == "__main__":
                                 for jj in ['gp', 'rp', 'ip']:
                                     if jj in list(set(ll3['filter'])):
                                         _color = _color + agnkey.sites.filterst1(_telescope)[jj]
-                                print _color, _calib, _field
                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww1], _fix, _type, _field, _catalogue,
-                                                           _color, _interactive, _redo, _show, _cutmag, 'dataredulco',
+                                                           _color, _interactive, _redo, _show, _cutmag, _table,
                                                            _calib)
                         elif _field == 'landolt':
                             ww0 = asarray([i for i in range(len(ll3['filter'])) if
@@ -355,9 +530,8 @@ if __name__ == "__main__":
                                 if jj in list(set(ll3['filter'])):
                                     _color = _color + agnkey.sites.filterst1(_telescope)[jj]
                             if len(ww0) >= 1:
-                                print _color, _calib, _field
                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww0], _fix, _type, _field, _catalogue,
-                                                           _color, _interactive, _redo, _show, _cutmag, 'dataredulco',
+                                                           _color, _interactive, _redo, _show, _cutmag, _table,
                                                            _calib)
                         elif _field == 'sloan':
                             ww0 = asarray([i for i in range(len(ll3['filter'])) if
@@ -367,9 +541,8 @@ if __name__ == "__main__":
                                 if jj in list(set(ll3['filter'])):
                                     _color = _color + agnkey.sites.filterst1(_telescope)[jj]
                             if len(ww0) >= 1:
-                                print _color, _calib, _field
                                 agnkey.agnloopdef.run_zero(ll3['namefile'][ww0], _fix, _type, _field, _catalogue,
-                                                           _color, _interactive, _redo, _show, _cutmag, 'dataredulco',
+                                                           _color, _interactive, _redo, _show, _cutmag, _table,
                                                            _calib)
                         else:
                             print 'warning: field not defined, zeropoint not computed'
@@ -385,11 +558,11 @@ if __name__ == "__main__":
                                            str(mm['psfmag'][i]), str(mm['zcat'][i]), str(mm['mag'][i]),
                                            str(mm['abscat'][i]))
                                 agnkey.agnloopdef.run_cat(ll3['namefile'], mm['namefile'], _interactive, 1, _type, _fix,
-                                                          'dataredulco', _field)
+                                                          _table, _field)
                             else:
                                 print '\n### warning : standard not found for this night ' + str(epo)
                         else:
-                            agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 1, _type, _fix, 'dataredulco',
+                            agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 1, _type, _fix, _table,
                                                       _field)
                     elif _stage == 'mag':  # compute final magnitude using:   mag1  mag2  Z1  Z2  C1  C2
                         if _standard:
@@ -402,45 +575,20 @@ if __name__ == "__main__":
                                            str(mm['psfmag'][i]), str(mm['zcat'][i]), str(mm['mag'][i]),
                                            str(mm['abscat'][i]))
                                 agnkey.agnloopdef.run_cat(ll3['namefile'], mm['namefile'], _interactive, 2, _type,
-                                                          False, 'dataredulco', _field)
+                                                          False, _table, _field)
                             else:
                                 print '\n### error: standard not found for this night' + str(epo)
                         else:
-                            agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 2, _type, False, 'dataredulco',
+                            agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 2, _type, False, _table,
                                                       _field)
                     elif _stage == 'merge':  # merge images using lacos and swarp
                         listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                         agnkey.agnloopdef.run_merge(array(listfile), _redo)
-                    elif _stage == 'diff':  # difference images using hotpants
-                        if not _name: sys.exit('you need to select one object: use option -n/--name')
-                        if _tempdate:
-                            lista1 = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs',
-                                                                     str(_tempdate), '', '*', _telescope)
-                        else:
-                            lista1 = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, 'dataredulco', 'dateobs',
-                                                                     '20120101', '20150101', '*', _telescope)
-                        if lista1:
-                            ll00 = {}
-                            for jj in lista1[0].keys():
-                                ll00[jj] = []
-                            for i in range(0, len(lista1)):
-                                for jj in lista1[0].keys():
-                                    ll00[jj].append(lista1[i][jj])
-                            inds = argsort(ll00['jd'])  #  sort by jd
-                            for i in ll00.keys():
-                                ll00[i] = take(ll00[i], inds)
-                            lltemp = agnkey.agnloopdef.filtralist(ll00, _filter, _id, _name, _ra, _dec, _bad, 4)
-                        else:
-                            sys.exit('template not found')
-
-                        listtar = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
-                        listtemp = [k + v for k, v in zip(lltemp['wdirectory'], lltemp['namefile'])]
-                        agnkey.agnloopdef.run_diff(array(listtar), array(listtemp), _show, _redo, _normalize)
-                        if len(listtemp) == 0 or len(listtar) == 0:
-                            sys.exit('no data selected ')
                     elif _stage == 'template':  # merge images using lacos and swarp
                         listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
-                        agnkey.agnloopdef.run_template(array(listfile), _show, _redo)
+                        agnkey.agnloopdef.run_template(array(listfile), _show, _redo, _interactive,\
+                                                       _ra, _dec, _psf, _mag, _clean, _subtract_mag_from_header)
+                        #agnkey.agnloopdef.run_template(array(listfile), _show, _redo)
                     else:
                         print _stage + ' not defined'
             else:

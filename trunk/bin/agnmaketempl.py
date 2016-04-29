@@ -16,21 +16,20 @@ import pywcs
 
 if __name__ == "__main__":
     parser = OptionParser(usage=usage, description=description)
-    parser.add_option("-R", "--RA", dest="RA", default='', type='str', help='RA coordinate \t\t\t %default')
-    parser.add_option("-D", "--DEC", dest="DEC", default='', type='str', help='DEC coordinate \t\t\t %default')
-    parser.add_option("-p", "--psf", dest="psf", default='', type='str', help='psf image \t\t\t %default')
-    parser.add_option("-s", "--show", dest="show", action='store_true', default=False,
-                      help='Show output \t\t [%default]')
-    parser.add_option("-f", "--force", dest="force", action='store_true', default=False,
-                      help='force archiving \t\t [%default]')
-    parser.add_option("--mag", dest="mag", action='store_true', default=False,
-                      help='chose mag interactively \t\t [%default]')
-    parser.add_option("--clean", dest="clean", action='store_true', default=False,
-                      help='clean from cosmic \t\t [%default]')
-    parser.add_option("--pos", dest="pos", action='store_true', default=False,
-                      help='chose mag interactively \t\t [%default]')
+    parser.add_option("-R", "--RA", dest="RA", default='',
+                      type='str', help='RA coordinate \t\t\t %default')
+    parser.add_option("-D", "--DEC", dest="DEC", default='',
+                      type='str', help='DEC coordinate \t\t\t %default')
+    parser.add_option("-p", "--psf", dest="psf", default='',
+                      type='str', help='psf image \t\t\t %default')
+    parser.add_option("--mag", dest="mag", type=float, default=0, help='mag to subtract \t\t [%default]')
+    parser.add_option("-s", "--show", action='store_true', help='Show output \t\t [%default]')
+    parser.add_option("-f", "--force", action='store_true', help='force archiving \t\t [%default]')
+    parser.add_option("--uncleaned", dest="clean", action='store_false', help='do not use cosmic ray cleaned image \t\t [%default]')
+    parser.add_option("-i", action='store_true', help='choose mag and position interactively \t\t [%default]')
+    parser.add_option("--subtract-mag-from-header", action='store_true', help='automatically subtract mag from header of file \t\t [%default]')
     option, args = parser.parse_args()
-    if len(args) < 1:
+    if len(args) < 1: 
         sys.argv.append('--help')
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
@@ -57,10 +56,16 @@ if __name__ == "__main__":
     _dec = option.DEC
     _show = option.show
     _force = option.force
-    chosemag = option.mag
-    chosepos = option.pos
+    chosemag = option.i
+    chosepos = option.i
     _clean = option.clean
+    _mag = option.mag
+    _subtract_mag_from_header = option.subtract_mag_from_header
     # #################################
+    from pyraf import iraf
+    from iraf import digiphot
+    from iraf import daophot
+    import pywcs
     ##################################
     goon = False
     for fil in imgdic:
@@ -213,27 +218,31 @@ if __name__ == "__main__":
                             answ = 'y'
                     else:
                         answ = 'y'
-                    raw_input('ddd')
                     agnkey.util.delete('_tmp.fits,_tmp2.fits,_tmp2.fits.art,ddd')
                     if answ == 'n':
                         agnkey.util.delete(imgout)
                         _mag0 = raw_input('which magnitude  ' + str(_mag) + ' ?')
                         if _mag0: _mag = _mag0
                 print 'insert in the archive'
+                _targid = agnkey.agnsqldef.targimg(imgout)
                 hd = agnkey.util.readhdr(imgout)
                 dictionary = {'dateobs': agnkey.util.readkey3(hd, 'date-obs'),
                               'exptime': agnkey.util.readkey3(hd, 'exptime'),
-                              'filter': agnkey.util.readkey3(hd, 'filter'), 'jd': agnkey.util.readkey3(hd, 'JD'),
+                              'filter': agnkey.util.readkey3(hd, 'filter'), 
+                              'mjd': agnkey.util.readkey3(hd, 'mjd'),
                               'telescope': agnkey.util.readkey3(hd, 'telescop'),
                               'airmass': agnkey.util.readkey3(hd, 'airmass'),
-                              'objname': agnkey.util.readkey3(hd, 'object'), 'ut': agnkey.util.readkey3(hd, 'ut'),
+                              'objname': agnkey.util.readkey3(hd, 'object'), 
+                              'ut': agnkey.util.readkey3(hd, 'ut'),
                               'wcs': agnkey.util.readkey3(hd, 'wcserr'),
                               'instrument': agnkey.util.readkey3(hd, 'instrume'),
-                              'ra0': agnkey.util.readkey3(hd, 'RA'), 'dec0': agnkey.util.readkey3(hd, 'DEC')}
+                              'ra0': agnkey.util.readkey3(hd, 'RA'), 
+                              'dec0': agnkey.util.readkey3(hd, 'DEC')}
                 dictionary['namefile'] = string.split(imgout, '/')[-1]
                 dictionary['wdirectory'] = agnkey.util.workingdirectory + '1mtel/' + \
                                            agnkey.util.readkey3(hd,'date-night') + '/'
                 dictionary['filetype'] = 4
+                dictionary['targid'] = _targid
                 ###################    insert in dataredulco
                 ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',
                                                       string.split(imgout, '/')[-1], '*')

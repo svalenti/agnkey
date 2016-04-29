@@ -165,7 +165,7 @@ def filterst(telescope):
               'fts':{'U':'U','B':'Bessell-B','V':'Bessell-V','R':'Bessell-R','I':'Bessell-I','u':'up','g':'SDSS-G','r':'SDSS-R','i':'SDSS-I','z':'Pan-Starrs-Z','landolt':'landolt','sloan':'sloan'}}
     _filters['1m0-03']=_filters['1m0-04']=_filters['1m0-05']=_filters['1m0-07']=_filters['1m0-08']=_filters['lsc']
     _filters['1m0-09']=_filters['1m0-10']=_filters['1m0-11']=_filters['1m0-12']=_filters['1m0-13']=_filters['lsc']
-    _filters['cpt']=_filters['all']=_filters['coj']=_filters['lsc']
+    _filters['cpt']=_filters['kb']=_filters['fl']=_filters['all']=_filters['coj']=_filters['lsc']
     return _filters[telescope]
 
 ###############################################################################

@@ -64,11 +64,13 @@ coomandsn = {'LSQ12fxd': '-c -x 3 -y 3 --bkg 3 --size 6',
     }
 
 
-def runin(epoch):
+def runin(epoch,_type):
     import os
+    start = string.split(epoch,'-')[0][0:4]+'-'+string.split(epoch,'-')[0][4:6]+'-'+string.split(epoch,'-')[0][6:8]
+    end = string.split(epoch,'-')[1][0:4]+'-'+string.split(epoch,'-')[1][4:6]+'-'+string.split(epoch,'-')[1][6:8]
     try:
-        print 'queryipac.py' + ' -e ' + epoch
-        os.system('queryipac.py  -e ' + epoch)
+        print 'downloaddata.py -r '+_type+' -s '+start + ' -e '+ end
+        os.system('downloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
     except:
         print 'problem with ingestion'
 
@@ -172,19 +174,18 @@ if __name__ == "__main__":
     else:
         fil = ['landolt', 'sloan']
 
-    if _ingest:
-        print '\n### ingest raw data'
-        for i in range(0, len(tel)):    runin(epoch)  # ingest raw date
 
-        #  download raw floyds
+
+        #  upload req info in logtable
     _JDn = agnkey.agnsqldef.JDnow() - 10
     username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
-    print _JDn, username, passwd
     agnkey.util.downloadfloydsraw(_JDn, username, passwd)
 
+    if _ingest:
+        print '\n### ingest raw data \n'
+        runin(epoch,'image')  # ingest raw images
+        runin(epoch,'spectra')  # ingest raw spectra
 
-    #        print '\n### ingest redu data'
-    #        for i in range(0,len(tel)):    runin(tel[i],'',epoch,'redu') # ingest redu data
 
     if _filter:
         ff = ' -f ' + _filter
@@ -195,6 +196,14 @@ if __name__ == "__main__":
         tt = ''
     else:
         tt = '  -T ' + _telescope + ' '
+
+    ##########################################################################
+    #    added for new idl pipeline
+    print '\n####  add hjd, when missing '
+    os.system('agnloop.py -e ' + epoch + ' -s idlstart ')
+    os.system('agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
+    #############################################################################
+
     print '\n####  compute  astrometry, when missing '
     #  compute astrometry when tim astrometry failed
     os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
@@ -202,14 +211,14 @@ if __name__ == "__main__":
     #  try again or set to bad image
     os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
 
+    #####################################################
     print '\n####  compute  psf, when missing '
     os.system('agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
 
+    ######################################################
     #    added for new calibration
     os.system('agnloop.py -e ' + epoch + ' -s apmag ')  #  compute psf
-    #    added for new idl pipeline
-    os.system('agnloop.py -e ' + epoch + ' -s idlstart ')  #  compute psf
-    #############################################################################
+
 
     ll = agnkey.agnloopdef.get_list(epoch, 'all', '', '', '', '', '', '', 'dataredulco', _filetype)
     if ll:
@@ -227,7 +236,8 @@ if __name__ == "__main__":
         _SN0 = ''
         _Std = ''
         _ra0, _dec0, _Std = agnkey.util.checksnlist(_dir + img, 'standardlist.txt')
-        if not _Std:  _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'supernovaelist.txt')
+        if not _Std:  
+            _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'supernovaelist.txt')
         if not _Std and not _SN0:
             _ra0, _dec0, _SS, _type = agnkey.util.checksndb(_dir + img, 'lsc_sn_pos')
             if _SS:
@@ -277,8 +287,10 @@ if __name__ == "__main__":
     print '\n### not in the lists:\n ' + str(notinthelist)
     #                 compute zero point for different fields
     for field in fil:
-        if field == 'landolt': listacampi = standard + landoltcal
-        if field == 'sloan':   listacampi = standard + sloancal
+        if field == 'landolt': 
+            listacampi = standard + landoltcal
+        if field == 'sloan':   
+            listacampi = standard + sloancal
         for _standard in listacampi:
             if _telescope == 'all':
                 for _tel in ['elp', 'lsc', 'cpt', 'coj']:

@@ -166,7 +166,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
     _object=agnkey.util.readkey3(hdr,'object')
     _ra=agnkey.util.readkey3(hdr,'RA')
     _dec=agnkey.util.readkey3(hdr,'DEC')
-    print _filter
     if _telescope in ['lsc','1m0-04','1m0-05','1m0-09']:
         kk=agnkey.sites.extintion('ctio')
     elif _telescope in ['elp','1m0-08']:
@@ -190,8 +189,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
     else:
         colorefisso=agnkey.sites.colfix(_instrume,_calib)
 
-    print redo
-    print _cat
     if _cat and not redo:
         print 'already calibrated'
     else:
@@ -213,8 +210,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         magerrsex=array(column['merrp3'],float)
      else: sys.exit(_type+' not valid (ph or fit)')
      
-
-     print len(rasex)
      if not cutmag: cutmag=99
      #else: cutmag= cutmag-2.5*math.log10(float(_exptime))
      if len(compress( array(magsex) < float(cutmag) , magsex)) < 5 : cutmag=99  # not cut if only few object
@@ -223,7 +218,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
      magerrsex = compress(array(magsex,float)<=cutmag,magerrsex)
      magsex    = compress(array(magsex,float)<=cutmag,array(magsex))
 
-     print len(rasex)
      if _interactive:
         iraf.set(stdimage='imt1024')
         iraf.display(re.sub('.sn2','',img),1,fill=True,Stdout=1)
@@ -252,7 +246,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         if _interactive:
               vector=[k+' '+v for k,v in  zip(standardpixC['ra'],standardpixC['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
-              print 'yelow circles sextractor'
+              print 'yellow circles sextractor'
 
         xstdC=standardpixC['ra']
         ystdC=standardpixC['dec']
@@ -273,7 +267,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
               vector=[k+' '+v for k,v in  zip(standardpixL['ra'],standardpixL['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
               #iraf.tvmark(1,'tmp.stdL.pix',mark="circle",number='yes',label='no',radii=8,nxoffse=5,nyoffse=5,color=204,txsize=2)
-              print 'yelow circles sextractor'
+              print 'yellow circles sextractor'
 
         xstdL=standardpixL['ra']
         ystdL=standardpixL['dec']
@@ -536,7 +530,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
 #              array(magsex1,float)
 #              ZZcut,sigmacut,mediancut=zeronew(ZZ,maxiter=10,nn=5,verbose=False,show)
 
-        print media
         if media!=9999: 
               agnkey.agnsqldef.updatevalue('dataredulco','ZPN',media,string.split(re.sub('.sn2.fits','.fits',img),'/')[-1],'agnkey','namefile')
               agnkey.agnsqldef.updatevalue('dataredulco','ZPNERR',mediaerr,string.split(re.sub('.sn2.fits','.fits',img),'/')[-1],'agnkey','namefile')
@@ -583,10 +576,12 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                 valore='%3.3s %6.6s %6.6s  %6.6s  %6.6s' %  (str(ll),str(result[ll][0]),str(result[ll][2]),str(result[ll][1]),str(result[ll][3]))
                 print '### ',valore
                 agnkey.util.updateheader(img,0,{'zp'+ll:[str(valore),'a b sa sb in y=a+bx']})
-                if ll[0]==ll[2]: num=2
-                elif ll[0]==ll[1]: num=1
-                else: sys.exit('somthing wrong with color '+ll)
-                print ll,num
+                if ll[0]==ll[2]: 
+                      num=2
+                elif ll[0]==ll[1]: 
+                      num=1
+                else: 
+                      sys.exit('somthing wrong with color '+ll)
                 try:
                     print 'zcol'+str(num),ll[1:],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1]
                     agnkey.agnsqldef.updatevalue(database,'zcol'+str(num),ll[1:],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
@@ -601,7 +596,6 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                           agnkey.agnsqldef.updatevalue(database,'dz'+str(num),result[ll][1],string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
                           agnkey.agnsqldef.updatevalue(database,'dc'+str(num),result[ll][3],string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
                     if result[ll][0]!=9999:
-                          print _catalogue
                           agnkey.agnsqldef.updatevalue(database,'zcat',string.split(_catalogue,'/')[-1],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
                           if os.path.isfile(string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1]):
                                 agnkey.agnsqldef.updatevalue(database,'zcat',string.split(_catalogue,'/')[-1],string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
@@ -705,7 +699,6 @@ def fitcol2(_col,_dmag,band,col,fixcol='',show=False,rejection=2):
         if show:
             import time
             from pylab import plot,ion,clf,draw,xlabel,ylabel,title
-            print len(_col),len(xx0)
             ion()
             clf()
             plot(_col,_dmag,'ob')
@@ -785,44 +778,6 @@ def meanclip3(xx,yy,slope, clipsig=3.0, maxiter=5, converge_num=0.1, verbose=0):
     return mean0, sig,slope,yy0,xx0
 
 ########################################################################
-
-#def makecatalogue(imglist):
-#    import pyfits
-#    import agnkey
-#    from numpy import array, zeros
-#    filters={}
-#    dicti={}
-#    for img in imglist:
-#        t = pyfits.open(img)
-#        tbdata = t[1].data
-#        hdr1=t[0].header
-#        hdr2=t[1].header
-#        _filter=agnkey.util.readkey3(hdr1,'filter')
-#        _exptime=agnkey.util.readkey3(hdr1,'exptime')
-#        _airmass=agnkey.util.readkey3(hdr1,'airmass')
-#        _telescope=agnkey.util.readkey3(hdr1,'telescop')
-#        if _filter not in dicti: dicti[_filter]={}
-#        if img not in dicti[_filter]: dicti[_filter][img]={}
-#        for jj in hdr1:
-#            if jj[0:2]=='ZP':
-#                dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
-
-#        dicti[_filter][img]['JD']=agnkey.util.readkey3(hdr1,'JD')
-#        dicti[_filter][img]['exptime']=_exptime
-#        dicti[_filter][img]['airmass']=_airmass
-#        dicti[_filter][img]['telescope']=_telescope
-        
-#        for col in tbdata.columns.names:
-#            dicti[_filter][img][col]=tbdata.field(col)
-#        if 'ra0' not in tbdata.columns.names:
-#            dicti[_filter][img]['ra0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
-#            dicti[_filter][img]['dec0']=array(zeros(len(dicti[_filter][img]['ra'])),float)
-#            for i in range(0,len(dicti[_filter][img]['ra'])):
-##                dicti[_filter][img]['ra0'][i]=float(iraf.real(dicti[_filter][img]['ra'][i]))*15
-##                dicti[_filter][img]['dec0'][i]=float(iraf.real(dicti[_filter][img]['dec'][i]))
-#                dicti[_filter][img]['ra0'][i],dicti[_filter][img]['dec0'][i]=agnkey.agnabsphotdef.deg2HMS(dicti[_filter][img]['ra'][i],dicti[_filter][img]['dec'][i])
-#    return dicti
-
 ######################################################################################################
 def finalmag(Z1,Z2,C1,C2,m1,m2):
     color=(Z1-Z2+m1-m2)/(1-(C1-C2))
@@ -874,7 +829,6 @@ def zeropoint(data,mag,maxiter=10,nn=2,show=False):
     if show:  
         import pylab as pl
         pl.ion()
-        print len(data2)
 
     while iter < maxiter and len(data2)>5:
         z1=np.mean(data1)
@@ -1059,7 +1013,6 @@ def zeronew(ZZ,maxiter=10,nn=5,verbose=False,show=False):
      while iter < maxiter and len(ZZcut)>5 and cut>0:
           iter+=1
           if verbose:
-               print iter
                print 'reject  '+str(cut)+' objects'  
                print 'number of object= '+str(len(ZZcut))
                print 'median=  '+str(mediancut)
@@ -1084,9 +1037,7 @@ def zeronew(ZZ,maxiter=10,nn=5,verbose=False,show=False):
           pl.draw()
           import time
           time.sleep(1)
-          #raw_input('go on')
-     
-     print np.std(ZZcut)
+                      
      return ZZcut,sigmacut,mediancut
 
 #######################################################################

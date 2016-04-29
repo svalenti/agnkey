@@ -11,8 +11,15 @@ import time
 import agnkey
 import pyfits
 import numpy as np
-
-
+from astropy.io import fits
+from astropy import wcs as pywcs
+"""
+this task:
+- query vizier (or local catalog)
+- read sn2.fits catalogue 
+- compute zeropoint using sn2.fits mag and catalog 
+- measure daophot aperture magnitude on target with 3 aperture 
+"""
 def vizq(_ra, _dec, catalogue, radius):
     ''' Query vizquery '''
     import os, string, re
@@ -152,7 +159,9 @@ if __name__ == "__main__":
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
     for img in imglist:
-        print img
+        #
+        #   read sn2.fits catalog  
+        # 
         table = agnkey.util.makecatalogue2([img])
         _filter = table.keys()[0]
         _rasex = table[table.keys()[0]][table[table.keys()[0]].keys()[0]]['ra0']
@@ -167,13 +176,12 @@ if __name__ == "__main__":
         hdr = pyfits.open(img)[0].header
         _ra0 = hdr['RA']
         _dec0 = hdr['DEC']
-
         _exptime = hdr['exptime']
+        _object = agnkey.util.readkey3(hdr, 'object')
+
         # _ra0,_dec0=agnkey.agnabsphotdef.deg2HMS(_ra0,_dec0)
         # _apass=vizq(_ra0,_dec0,'apass',20)
         #_sloan=vizq(_ra0,_dec0,'sdss7',20)
-
-        _object = agnkey.util.readkey3(hdr, 'object')
 
         mag = _magp4
         magerr = _merrp4
@@ -254,61 +262,69 @@ if __name__ == "__main__":
 
         if len(pos0) >= 3:
 ############################       compute zero point with aperture 2
-            xx2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99),
+            xx1 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
-            yy2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99), np.array(_magp2[pos0]))
+            yy1 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99), np.array(_magp2[pos0]))
 
-            yy2err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp2[pos0])) <= 99),
+            yy1err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp2[pos0])) <= 99),
                                 np.array(magerr[pos0]))
-            xx2err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99),
+            xx1err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99),
                                 np.array(_cat[_filter + 'err'])[pos1])
-            ZZ2 = np.array(xx2 - yy2)
+            ZZ1 = np.array(xx1 - yy1)
 
             if _verbose:
                 _show = True
             else:
                 _show = False
 
-            data2, std2, ZZ2 = agnkey.agnabsphotdef.zeronew(ZZ2, maxiter=10, nn=2, verbose=_verbose, show=_show)
+            data1, std1, ZZ1 = agnkey.agnabsphotdef.zeronew(ZZ1, maxiter=10, nn=2, verbose=_verbose, show=_show)
 ############################       compute zero point with aperture 3
-            xx3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
+            xx2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
-            yy3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99), np.array(_magp3[pos0]))
+            yy2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99), np.array(_magp3[pos0]))
 
-            yy3err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp3[pos0])) <= 99),
+            yy2err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp3[pos0])) <= 99),
                                 np.array(magerr[pos0]))
-            xx3err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
+            xx2err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
+                                np.array(_cat[_filter + 'err'])[pos1])
+            ZZ2 = np.array(xx2 - yy2)
+            data2, std2, ZZ2 = agnkey.agnabsphotdef.zeronew(ZZ2, maxiter=10, nn=2, verbose=_verbose, show=_show)
+############################       compute zero point with aperture 4
+            xx3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
+                             np.array(_cat[_filter])[pos1])
+            yy3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99), np.array(_magp4[pos0]))
+
+            yy3err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp4[pos0])) <= 99),
+                                np.array(magerr[pos0]))
+            xx3err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
                                 np.array(_cat[_filter + 'err'])[pos1])
             ZZ3 = np.array(xx3 - yy3)
             data3, std3, ZZ3 = agnkey.agnabsphotdef.zeronew(ZZ3, maxiter=10, nn=2, verbose=_verbose, show=_show)
-############################       compute zero point with aperture 4
-            xx4 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
-                             np.array(_cat[_filter])[pos1])
-            yy4 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99), np.array(_magp4[pos0]))
-
-            yy4err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_merrp4[pos0])) <= 99),
-                                np.array(magerr[pos0]))
-            xx4err = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
-                                np.array(_cat[_filter + 'err'])[pos1])
-            ZZ4 = np.array(xx2 - yy2)
-            data4, std4, ZZ4 = agnkey.agnabsphotdef.zeronew(ZZ4, maxiter=10, nn=2, verbose=_verbose, show=_show)
-            print 'here'
 #######################################################################
-            ZZ0=ZZ4
-            std0=std4
-            agnkey.agnsqldef.updatevalue('dataredulco', 'ZPN', float(ZZ0),
+            #ZZ0=ZZ3
+            #std0=std3
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ1', float(ZZ1),
                                          string.split(re.sub('sn2.', '', img), '/')[-1])
-            agnkey.agnsqldef.updatevalue('dataredulco', 'ZPNERR', float(std0),
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ1err', float(std1),
                                          string.split(re.sub('sn2.', '', img), '/')[-1])
-            agnkey.agnsqldef.updatevalue('dataredulco', 'ZPNNUM', len(data2),
-                                         string.split(re.sub('sn2.', '', img), '/')[-1])
-            headers = {'ZPN': [float(ZZ0), 'zeropoint'], 'ZPNERR': [float(std0), 'zeropoint std'],
-                       'ZPNNUM': [len(data2), 'number of stars used for zeropoint']}
-            agnkey.util.updateheader(img, 0, headers)
 
-            agnkey.util.updateheader(img, 0, {'ZZ2': [ZZ2, 'zeropoint with aperture 2']})
-            agnkey.util.updateheader(img, 0, {'ZZ3': [ZZ3, 'zeropoint with aperture 3']})
-            agnkey.util.updateheader(img, 0, {'ZZ4': [ZZ4, 'zeropoint with aperture 4']})
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ2', float(ZZ2),
+                                         string.split(re.sub('sn2.', '', img), '/')[-1])
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ2err', float(std2),
+                                         string.split(re.sub('sn2.', '', img), '/')[-1])
+
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ3', float(ZZ3),
+                                         string.split(re.sub('sn2.', '', img), '/')[-1])
+            agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ3err', float(std3),
+                                         string.split(re.sub('sn2.', '', img), '/')[-1])
+
+#            headers = {'ZPN': [float(ZZ0), 'zeropoint'], 'ZPNERR': [float(std0), 'zeropoint std'],
+#                       'ZPNNUM': [len(data2), 'number of stars used for zeropoint']}
+#            agnkey.util.updateheader(img, 0, headers)
+
+            agnkey.util.updateheader(img, 0, {'ZZ1': [ZZ1, 'zeropoint with aperture 2']})
+            agnkey.util.updateheader(img, 0, {'ZZ2': [ZZ2, 'zeropoint with aperture 3']})
+            agnkey.util.updateheader(img, 0, {'ZZ3': [ZZ3, 'zeropoint with aperture 4']})
 
 
             if _ra and _dec:
@@ -316,12 +332,8 @@ if __name__ == "__main__":
                 print _ra,_dec
                 rasn = _ra
                 decsn = _dec
-
                 distvec, pos0, pos1 = crossmatch(_rasex, _decsex, [_ra], [_dec], 5)
-                print distvec, pos0, pos1
-                print _magp2[pos0]
-                print _magp3[pos0]
-                print _magp4[pos0]
+
             else:
                 targ = agnkey.agnsqldef.targimg(img)
                 aa = agnkey.agnsqldef.query(['select ra_sn,dec_sn from lsc_sn_pos where id="' + str(targ) + '"'])
@@ -334,27 +346,30 @@ if __name__ == "__main__":
 
             if rasn and decsn:
                 from pyraf import iraf
-
                 iraf.astcat(_doprint=0)
                 iraf.imcoords(_doprint=0)
                 iraf.digiphot(_doprint=0)
                 iraf.daophot(_doprint=0)
 
                 lll = [str(rasn) + '    ' + str(decsn)]
-                sss = iraf.wcsctran('STDIN', 'STDOUT', img, Stdin=lll, inwcs='world', units='degrees degrees',
+#                hdr1 = fits.getheader(re.sub('sn2.','',img))
+#                wcs1 = pywcs.WCS(hdr1)
+#                print rasn,decsn
+#                sky = zip([rasn], [decsn])
+#                pix0 = wcs1.wcs_world2pix(sky, 1)
+#                xx10,yy10 = zip(*pix0)
+#                print xx10,yy10 
+                sss = iraf.wcsctran('STDIN', 'STDOUT', re.sub('sn2.','',img), Stdin=lll, inwcs='world', units='degrees degrees',
                                     outwcs='logical', columns='1 2', formats='%10.1f %10.1f', Stdout=1)
 
                 if _verbose:
                     iraf.display(re.sub('sn2.','',img),fill='yes',frame=1)
-                    print sss[-1]
+                    iraf.display(re.sub('diff.sn2.','',img),fill='yes',frame=2)
                     iraf.tvmark(1, 'STDIN', Stdin = list(sss) ,mark = "circle" , number = 'yes' ,label = 'no' ,
                                 radii = 10, nxoffse = 5, nyoffse = 5, color = 204, txsize = 2)
-#                    raw_input('ddddd')
+                    iraf.tvmark(2, 'STDIN', Stdin = list(sss) ,mark = "circle" , number = 'yes' ,label = 'no' ,
+                                radii = 10, nxoffse = 5, nyoffse = 5, color = 204, txsize = 2)
 
-
-                f = open('_coord', 'w')
-                f.write(sss[-1])
-                f.close()
                 _gain = agnkey.util.readkey3(hdr, 'gain')
                 _ron = agnkey.util.readkey3(hdr, 'ron')
                 _exptime = agnkey.util.readkey3(hdr, 'exptime')
@@ -366,7 +381,6 @@ if __name__ == "__main__":
                 zmag= 0.0
                 _datamax=45000
                 _center='no'
-
                 iraf.fitskypars.annulus = a4
                 iraf.fitskypars.dannulus = a4
                 iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
@@ -394,17 +408,15 @@ if __name__ == "__main__":
                 #            else:
                 #                aaa=iraf.noao.digiphot.daophot.phot(re.sub('sn2.','',img),'_coord','STDOUT',veri='no',verbose='no',Stdout=1)
                 ####################################################
-                aaa = iraf.noao.digiphot.daophot.phot(re.sub('sn2.', '', img), '_coord', 'STDOUT', veri='no',
-                                                      verbose='no', Stdout=1)
-
-                #            for ii in aaa: print ii
-
-                epadu = float(string.split([i for i in aaa if 'EPADU' in i][0])[3])
-                aaa = [i for i in aaa if i[0] != '#']
-                print aaa
-                rad3, sum3, area3, flux3, mag3, dmag3 = string.split(aaa[-1])[0:6]
-                rad2, sum2, area2, flux2, mag2, dmag2 = string.split(aaa[-2])[0:6]
-                rad1, sum1, area1, flux1, mag1, dmag1 = string.split(aaa[-3])[0:6]
+                bbb = iraf.noao.digiphot.daophot.phot(re.sub('sn2.', '', img), 'STDIN', 'STDOUT', veri='no',
+                                                      verbose='no', Stdin=[sss[-1]], Stdout=1)
+                
+                epadu = float(string.split([i for i in bbb if 'EPADU' in i][0])[3])
+                bbb = [i for i in bbb if i[0] != '#']
+                bbb=bbb[:-1]
+                rad3, sum3, area3, flux3, mag3, dmag3 = string.split(bbb[-1])[0:6]
+                rad2, sum2, area2, flux2, mag2, dmag2 = string.split(bbb[-2])[0:6]
+                rad1, sum1, area1, flux1, mag1, dmag1 = string.split(bbb[-3])[0:6]
 
                 if str(mag1).count('.')==2:
                     dmag1='0.'+mag1.rsplit('.',mag1.count('.')-1)[1]
@@ -416,76 +428,109 @@ if __name__ == "__main__":
                     dmag3='0.'+mag3.rsplit('.',mag3.count('.')-1)[1]
                     mag3=mag3.rsplit('.',mag3.count('.')-1)[0]
 
-                MSKY, STDEV, SSKEW, NSKY, NSREJ, SIER, SERROR, _ = string.split(aaa[2])
-                error3 = np.sqrt(
-                    float(flux3) / float(epadu) + float(area3) * (float(STDEV) ** 2) + (float(area3) ** 2) * float(
-                        STDEV) ** 2 / float(NSKY))
-
-                if 'diff' in img:
-                    if 'apfl1re' in hdr and 'dapfl1re':
-                        print 'zeropoint there'
-                        FLUXref = hdr['apfl1re']
-                        dFLUXref = hdr['dapfl1re']
+                MSKY, STDEV, SSKEW, NSKY, NSREJ, SIER, SERROR, _ = string.split(bbb[3])
+                try:
+                    aaa = float(flux1) / float(epadu) + float(area1) * (float(STDEV) ** 2) + (float(area1) ** 2) *\
+                          float(STDEV) ** 2 / float(NSKY)
+                    if aaa>=0:
+                        error1 = np.sqrt(aaa)
                     else:
-                        FLUXref = ''
-
-                    if 'ZPNref' in hdr:
-                        print 'flux there'
-                        ZZ0ref = hdr['ZPNref']
+                        error1 = 0
+                except:
+                    error1 = 0
+                try:
+                    aaa=np.sqrt(float(flux2) / float(epadu) + float(area2) * (float(STDEV) ** 2) + (float(area2) ** 2) *\
+                                     float(STDEV) ** 2 / float(NSKY))
+                    if aaa>=0:
+                        error2 = np.sqrt(aaa)
                     else:
-                        ZZ0ref = ''
-
-                    if FLUXref and ZZ0ref:
-                        #print FLUXref, dFLUXref, flux3, error3
-                        if float(ZZ0ref) == float(ZZ0):
-                            print 'difference image scaled to the reference, zero point of the difference ' \
-                                  'image is the same'
-                            magfromflux = -2.5 * np.log10((float(FLUXref)) + (float(flux3) / _exptime))
-                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
-                                (float(flux3) / _exptime) + float(FLUXref))
-                        else:
-                            magfromflux = -2.5 * np.log10(
-                                (float(FLUXref)) * 10 ** ((float(ZZ0ref) - ZZ0) / -2.5) + (float(flux3) / _exptime))
-                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
-                                (float(flux3) / _exptime) + float(FLUXref))
-                            print 'difference image scaled to target image, need  zeropoint of both images'
-
-                        print  'this is a difference image\n I found a zeropoint and flux measurment in the ' \
-                               'reference image'
-                        print  "I'm going to replace tha magnitude at aperture 3 with this value"
-                        mag3 = magfromflux
-                        dmag3 = dmagfromflux
-                        #print mag3, dmag3
+                        error2 = 0
+                except:
+                    error2 = 0
+                try:
+                    aaa = np.sqrt(float(flux3) / float(epadu) + float(area3) * (float(STDEV) ** 2) + (float(area3) ** 2) *\
+                                  float(STDEV) ** 2 / float(NSKY))
+                    if aaa>=0:
+                        error3 = np.sqrt(aaa)
                     else:
-                        print 'Warning: this is a difference image, but I did not find a flux and zeropoint\n'
-                        print 'for the reference image, the reference image does not include the target we ' \
-                              'are measuring'
-
+                        error3 = 0
+                except:
+                    error3 = 0
+#                if 'diff' in img:
+#                    if 'apfl1re' in hdr and 'dapfl1re':
+#                        print 'zeropoint there'
+#                        FLUXref = hdr['apfl1re']
+#                        dFLUXref = hdr['dapfl1re']
+#                    else:
+#                        FLUXref = ''
+#                    if 'ZPNref' in hdr:
+#                        print 'flux there'
+#                        ZZ0ref = hdr['ZPNref']
+#                    else:
+#                        ZZ0ref = ''
+#                    if FLUXref and ZZ0ref:
+#                        #print FLUXref, dFLUXref, flux3, error3
+#                        if float(ZZ0ref) == float(ZZ0):
+#                            print 'difference image scaled to the reference, zero point of the difference ' \
+#                                  'image is the same'
+#                            magfromflux = -2.5 * np.log10((float(FLUXref)) + (float(flux3) / _exptime))
+#                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
+#                                (float(flux3) / _exptime) + float(FLUXref))
+#                        else:
+#                            magfromflux = -2.5 * np.log10(
+#                                (float(FLUXref)) * 10 ** ((float(ZZ0ref) - ZZ0) / -2.5) + (float(flux3) / _exptime))
+#                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
+#                                (float(flux3) / _exptime) + float(FLUXref))
+#                            print 'difference image scaled to target image, need  zeropoint of both images'
+#
+#                        print  'this is a difference image\n I found a zeropoint and flux measurment in the ' \
+#                               'reference image'
+#                        print  "I'm going to replace tha magnitude at aperture 3 with this value"
+#                        mag3 = magfromflux
+#                        dmag3 = dmagfromflux
+#                        #print mag3, dmag3
+#                    else:
+#                        print 'Warning: this is a difference image, but I did not find a flux and zeropoint\n'
+#                        print 'for the reference image, the reference image does not include the target we ' \
+#                              'are measuring'
                         #            mag1,dmag1=string.split(aaa[-3])[4],string.split(aaa[-3])[5]
                         #            mag2,dmag2=string.split(aaa[-2])[4],string.split(aaa[-2])[5]
                         #            mag3,dmag3=string.split(aaa[-1])[4],string.split(aaa[-1])[5]
                         #            flux1,dflux1=string.split(aaa[-1])[3],string.split(aaa[-1])[3]
                         #            totalflux=(float(flux1)/_exptime)*10**(float(ZZ0)/-2.5)   #  compute total flux
                         #            print totalflux
-
                         #            raw_input('go on')
-                agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', float(flux3) / _exptime,
+                if str(flux1)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', float(flux1) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error1)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', float(error1) / _exptime,
                                              string.split(re.sub('sn2.', '', img), '/')[-1])
-                agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', float(error3) / _exptime,
-                                             string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(flux2)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux2', float(flux2) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error2)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux2', float(error2) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(flux3)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux3', float(flux3) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error3)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux3', float(error3) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
 
                 if mag1 != 'INDEF':
-                    print float(mag1)
-                    print float(mag1) + float(ZZ2)
+                    print mag1, ZZ1
+                    print float(mag1) + float(ZZ1)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(mag1) + ZZ2,
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(mag1) + ZZ1,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(dmag1),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(mag1),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
-                        print 'no possible'
+                        print 'no possible mag1'
                 else:
                         agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(9999),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
@@ -495,17 +540,17 @@ if __name__ == "__main__":
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
 
                 if mag2 != 'INDEF':
-                    print float(mag2)
-                    print float(mag2) + float(ZZ3)
+                    print mag2, ZZ2
+                    print float(mag2) + float(ZZ2)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(mag2) + ZZ3,
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(mag2) + ZZ2,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(dmag1),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(mag2),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
-                        print 'no possible'
+                        print 'no possible mag 2'
                 else:
                         agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(9999),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
@@ -514,17 +559,17 @@ if __name__ == "__main__":
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(9999),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                 if mag3 != 'INDEF':
-                    print float(mag3)
-                    print float(mag3) + float(ZZ4)
+                    print mag3, ZZ3, dmag3
+                    print float(mag3) + float(ZZ3)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(mag3) + ZZ4,
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(mag3) + ZZ3,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(dmag1),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(dmag3),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(mag3),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
-                        print 'no possible'
+                        print 'no possible mag3 '
                 else:
                         agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(9999),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
@@ -533,11 +578,13 @@ if __name__ == "__main__":
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(9999),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
 
-                headers = {'apflux1': [float(flux3) / _exptime, ''], 'dapflux1': [float(error3) / _exptime, '']}
+                headers = {'apflux1': [float(flux1) / _exptime, ''], 'dapflux1': [float(error1) / _exptime, ''],
+                           'apflux2': [float(flux2) / _exptime, ''], 'dapflux2': [float(error2) / _exptime, ''],
+                           'apflux3': [float(flux3) / _exptime, ''], 'dapflux3': [float(error3) / _exptime, '']}
+
                 agnkey.util.updateheader(img, 0, headers)
             else:
                 print 'ra and dec not defined'
-#            raw_input('go on')
 
             #'appmagap1':[float(mag1)+ZZ0,''],'appmagap2':[float(mag2)+ZZ0,''],'appmagap3':[float(mag3)+ZZ0,''],\
             #'dappmagap1':[float(dmag1),''],'dappmagap2':[float(dmag2),''],'dappmagap3':[float(dmag3),''],\

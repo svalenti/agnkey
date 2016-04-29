@@ -82,16 +82,16 @@ def archivereducedspectrum(img):
     # ra and  dec
     _ra = hdr.get('RA')
     _dec = hdr.get('DEC')
-    _jd = None
+    _mjd = None
     if ':' in str(_ra):
         _ra, _dec = deg2HMS(_ra, _dec)
     # JD
     if 'MJD' in hdr:
-        _jd = hdr.get('MJD') + 0.5
+        _mjd = hdr.get('MJD')
     elif 'MJD-OBS' in hdr:
-        _jd = hdr.get('MJD-OBS') + 0.5
+        _mjd = hdr.get('MJD-OBS')
     elif 'JD' in hdr:
-        _jd = hdr.get('JD')
+        _mjd = hdr.get('JD')-0.5
     elif 'DATE-OBS' in hdr:
         dd = ''
         try:
@@ -102,11 +102,11 @@ def archivereducedspectrum(img):
             except:
                 pass
         if dd:
-            _jd = JDnow(dd, False)
+            _mjd = JDnow(dd, False)-2400000.5
 
     if _telescope in ['fts', 'ftn']:
         dictionary = {'dateobs': _dateobs, 'exptime': hdr.get('exptime'), 'filter': hdr.get('filter'),
-                      'jd': float(hdr.get('MJD')) + 0.5,
+                      'mjd': float(hdr.get('MJD-OBS')),
                       'telescope': _telescope, 'airmass': hdr.get('airmass'), 'objname': _object, 'ut': _ut,
                       'instrument': hdr.get('instrume'), 'ra0': _ra, 'dec0': _dec, 'slit': hdr.get('APERWID'),
                       'targid': _targid, 'grism': re.sub('/', '_', hdr.get('GRISM')), 'original': hdr.get('arcfile'),
@@ -117,14 +117,14 @@ def archivereducedspectrum(img):
             _telescope = 'gs'
         else:
             _telescope = 'gn'
-        dictionary = {'dateobs': _dateobs, 'exptime': hdr.get('exptime'), 'filter': hdr.get('filter'), 'jd': _jd,
+        dictionary = {'dateobs': _dateobs, 'exptime': hdr.get('exptime'), 'filter': hdr.get('filter'), 'mjd': _mjd,
                       'telescope': _telescope, 'airmass': hdr.get('AIRMASS'), 'objname': _object, 'ut': _ut,
                       'instrument': hdr.get('INSTRUME'), 'ra0': _ra, 'dec0': _dec, 'slit': hdr.get('slit'),
                       'targid': _targid, 'grism': hdr.get('GRATING'),
                       'original': hdr.get('arcfile')}
 
     else:
-        dictionary = {'dateobs': _dateobs, 'exptime': hdr.get('exptime'), 'filter': hdr.get('filter'), 'jd': _jd,
+        dictionary = {'dateobs': _dateobs, 'exptime': hdr.get('exptime'), 'filter': hdr.get('filter'), 'mjd': _mjd,
                       'telescope': _telescope, 'airmass': hdr.get('airmass'), 'objname': _object, 'ut': _ut,
                       'instrument': hdr.get('instrume'), 'ra0': _ra, 'dec0': _dec, 'slit': hdr.get('slit'),
                       'targid': _targid, 'grism': hdr.get('GRISM'),

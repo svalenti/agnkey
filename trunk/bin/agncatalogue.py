@@ -87,7 +87,7 @@ if __name__ == "__main__":
                                 for ll in dicti[filt2][jj].keys():
                                     if 'ZP' in ll and ll[-2:] == cc:
                                         secondimage.append(jj)
-                                        jdvec.append(dicti[filt2][jj]['JD'] - dicti[_filter][img]['JD'])
+                                        jdvec.append(dicti[filt2][jj]['mjd'] - dicti[_filter][img]['mjd'])
                                         filtvec.append(filt2)
                                         colore.append(cc)
 
