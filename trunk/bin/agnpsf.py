@@ -205,7 +205,6 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
 def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='gauss', fixaperture=False,_catalog=''):
     try:
         import agnkey
-
         hdr = agnkey.util.readhdr(img + '.fits')
         instrument = agnkey.util.readkey3(hdr, 'instrume')
         print 'INSTRUMENT:', instrument
@@ -219,29 +218,23 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
                 pixelscale = agnkey.util.readkey3(hdr, 'CCDSCALE') * int(
                     string.split(agnkey.util.readkey3(hdr, 'CCDSUM'))[0])
 
-        if 'kb' in instrument:  # in ['kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79']:
+        if 'kb' in instrument:  
             scale = pixelscale
             _datamax = 45000
-        elif 'fl' in instrument: # in ['fl02', 'fl03', 'fl04']:
+        elif 'fl' in instrument:
             scale = pixelscale
             _datamax = 120000
-        elif 'fs' in instrument:  # in ['fs01', 'em03']:
+        elif 'fs' in instrument:
             scale = pixelscale
             _datamax = 65000
-#        elif instrument in ['fs02', 'fs03']:
-#            scale = pixelscale
-#            _datamax = 65000
-#        elif instrument in ['em01']:
-#            scale = pixelscale
-#            _datamax = 65000
         try:
             _wcserr = agnkey.util.readkey3(hdr, 'wcserr')
             if float(_wcserr) == 0:
-                if 'kb' in instrument:  # in ['kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79']:
+                if 'kb' in instrument:  
                     seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
-                elif 'fl' in instrument:     # in ['fl02', 'fl03', 'fl04']:
+                elif 'fl' in instrument:     
                     seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
-                elif 'fs' in instrument: # in ['fs01', 'fs02', 'fs03', 'em03', 'em01']:
+                elif 'fs' in instrument: 
                     if 'L1FWHM' in hdr:
                         seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
                     elif 'L1SEEING' in hdr:
@@ -289,32 +282,33 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         else:
             ############              run  sextractor                #####################################
             xs, ys, ran, decn, magbest, classstar, fluxrad, bkg = runsex(img, fwhm, threshold, scale)
-            ########  cut object with fwhm different than input fwhm          ##########################
-            tot = np.compress(abs(np.array(fluxrad) * 1.6 - fwhm) / fwhm < .5, fluxrad)
-            if len(tot) < 5:
-                print 'warning: fwhm from sexractor different from fwhm computed during pre-reduction'
-                print 'try using option --fwhm xxx'
+            
+            _ra1,_dec1,xx11,yy11,_mag,_dist = agnkey.agnastrodef.starsfields(img+'.fits',20,19)
+            if len(_ra1):
+                dist,pos0,pos1 = agnkey.agnastrodef.crossmatchxy(xs,ys,xx11,yy11,10)
+                if len(pos0):
+                    xs = xs[pos0]
+                    ys = ys[pos0]
+                    ran = ran[pos0]
+                    decn = decn[pos0]
+                    magbest = magbest[pos0]
+                    classstar = classstar[pos0]
+                    fluxrad = fluxrad[pos0]
+                    bkg = bkg[pos0]
+
 
             ff = open('tmp.cursor', 'w')
             for i in range(len(xs)):
-                _xs = np.delete(xs, i)
-                _ys = np.delete(ys, i)
-                dist2 = np.sqrt((_xs - xs[i]) ** 2 + (_ys - ys[i]) ** 2)
-                ###########           cut  star, not near other object    ##########################
-                if abs(fluxrad[i] * 1.6 - fwhm) / fwhm < .5 and min(dist2) > distance * fwhm:
-                    x1, x2 = int(xs[i] - fwhm * 3), int(xs[i] + fwhm * 3)
-                    y1, y2 = int(ys[i] - fwhm * 3), int(ys[i] + fwhm * 3)
-                    if x1 < 1: x1 = 1
-                    if y1 < 1: y1 = 1
-                    if x2 > int(xdim):
-                        x2 = int(xdim)
-                    if y2 > int(ydim):
-                        y2 = int(ydim)
-                    sect = '[' + str(x1) + ':' + str(x2) + ',' + str(y1) + ':' + str(y2) + ']'
+                x1, x2 = int(xs[i] - fwhm * 3), int(xs[i] + fwhm * 3)
+                y1, y2 = int(ys[i] - fwhm * 3), int(ys[i] + fwhm * 3)
+                sect = '[' + str(x1) + ':' + str(x2) + ',' + str(y1) + ':' + str(y2) + ']'
+                try:
                     fmax = iraf.imstat(img + sect, fields='max', Stdout=1)[1]
-                ##########       cut saturated object               ########################
+                    ##########       cut saturated object               ########################
                     if float(fmax) < _datamax:  # not saturated
                         ff.write('%10.3f %10.3f 1 m \n' % (xs[i], ys[i]))
+                except:
+                    pass
             ff.close()
 
             iraf.delete('tmp.lo?,tmp.sta?,tmp.gk?', verify=False)
@@ -345,7 +339,6 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
             fw = []
             ff = open('_psf.coo', 'w')
             for i in range(len(xns)):
-                if abs(_fws[i] - fwhm) / fwhm < .3:
                     ff.write('%10.3f %10.3f %7.2f \n' % (xns[i], yns[i], float(_fws[i])))
                     fw.append(_fws[i])
             ff.close()  ## End automatic selection

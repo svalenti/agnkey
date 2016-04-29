@@ -137,7 +137,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
 
    try:
       cursor = conn.cursor (MySQLdb.cursors.DictCursor)
-      if value in [True,False]:
+      if value in [True,False,'NULL']:
          cursor.execute ("UPDATE "+str(table)+" set "+column+"="+str(value)+" where "+str(namefile0)+"= "+"'"+str(namefile)+"'"+"   ")
       else:
          cursor.execute ("UPDATE "+str(table)+" set "+column+"="+"'"+str(value)+"'"+" where "+str(namefile0)+"= "+"'"+str(namefile)+"'"+"   ")
@@ -182,22 +182,22 @@ def insert_values(conn,table,values):
 
 ########################################################################
 #  dataraw
-#create table dataraw (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), jd FLOAT, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT, OBID INT, temperature FLOAT, observer VARCHAR(30) );
+#create table dataraw (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), mjd FLOAT, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT, OBID INT, temperature FLOAT, observer VARCHAR(30) );
 
 # dataredu
-#create table dataredu (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), jd FLOAT, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT, OBID INT, temperature FLOAT, observer VARCHAR(30) );
+#create table dataredu (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), mjd FLOAT, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT, OBID INT, temperature FLOAT, observer VARCHAR(30) );
 
 #reducomputed
 #create table redulog (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), bias  VARCHAR(50), flat VARCHAR(50), dark VARCHAR(50), illcorr VARCHAR(50), crosstalk VARCHAR(50), arc VARCHAR(50), skysub VARCHAR(50), mask  VARCHAR(50), fringing VARCHAR(50), astrometry  BOOL, zeropoint  VARCHAR(30), sensitivity VARCHAR(50), telluric  VARCHAR(50) );
 
 #(val BOOL, true INT DEFAULT 1, false INT DEFAULT 0)
 ###############################
-#create table datarawlco (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), jd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT,  fwhm FLOAT DEFAULT 9999, OBID INT, temperature FLOAT, PROPID VARCHAR(30), rotskypa FLOAT, observer VARCHAR(30), USERID VARCHAR(30), dateobs2  VARCHAR(23)) ;
+#create table datarawlco (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), mjd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT,  fwhm FLOAT DEFAULT 9999, OBID INT, temperature FLOAT, PROPID VARCHAR(30), rotskypa FLOAT, observer VARCHAR(30), USERID VARCHAR(30), dateobs2  VARCHAR(23)) ;
 
 
-#create table datarawfloyds (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), jd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT,  fwhm FLOAT DEFAULT 9999, OBID INT, temperature FLOAT, PROPID VARCHAR(30), rotskypa FLOAT, observer VARCHAR(30), USERID VARCHAR(30), dateobs2  VARCHAR(23)) ;
+#create table datarawfloyds (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, directory VARCHAR(100), objname VARCHAR(50), mjd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), grism VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), type VARCHAR(20), category VARCHAR(20) , tech VARCHAR(20) , airmass FLOAT, ut TIME, slit VARCHAR(20), lamp VARCHAR(20), status VARCHAR(50), input VARCHAR(50), note VARCHAR(100), ra0 FLOAT, dec0 FLOAT,  fwhm FLOAT DEFAULT 9999, OBID INT, temperature FLOAT, PROPID VARCHAR(30), rotskypa FLOAT, observer VARCHAR(30), USERID VARCHAR(30), dateobs2  VARCHAR(23)) ;
 
-#create table dataredulco (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, wdirectory VARCHAR(100), objname VARCHAR(50), jd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), airmass FLOAT, ut TIME, wcs FLOAT DEFAULT 9999, psf FLOAT DEFAULT 9999, apmag FLOAT, psfx FLOAT, psfy FLOAT, psfmag FLOAT DEFAULT 9999, psfdmag FLOAT, z1 FLOAT DEFAULT 9999, z2 FLOAT DEFAULT 9999, c1 FLOAT DEFAULT 9999, c2 FLOAT DEFAULT 9999, dz1 FLOAT DEFAULT 9999, dz2 FLOAT DEFAULT 9999, dc1 FLOAT DEFAULT 9999, dc2 FLOAT DEFAULT 9999 , zcol1 VARCHAR(2), zcol2 VARCHAR(2) , mag FLOAT DEFAULT 9999, dmag FLOAT, quality BOOL, zcat varchar(50) DEFAULT 'X', abscat varchar(50) DEFAULT 'X');
+#create table dataredulco (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namefile VARCHAR(50) UNIQUE KEY, wdirectory VARCHAR(100), objname VARCHAR(50), mjd DOUBLE, dateobs DATE, exptime FLOAT, filter VARCHAR(20), telescope VARCHAR(20), instrument VARCHAR(20), airmass FLOAT, ut TIME, wcs FLOAT DEFAULT 9999, psf FLOAT DEFAULT 9999, apmag FLOAT, psfx FLOAT, psfy FLOAT, psfmag FLOAT DEFAULT 9999, psfdmag FLOAT, z1 FLOAT DEFAULT 9999, z2 FLOAT DEFAULT 9999, c1 FLOAT DEFAULT 9999, c2 FLOAT DEFAULT 9999, dz1 FLOAT DEFAULT 9999, dz2 FLOAT DEFAULT 9999, dc1 FLOAT DEFAULT 9999, dc2 FLOAT DEFAULT 9999 , zcol1 VARCHAR(2), zcol2 VARCHAR(2) , mag FLOAT DEFAULT 9999, dmag FLOAT, quality BOOL, zcat varchar(50) DEFAULT 'X', abscat varchar(50) DEFAULT 'X');
 
 #create table inoutredu (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, namein VARCHAR(100), tablein VARCHAR(20), nameout VARCHAR(100), tableout VARCHAR(20) );
 
@@ -228,7 +228,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
       hostname, username, passwd, database=agnkey.agnsqldef.getconnection('lcogt')
 
    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
-   print instrument
+
    if telescope=='all': tellist=['elp','lsc','cpt','coj']
    elif telescope in ['1m0-08']: tellist=['elp']
    elif telescope in ['1m0-05','1m0-04','1m0-09']: tellist=['lsc']
@@ -249,7 +249,6 @@ def ingestdata(telescope,instrument,listepoch,_force):
    else:                       instrumentlist = [instrument]
 
    for epoch in listepoch:
-    print epoch
     if telescope in ['fts']:
        imglist=''
        print '\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/'
@@ -265,7 +264,6 @@ def ingestdata(telescope,instrument,listepoch,_force):
        for tel in tellist:
           for instrument in instrumentlist:
              directory=agnkey.util.rawdata+tel+'/'+instrument+'/'+str(epoch)+'/oracproc/'
-             print directory
              imglist=imglist+glob.glob(directory+'*0.fits')
     elif telescope in ['tar']:
        import agnkey
@@ -285,10 +283,9 @@ def ingestdata(telescope,instrument,listepoch,_force):
              if readkey3(hdr,'TELESCOP') not in tellist:             
                 tellist=tellist+[readkey3(hdr,'TELESCOP')]
              imglist=imglist+[img]
-       print tellist,instrumentlist
-       print imglist
-    else:      imglist=[]
-    datarawtable='datarawlco'
+    else:      
+       imglist=[]
+    datarawtable='dataredulco'
     for img in imglist:
       if not agnkey.agnsqldef.getfromdataraw(conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile') or _force:
          if telescope in ['fts','ftn']:
@@ -297,7 +294,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
                   _tech=None
                   dictionary={ 'lamp':readkey3(hdr,'lamp'), 'grism':readkey3(hdr,'grism'),'telescope':readkey3(hdr,'TELID'),\
                            'instrument':readkey3(hdr,'instrume'),'dec0':readkey3(hdr,'DEC'),'ra0':readkey3(hdr,'RA'),'ut':readkey3(hdr,'ut'),\
-                           'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
+                           'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'mjd':readkey3(hdr,'mjd'),\
                            'slit':readkey3(hdr,'slit'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'type':readkey3(hdr,'type'),\
                            'category':readkey3(hdr,'catg'),'tech':_tech,'observer':readkey3(hdr,'OBSERVER'),'propid':readkey3(hdr,'PROPID'),\
                            'OBID':readkey3(hdr,'GROUPID'),'USERID':readkey3(hdr,'USERID'),'temperature':readkey3(hdr,'CCDATEMP'),'dateobs2':readkey3(hdr,'DATE-OBS')}
@@ -313,7 +310,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
                      _tech=None
                      dictionary={ 'lamp':readkey3(hdr,'lamp'), 'grism':readkey3(hdr,'grism'),'telescope':readkey3(hdr,'telescop'),'fwhm':readkey3(hdr,'L1FWHM'),\
                            'instrument':readkey3(hdr,'instrume'),'dec0':readkey3(hdr,'DEC'),'ra0':readkey3(hdr,'RA'),'ut':readkey3(hdr,'ut'),\
-                           'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
+                           'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'mjd':readkey3(hdr,'mjd'),\
                            'slit':readkey3(hdr,'slit'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'type':readkey3(hdr,'type'),\
                            'category':readkey3(hdr,'catg'),'tech':_tech,'observer':readkey3(hdr,'OBSERVER'),'propid':readkey3(hdr,'PROPID'),\
                             'OBID':readkey3(hdr,'GROUPID'),'USERID':readkey3(hdr,'USERID'),'temperature':readkey3(hdr,'CCDATEMP'),'dateobs2':readkey3(hdr,'DATE-OBS')}
@@ -370,7 +367,6 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
       exist=agnkey.agnsqldef.getfromdataraw(conn,dataredutable,'namefile', string.split(img,'/')[-1],column2='namefile')
       if exist:
          if force=='yes':
-            print img,database
             agnkey.agnsqldef.deleteredufromarchive(string.split(img,'/')[-1],dataredutable)
             print 'delete line from '+str(database)
             exist=agnkey.agnsqldef.getfromdataraw(conn,dataredutable,'namefile', string.split(img,'/')[-1],column2='namefile')
@@ -399,7 +395,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             else:
                wcs='WCSERR'
             _targid=agnkey.agnsqldef.targimg(_dir+img)
-            dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
+            dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'mjd':readkey3(hdr,'mjd'),\
                            'telescope':readkey3(hdr,'telescop'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
                            'wcs':readkey3(hdr,wcs),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
             dictionary['namefile']=string.split(img,'/')[-1]
@@ -408,16 +404,13 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             dictionary['filetype']=filetype
             dictionary['targid']=_targid
 
-            print img
-            print dictionary
             print 'insert reduced'
-            print database
             ggg=agnkey.agnsqldef.getfromdataraw(conn, dataredutable, 'namefile',str(img), '*')
             if not ggg:
                agnkey.agnsqldef.insert_values(conn,dataredutable,dictionary)
             else:
                for voce in dictionary:
-#               for voce in ['filetype','ra0','dec0','jd','exptime','filter']:
+#               for voce in ['filetype','ra0','dec0','mjd','exptime','filter']:
                   agnkey.agnsqldef.updatevalue(dataredutable,voce,dictionary[voce],string.split(img,'/')[-1])
 
          ######################################
@@ -438,7 +431,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             else:
                wcs='WCSERR'
             _targid=agnkey.agnsqldef.targimg(_dir+img)
-            dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'jd':readkey3(hdr,'JD'),\
+            dictionary={'dateobs':readkey3(hdr,'date-obs'),'exptime':readkey3(hdr,'exptime'), 'filter':readkey3(hdr,'filter'),'mjd':readkey3(hdr,'mjd'),\
                            'telescope':readkey3(hdr,'TELID'),'airmass':readkey3(hdr,'airmass'),'objname':readkey3(hdr,'object'),'ut':readkey3(hdr,'ut'),\
                            'wcs':readkey3(hdr,wcs),'instrument':readkey3(hdr,'instrume'),'ra0':readkey3(hdr,'RA'),'dec0':readkey3(hdr,'DEC')}
             dictionary['namefile']=string.split(img,'/')[-1]
@@ -542,7 +535,6 @@ def targimg(img):
     aa=agnkey.agnsqldef.getfromdataraw(conn, 'recobjects', 'name', _object,'*')
     if len(aa)>=1: 
        _targid=aa[0]['targid']
-       print _targid
        aa=agnkey.agnsqldef.getfromdataraw(conn, 'lsc_sn_pos','targid',str(_targid),'*')
        _RA,_DEC,_SN=aa[0]['ra_sn'],aa[0]['dec_sn'],aa[0]['name']
     else:
@@ -563,7 +555,7 @@ def targimg(img):
        cc=agnkey.agnsqldef.getfromdataraw(conn,'permissionlog','targid', str(_targid),column2='groupname')
        if len(cc)==0:
           _JDn=agnkey.agnsqldef.JDnow()
-          dictionary2={'targid':_targid,'jd':_JDn,'groupname':32769}
+          dictionary2={'targid':_targid,'mjd':_JDn-2400000.5,'groupname':32769}
           agnkey.agnsqldef.insert_values(conn,'permissionlog',dictionary2)
     return _targid
 

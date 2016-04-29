@@ -225,7 +225,7 @@ if __name__ == "__main__":
             _tel = agnkey.util.readkey3(hd, 'telid')
             dictionary = {'dateobs': agnkey.util.readkey3(hd, 'date-obs'),
                           'exptime': agnkey.util.readkey3(hd, 'exptime'), 'filter': agnkey.util.readkey3(hd, 'filter'),
-                          'jd': agnkey.util.readkey3(hd, 'JD'), 'telescope': agnkey.util.readkey3(hd, 'telescop'),
+                          'mjd': agnkey.util.readkey3(hd, 'mjd'), 'telescope': agnkey.util.readkey3(hd, 'telescop'),
                           'airmass': agnkey.util.readkey3(hd, 'airmass'), 'objname': agnkey.util.readkey3(hd, 'object'),
                           'ut': agnkey.util.readkey3(hd, 'ut'), 'wcs': agnkey.util.readkey3(hd, 'wcserr'),
                           'instrument': agnkey.util.readkey3(hd, 'instrume'), 'ra0': agnkey.util.readkey3(hd, 'RA'),

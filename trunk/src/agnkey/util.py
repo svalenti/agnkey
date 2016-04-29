@@ -21,7 +21,7 @@ elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','va
 elif host in ['dark']:
    host = 'dark'
    workingdirectory = '/dark/hal/AGNKEY/'
-   execdirectory = '/home/hal/bin/'
+   execdirectory = '/dark/hal/bin/'
    rawdata = '/archive/engineering/'
    realpass = 'configure'
 elif 'physics.ucdavis' in host:
@@ -195,6 +195,7 @@ def readkey3(hdr,keyword):
                            'wcserr'    : 'WCSERR',\
                            'instrume'  : 'INSTRUME',\
                            'JD'        : 'MJD-OBS',\
+                           'mjd'        : 'MJD-OBS',\
                            'filter'    : 'FILTER',\
                            'gain'      : 'GAIN',\
                            'ron'       : 'RDNOISE',\
@@ -217,6 +218,7 @@ def readkey3(hdr,keyword):
                            'wcserr'    : 'WCSERR',\
                            'instrume'  : 'INSTRUME',\
                            'JD'        : 'MJD-OBS',\
+                           'mjd'        : 'MJD-OBS',\
                            'filter'    : 'FILTER',\
                            'gain'      : 'GAIN',\
                            'ron'       : 'RDNOISE',\
@@ -237,6 +239,7 @@ def readkey3(hdr,keyword):
                          'exptime'   : 'EXPTIME',\
                          'instrume'  : 'INSTRUME',\
                          'JD'        : 'MJD-OBS',\
+                         'mjd'        : 'MJD-OBS',\
                          'filter'    : 'FILTER',\
                          'gain'      : 'GAIN',\
                          'ron'       : 'RDNOISE',\
@@ -528,7 +531,7 @@ def residual(p,y,x):
         err = (y-p[i]*x**i)
     return err
 #########################################################################
-def defsex(namefile):
+def defsex(namefile, output='detections.cat'):
     import agnkey
     import string,re,os
     sexfile=agnkey.__path__[0]+'/standard/sex/default.sex'
@@ -537,7 +540,9 @@ def defsex(namefile):
     f.close()
     ff=open(namefile,'w')
     for i in ss:
-        if string.count(i,'PARAMETERS_NAME')==1:
+        if string.count(i,'CATALOG_NAME')==1:
+            ff.write('CATALOG_NAME  "' + output + ' # name of the output catalog\n')
+        elif string.count(i,'PARAMETERS_NAME')==1:
             ff.write('PARAMETERS_NAME  "' + agnkey.__path__[0]+'/standard/sex/default.param"\n')
         elif string.count(i,'FILTER_NAME') == 1:
             ff.write('FILTER_NAME  "' + agnkey.__path__[0]+'/standard/sex/default.conv"\n')
@@ -724,7 +729,7 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
     iraf.images(_doprint=0)
     iraf.imcoords(_doprint=0)
     iraf.proto(_doprint=0)
-    iraf.set(stdimage='imt1024')
+    iraf.set(stdimage='imt2048')
     hdr = agnkey.util.readhdr(fitstab)
     _filter = agnkey.util.readkey3(hdr,'filter')
     column = agnkey.util.makecatalogue2([fitstab])[_filter][fitstab]
@@ -767,42 +772,156 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
         iraf.tvmark(frame,'STDIN',Stdin=list(xy1),mark="cross",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=205,txsize=2)
 
 ###############################
+###############################
 
 def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
-    import time
-    start=time.time()
-    import pyfits
-    import agnkey
-    import re,os,string
-    from numpy import array,where,int16,uint8
-    hd = pyfits.getheader(img)
-    ar = pyfits.getdata(img)
-    _tel=hd['TELID']
-    if _tel in ['fts','ftn']:
-        agnkey.delete('new.fits')
-        out_fits = pyfits.PrimaryHDU(header=hd,data=ar)
-        out_fits.scale('float32',bzero=0,bscale=1)
-        out_fits.writeto('new.fits', clobber=True, output_verify='fix')
-        ar = pyfits.getdata('new.fits')
-        hd = pyfits.getheader('new.fits')
-        agnkey.delete('new.fits')
-        gain    = hd['GAIN']
-        sat     = 35000
-        rdnoise = hd['RDNOISE']
-    else:
-        gain    = hd['GAIN']
-        sat     = hd['SATURATE']
-        rdnoise = hd['RDNOISE']
-    niter = 1
-    print 'gain,sat,noise,sigclip,objlim,sigfrac'
-    ar[ar<0] = sat   #    set as saturated vaule all negative values
-    if 'L1SIGMA' in hd and 'L1MEAN' in hd:
-        _pssl = ((gain * hd['L1SIGMA'])**2 - rdnoise**2)/gain - hd['L1MEAN']
-    else:
-        _pssl = 0.0
+   import time
+   start=time.time()
+   import pyfits
+   import agnkey
+   import re,os,string
+   import numpy as np
+   ar, hd = pyfits.getdata(img, header=True)
 
-    print gain,sat,rdnoise,_sigclip,_objlim,_sigfrac,_pssl
-    c = agnkey.cosmics.cosmicsimage(ar
+   if 'TELID' in hd:
+      _tel=hd['TELID']
+   elif 'telescop' in hd:
+      _tel = hd['telescop']
+   else:
+      _tel='extdata'
+
+   if _tel in ['fts','ftn']:
+      agnkey.delete('new.fits')
+      out_fits = pyfits.PrimaryHDU(header=hd,data=ar)
+      out_fits.scale('float32',bzero=0,bscale=1)
+      out_fits.writeto('new.fits', clobber=True, output_verify='fix')
+      ar = pyfits.getdata('new.fits')
+      agnkey.delete('new.fits')
+      gain    = hd['GAIN']
+      sat     = 35000
+      rdnoise = hd['RDNOISE']
+   else:
+      if 'gain' in hd:
+         gain    = hd['GAIN']
+      else:
+         print 'warning GAIN not found'
+         gain = 1
+      if 'saturate' in hd:
+         sat     = hd['SATURATE']
+      else:
+         print 'warning SATURATE not found'
+         sat = 60000
+      if 'RDNOISE' in hd:
+         rdnoise = hd['RDNOISE']
+      else:
+         print 'warning RDNOISE not found'
+         rdnoise = 1
+   # need to trick LACosmic into using the right sigma for a sky-subtracted image
+   med = np.median(ar)                           # median pixel of image (in ADU)
+   noise = 1.4826*np.median(np.abs(ar - med))    # using median absolute deviation instead of sigma
+   _pssl = gain*noise**2 - rdnoise**2/gain - med # previously subtracted sky level
+   ar[ar < -_pssl] = sat                         # change (what will be) negative values to saturated
+
+#   # same as above but using stats from ORAC pipeline
+#   if 'L1SIGMA' in hd and 'L1MEAN' in hd:
+#      _pssl=((gain*hd['L1SIGMA'])**2-rdnoise**2)/gain-hd['L1MEAN']
+#   else:
+#      _pssl=0.0
+
+   print 'gain    sat     noise   sigclip objlim  sigfrac pssl'
+   print '{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl)
+
+   niter = 1
+   c = agnkey.cosmics.cosmicsimage(ar, pssl=_pssl, gain=gain, readnoise=rdnoise, sigclip=5, sigfrac=0.3 , objlim=5, satlevel=sat)
+   c.run(maxiter = niter)
+
+   out=re.sub('.fits','.clean.fits',string.split(img,'/')[-1])
+   outmask=re.sub('.fits','.mask.fits',string.split(img,'/')[-1])
+   outsat=re.sub('.fits','.sat.fits',string.split(img,'/')[-1])
+
+   out1=c.cleanarray
+   out2=c.cleanarray-c.rawarray
+   out3=c.getsatstars()
+
+   out_fits = pyfits.PrimaryHDU(header=hd,data=out1)
+   out_fits.writeto(out, clobber=True, output_verify='fix')
+
+   # we are going to register the mask for the template image,
+   # so it makes sense to save it as a float instead of an int
+   if 'temp' in img: pixtype = 'float32'
+   else:             pixtype = 'uint8'
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out2!=0).astype(pixtype))
+   out_fits.writeto(outmask, clobber=True, output_verify='fix')
+
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out3!=0).astype('uint8'))
+   out_fits.writeto(outsat, clobber=True, output_verify='fix')
+
+   print 'time to do cosmic ray rejection:', time.time()-start
+   return out,outmask,outsat
+
+##############################################
+
+def Docosmicold(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
+   import time
+   start=time.time()
+   import pyfits
+   import agnkey
+   import re,os,string
+   import numpy as np
+    
+   ar, hd = pyfits.getdata(img, header=True)
+
+   if 'TELID' in hd:
+      _tel=hd['TELID']
+   elif 'telescop' in hd:
+      _tel = hd['telescop']
+   else:
+      _tel='extdata'
+
+   if _tel in ['fts','ftn']:
+      agnkey.delete('new.fits')
+      out_fits = pyfits.PrimaryHDU(header=hd,data=ar)
+      out_fits.scale('float32',bzero=0,bscale=1)
+      out_fits.writeto('new.fits', clobber=True, output_verify='fix')
+      ar = pyfits.getdata('new.fits')
+      hd = pyfits.getheader('new.fits')
+      agnkey.delete('new.fits')
+      gain    = hd['GAIN']
+      sat     = 35000
+      rdnoise = hd['RDNOISE']
+   else:
+      if 'gain' in hd:
+         gain    = hd['GAIN']
+      else:
+         print 'warning GAIN not found'
+         gain = 1
+      if 'saturate' in hd:
+         sat     = hd['SATURATE']
+      else:
+         print 'warning SATURATE not found'
+         sat = 60000
+      if 'RDNOISE' in hd:
+         rdnoise = hd['RDNOISE']
+      else:
+         print 'warning RDNOISE not found'
+         rdnoise = 1
+   # need to trick LACosmic into using the right sigma for a sky-subtracted image
+   med = np.median(ar)                           # median pixel of image (in ADU)
+   noise = 1.4826*np.median(np.abs(ar - med))    # using median absolute deviation instead of sigma
+   _pssl = gain*noise**2 - rdnoise**2/gain - med # previously subtracted sky level
+   ar[ar < -_pssl] = sat                         # change (what will be) negative values to saturated
+
+   print 'gain    sat     noise   sigclip objlim  sigfrac pssl'
+   print '{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl)
+
+#    ar[ar<0] = sat   #    set as saturated vaule all negative values
+#    if 'L1SIGMA' in hd and 'L1MEAN' in hd:
+#        _pssl = ((gain * hd['L1SIGMA'])**2 - rdnoise**2)/gain - hd['L1MEAN']
+#    else:
+#        _pssl = 0.0
+
+   niter = 1
+   c = agnkey.cosmics.cosmicsimage(ar
                                  ,pssl=_pssl
                                  ,gain=gain
                                  ,readnoise=rdnoise
@@ -811,28 +930,30 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
                                  ,objlim=_objlim
                                  ,satlevel=sat
                                  )
-    c.run(maxiter = niter)
-    out = re.sub('.fits','.clean.fits',string.split(img,'/')[-1])
-    outmask = re.sub('.fits','.mask.fits',string.split(img,'/')[-1])
-    outsat = re.sub('.fits','.sat.fits',string.split(img,'/')[-1])
+   c.run(maxiter = niter)
+   out = re.sub('.fits','.clean.fits',string.split(img,'/')[-1])
+   outmask = re.sub('.fits','.mask.fits',string.split(img,'/')[-1])
+   outsat = re.sub('.fits','.sat.fits',string.split(img,'/')[-1])
 
-    out1 = c.getcleanarray()
-    out2 = c.getcleanarray()-c.rawarray
-    out3 = c.getsatstars()
+   out1 = c.getcleanarray()
+   out2 = c.getcleanarray()-c.rawarray
+   out3 = c.getsatstars()
 
-    out_fits = pyfits.PrimaryHDU(header = hd, data = out1)
-    out_fits.writeto(out, clobber = True, output_verify = 'fix')
+   out_fits = pyfits.PrimaryHDU(header = hd, data = out1)
+   out_fits.writeto(out, clobber = True, output_verify = 'fix')
 
-    out_fits = pyfits.PrimaryHDU(header = hd, data = (out2 != 0).astype(uint8))
-    out_fits.writeto(outmask, clobber = True, output_verify = 'fix')
+   # we are going to register the mask for the template image,
+   # so it makes sense to save it as a float instead of an int
+   if 'temp' in img: pixtype = 'float32'
+   else:             pixtype = 'uint8'
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out2!=0).astype(pixtype))
+   out_fits.writeto(outmask, clobber=True, output_verify='fix')
 
-    out_fits = pyfits.PrimaryHDU(header = hd, data = (out3 != 0).astype(uint8))
-    out_fits.writeto(outsat, clobber = True, output_verify = 'fix')
+   out_fits = pyfits.PrimaryHDU(header=hd,data=(out3!=0).astype('uint8'))
+   out_fits.writeto(outsat, clobber=True, output_verify='fix')
 
-#   if bp==16:           out_fits.scale('int16', 'old')
-#   if bp==16:  lsc.util.updateheader(outsat,0,{'BZERO':[bz,'Number to offset data values by '],'BSCALE':[bs,'Number to multiply data values by']})
-    print time.time()-start
-    return out, outmask, outsat
+   print 'time to do cosmic ray rejection:', time.time()-start
+   return out,outmask,outsat
 
 ##############################################
 
@@ -1000,6 +1121,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     import urllib
     import json
     import string,re
+    import numpy as np
     from datetime import datetime
     def JDnow(datenow='',verbose=False):
         import datetime
@@ -1026,6 +1148,16 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
         telclass = '1m0'
     else:
         telclass = '2m0'
+
+#################################### adding dither
+    if camera in ['sinistro']:
+       pixel = 10
+       pixarc = 0.387 * 2.
+       delta = pixel * pixarc / 3600. # 10 pixel in degree for sinisto camera
+       scal = np.pi/180.
+       _ra = float(_ra) + ( delta * np.cos(float(_dec) * scal) )
+       _dec = float(_dec) + delta 
+####################################
 
     if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj']:
        _location={ "telescope_class": telclass, 'site' : _site}
@@ -1322,7 +1454,6 @@ def downloadfloydsraw(JD,username,passwd):
     import glob
     import datetime
     command = ['select t.*,l.filters  from triggerslog as t join triggers as l where t.triggerid=l.id and t.tracknumber and t.windowstart >'+str(JD)]
-#    command = ['select * from triggerslog where tracknumber and windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
     if len(lista) == 0:
         print 'no tracknumber for spectra '
@@ -1337,6 +1468,7 @@ def downloadfloydsraw(JD,username,passwd):
         for kk,track in enumerate(ll0['tracknumber']):
             _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
 
+            print track
             #################   update status
             if 'state' in _dict.keys(): 
                 _status=_dict['state']
@@ -1359,138 +1491,74 @@ def downloadfloydsraw(JD,username,passwd):
             else:
                _reqnumber = ''
 
-            if ll0['filters'][kk]=='floyds':
-                 ###########   tar file if it is a spectrum 
-                 if ll0['tarfile'][kk]:
-                     print 'tarfile already there: %s ' % (ll0['tarfile'][kk])
-                 else:
-                   print kk,track,_status,_reqnumber
-                   if _reqnumber and _status in ['COMPLETED']:
-                     aa=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(-1)).isoformat()
-                     bb=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(0)).isoformat()
-                     cc=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(1)).isoformat()
-                     aa = re.sub('-','',string.split(aa,'T')[0])
-                     bb = re.sub('-','',string.split(bb,'T')[0])
-                     cc = re.sub('-','',string.split(cc,'T')[0])
-                     directory = agnkey.util.workingdirectory + 'floydsraw/'
-                     dd=[aa,bb,cc]
-                     print track,kk,ll0['tarfile'][kk]
-                     print _reqnumber
-                     print dd
-                     for name in dd:
-                         _tarfile = _reqnumber+'_'+name+'.tar.gz'
-                         if os.path.isfile(directory + _tarfile):                        
-                                 print 'file  %s already there' % (_tarfile)
-                                 print 'UPDATE'
-                                 agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
-                                                              connection='agnkey',namefile0='tracknumber')
-                                 break
-                         else:
-                                 line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
-                                     '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
-                                     _tarfile + ' --directory-prefix=' + directory
-                                 print line      
-                                 os.system(line)
-                                 if os.path.isfile(directory + _tarfile):
-                                    ##############   unzip the tar file in floydsraw2    ###########################
-                                    os.chdir('/dark/hal/AGNKEY/tmp/')
-                                    os.system('cp '+directory + _tarfile + ' /dark/hal/AGNKEY/tmp/ ')
-                                    os.system('tar -zxvf '+_tarfile)
-                                    epoch = re.sub('.tar.gz','',string.split(_tarfile,'_')[1])
-
-                                    imglist=glob.glob('ogg*.fits')
-                                    for img in imglist:
-                                       dire = '/dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]
-                                       if not os.path.isdir(dire):
-                                          os.mkdir(dire)
-                                          os.mkdir(dire+'/raw/')
-                                       os.system('mv '+img+\
-                                                 ' /dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]+'/raw/')
-                                    imglist=glob.glob('coj*.fits')
-                                    for img in imglist:
-                                       dire = '/dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]
-                                       if not os.path.isdir(dire):
-                                          os.mkdir(dire)
-                                          os.mkdir(dire+'/raw/')
-                                       os.system('mv '+img+\
-                                                 ' /dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]+'/raw/')
-
-                                    os.system('rm -rf /dark/hal/AGNKEY/tmp/*')
-
-                                    ##### ingest raw data in the database
-                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site ogg')
-                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site coj')
-                                    #########################################################3
-                                    print 'file  %s already there' % (_tarfile)
-                                    print 'UPDATE'
-                                    agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
-                                                                 connection='agnkey',namefile0='tracknumber')
-
-                                    break
-
-                                
-
+#            if ll0['filters'][kk]=='floyds':
+#                 ###########   tar file if it is a spectrum 
+#                 if ll0['tarfile'][kk]:
+#                     print 'tarfile already there: %s ' % (ll0['tarfile'][kk])
+#                 else:
+#                   print kk,track,_status,_reqnumber
+#                   if _reqnumber and _status in ['COMPLETED']:
+#                     aa=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(-1)).isoformat()
+#                     bb=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(0)).isoformat()
+#                     cc=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
+#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(1)).isoformat()
+#                     aa = re.sub('-','',string.split(aa,'T')[0])
+#                     bb = re.sub('-','',string.split(bb,'T')[0])
+#                     cc = re.sub('-','',string.split(cc,'T')[0])
+#                     directory = agnkey.util.workingdirectory + 'floydsraw/'
+#                     dd=[aa,bb,cc]
+#                     print track,kk,ll0['tarfile'][kk]
+#                     print _reqnumber
+#                     print dd
+#                     for name in dd:
+#                         _tarfile = _reqnumber+'_'+name+'.tar.gz'
+#                         if os.path.isfile(directory + _tarfile):                        
+#                                 print 'file  %s already there' % (_tarfile)
+#                                 print 'UPDATE'
+#                                 agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
+#                                                              connection='agnkey',namefile0='tracknumber')
+#                                 break
+#                         else:
+#                                 line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
+#                                     '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
+#                                     _tarfile + ' --directory-prefix=' + directory
+#                                 print line      
+#                                 os.system(line)
+#                                 if os.path.isfile(directory + _tarfile):
+#                                    ##############   unzip the tar file in floydsraw2    ###########################
+#                                    os.chdir('/dark/hal/AGNKEY/tmp/')
+#                                    os.system('cp '+directory + _tarfile + ' /dark/hal/AGNKEY/tmp/ ')
+#                                    os.system('tar -zxvf '+_tarfile)
+#                                    epoch = re.sub('.tar.gz','',string.split(_tarfile,'_')[1])
+#                                    imglist=glob.glob('ogg*.fits')
+#                                    for img in imglist:
+#                                       dire = '/dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]
+#                                       if not os.path.isdir(dire):
+#                                          os.mkdir(dire)
+#                                          os.mkdir(dire+'/raw/')
+#                                       os.system('mv '+img+\
+#                                                 ' /dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]+'/raw/')
+#                                    imglist=glob.glob('coj*.fits')
+#                                    for img in imglist:
+#                                       dire = '/dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]
+#                                       if not os.path.isdir(dire):
+#                                          os.mkdir(dire)
+#                                          os.mkdir(dire+'/raw/')
+#                                       os.system('mv '+img+\
+#                                                 ' /dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]+'/raw/')
+#                                    os.system('rm -rf /dark/hal/AGNKEY/tmp/*')
+#                                    ##### ingest raw data in the database
+#                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site ogg')
+#                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site coj')
+#                                    #########################################################3
+#                                    print 'file  %s already there' % (_tarfile)
+#                                    print 'UPDATE'
+#                                    agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
+#                                                                 connection='agnkey',namefile0='tracknumber')
+#                                    break
 ############################################################################
-
-#def downloadfloydsraw(JD,username,passwd):
-#    import agnkey
-#    import os
-#    import string
-#    import re
-#    import sys
-#    command = ['select * from obslog where tracknumber and filters="floyds" and windowstart >'+str(JD)]
-#    lista=agnkey.agnsqldef.query(command)
-#    if len(lista) == 0:
-#        print 'no tracknumber for spectra '
-#    else:
-#        ll0={}
-#        for jj in lista[0].keys():
-#            ll0[jj] = []
-#        for i in range(0,len(lista)):
-#            for jj in lista[0].keys():
-#                ll0[jj].append(lista[i][jj])
-#
-#        for track in ll0['tracknumber']:
-#            print track
-#            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-#            print _dict
-#            if 'state' in _dict.keys(): _status=_dict['state']
-#            else:  _status = 'xxxx'
-#            if 'requests' in _dict.keys():
-#               _reqnumber = _dict['requests'].keys()[0]
-#            else:
-#               _reqnumber = ''
-#            if _reqnumber and _status in ['UNSCHEDULABLE','COMPLETED']:
-#                for ii in  _dict['requests'].keys():
-#                    _tracknumber = str(ii).zfill(10)
-#                    try:
-#                       _date = re.sub('-','',_dict['requests'][ii]['schedule'][0]['frames'][0]['day_obs'])
-#                       print _status,_reqnumber
-#                       _tarfile = _reqnumber+'_'+str(_date)+'.tar.gz'
-#                    except:
-#                       _tarfile = ''
-#                    directory = agnkey.util.workingdirectory + 'floydsraw/'
-#                    if _tracknumber != 'xxxx' and _tarfile:
-#                        if not os.path.isfile(directory + _tarfile):
-#                            line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
-#                               '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
-#                                 _tarfile + ' --directory-prefix=' + directory
-#                            print line
-#                            os.system(line)
-#                            if os.path.isfile(directory + _tarfile):
-#                               agnkey.agnsqldef.updatevalue('obslog', 'tarfile', _tarfile, track,
-#                                                            connection='agnkey',namefile0='tracknumber')
-#                        else:
-#                            print 'file already there'
-#                    else:   print 'request number not defined'
-#            if str(track) == '51565':
-#               print _dict
-#               raw_input('gogon')
-##########################################################################################
-
 
 def makecatalogue(imglist):
     import pyfits
@@ -1517,7 +1585,7 @@ def makecatalogue(imglist):
 #       early data may have JD instead of mjd in the fits table
 #
         if 'MJD' in hdr1.keys():
-              dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'MJD')
+              dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'mjd')
         else:
               dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'JD')
         dicti[_filter][img]['JD']=dicti[_filter][img]['mjd']
@@ -1605,7 +1673,7 @@ def makecatalogue2(imglist):
             if jj[0:2]=='ZP':
                 dicti[_filter][img][jj]=agnkey.util.readkey3(hdr1,jj)
 
-        dicti[_filter][img]['JD']=agnkey.util.readkey3(hdr1,'JD')
+        dicti[_filter][img]['mjd']=agnkey.util.readkey3(hdr1,'mjd')
         dicti[_filter][img]['exptime']=_exptime
         dicti[_filter][img]['airmass']=_airmass
         dicti[_filter][img]['telescope']=_telescope
