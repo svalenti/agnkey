@@ -72,6 +72,9 @@ def colfix(instrument,ss='sloan'):
         colorefisso['kb71']={'UUB':0.059,'uug':0.0,'BUB':-0.095,'BBV':0.06,'VBV':0.03,'VVR':-0.059,\
                              'gug':0.13,'ggr':-0.02,'RVR':-0.028,'RRI':-0.033,'rrz':0.0,'zrz':0.0,'ggi':0.0,'igi':0.0,\
                              'rgr':0.034,'rri':0.025,'iri':0.071,'iiz':0.110,'IRI':0.013,'ziz':-0.04}
+        colorefisso['kb69']={'UUB':0.059,'uug':0.0,'BUB':-0.095,'BBV':0.06,'VBV':0.03,'VVR':-0.059,\
+                             'gug':0.13,'ggr':-0.02,'RVR':-0.028,'RRI':-0.033,'rrz':0.0,'zrz':0.0,'ggi':0.0,'igi':0.0,\
+                             'rgr':0.034,'rri':0.025,'iri':0.071,'iiz':0.110,'IRI':0.013,'ziz':-0.04}
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
@@ -91,6 +94,7 @@ def colfix(instrument,ss='sloan'):
         colorefisso['kb05']={'BBV':-0.13,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
         colorefisso['kb76']={'BBV':-0.13,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
         colorefisso['kb71']={'BBV':-0.13,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
+        colorefisso['kb69']={'BBV':-0.13,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
@@ -125,6 +129,9 @@ def colfix(instrument,ss='sloan'):
         colorefisso['kb79']={'UUB':0.059,'uug':0.0,'BUB':-0.095,'BBV':0.06,'VBV':0.03,'VVR':-0.059,\
                              'gug':0.13,'ggr':0.054,'RVR':-0.028,'RRI':-0.033,'rrz':0.0,'zrz':0.0,'ggi':0.0,'igi':0.0,\
                              'rgr':0.003,'rri':-0.007,'iri':0.028,'iiz':0.110,'IRI':0.013,'ziz':-0.16}
+        colorefisso['kb69']={'UUB':0.059,'uug':0.0,'BUB':-0.095,'BBV':0.06,'VBV':0.03,'VVR':-0.059,\
+                             'gug':0.13,'ggr':0.054,'RVR':-0.028,'RRI':-0.033,'rrz':0.0,'zrz':0.0,'ggi':0.0,'igi':0.0,\
+                             'rgr':0.003,'rri':-0.007,'iri':0.028,'iiz':0.110,'IRI':0.013,'ziz':-0.16}
         colorefisso['kb70']={'UUB':0.059,'uug':0.0,'BUB':-0.095,'BBV':0.06,'VBV':0.03,'VVR':-0.059,\
                              'gug':0.13,'ggr':0.054,'RVR':-0.028,'RRI':-0.033,'rrz':0.0,'zrz':0.0,'ggi':0.0,'igi':0.0,\
                              'rgr':0.003,'rri':-0.007,'iri':0.028,'iiz':0.110,'IRI':-0.015,'ziz':-0.16}
@@ -150,7 +157,7 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fs01']=colorefisso['fs02']=colorefisso['fs03']=colorefisso['em03']=colorefisso['em01']
         colorefisso['kb77']=colorefisso['kb73']=colorefisso['kb78']=colorefisso['kb74']=colorefisso['em01']
         colorefisso['kb79']=colorefisso['kb70']=colorefisso['kb75']=colorefisso['kb05']=colorefisso['kb71']=colorefisso['kb76']=colorefisso['em01']
-        colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
+        colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb69']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
     print instrument

@@ -216,9 +216,9 @@ if __name__ == "__main__":
                         agnkey.util.delete(temp_file0+'_tempmask3.fits')
                         if os.path.isfile(re.sub('.fits','.clean.fits',_dir+imgtarg0)):
                             print 'use clean'
-                            iraf.imcopy(re.sub('.fits','.clean.fits', _dir+imgtarg0), imgtarg, verbose='yes')
+                            iraf.imcopy(re.sub('.fits','.clean.fits', _dir+imgtarg0)+'[0]', imgtarg, verbose='yes')
                         else:
-                            iraf.imcopy(_dir + imgtarg0, imgtarg, verbose='no')
+                            iraf.imcopy(_dir + imgtarg0+'[0]', imgtarg, verbose='no')
 
                         iraf.imcopy(_dir + targmask0, targmask, verbose='no')
 #                        try:

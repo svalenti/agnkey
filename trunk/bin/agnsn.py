@@ -28,6 +28,8 @@ if __name__ == "__main__":
                       help=' half size of the stamp \t\t %default')
     parser.add_option("-m", "--datamax", dest="datamax", default=51000, type='float',
                       help=' data max for saturation \t\t %default')
+    parser.add_option("--datamin", dest="datamin", default=-100, type='float',
+                      help=' data min for saturation \t\t %default')
     parser.add_option("-i", "--interactive", action="store_true", dest='interactive', default=False,
                       help='Interactive \t\t\t [%default]')
     parser.add_option("-s", "--show", action="store_true", dest='show', default=False,
@@ -52,6 +54,7 @@ if __name__ == "__main__":
     _yord = option.yorder
     _numiter = option.niter
     _dmax = option.datamax
+    _dmin = option.datamin
     _interactive = option.interactive
     if option.recenter == False:
         _recenter = True
@@ -66,7 +69,8 @@ if __name__ == "__main__":
     else:
         redo = True
     arterr = ''
-    if _interactive: _show = True
+    if _interactive: 
+        _show = True
     print _show, _interactive
     # ####################### SET   IRAF   PARAMETERS  #######################
     from pyraf import iraf
@@ -98,6 +102,17 @@ if __name__ == "__main__":
             ######
             hdr = agnkey.util.readhdr(imglong)
             _instrument = agnkey.util.readkey3(hdr, 'instrume')
+
+            if not _dmax:
+                if 'kb' in _instrument:  
+                    _dmax = 45000
+                elif 'fl' in _instrument:
+                    _dmax = 120000
+                elif 'fs' in _instrument:
+                    _dmax = 65000
+                else:
+                    _dmax = 65000
+
             filter = agnkey.util.readkey3(hdr, 'filter')
             print '##########  ' + str(filter) + '  ##############'
             if not psflist:
@@ -517,7 +532,7 @@ if __name__ == "__main__":
                 print img, psfimage, 'xxxxx'
                 apori1, apori2, apori3, apmag1, apmag2, apmag3, fitmag, truemag, magerr, centx, centy = \
                     agnkey.agnsnoopy.fitsn(img, psfimage, img + '.sn.coo', _recenter, fwhm0, 'original', 'sn',
-                                           'residual', _show, _interactive, z11, z22, midpt, _size, apco0, _dmax)
+                                           'residual', _show, _interactive, z11, z22, midpt, _size, apco0, _dmax, _dmin)
                 #################       Iterate Beckground    ###################################
                 if _interactive:
                     if not _numiter:
@@ -575,7 +590,7 @@ if __name__ == "__main__":
                     agnkey.util.delete("skyfit.fits")
                     apori1, apori2, apori3, apmag1, apmag2, apmag3, fitmag, truemag, magerr, centx, centy = \
                         agnkey.agnsnoopy.fitsn(img, psfimage, img + '.sn.coo', _recenter, fwhm0, 'original', 'sn',
-                                               'residual', _show, _interactive, z11, z22, midpt, _size, apco0, _dmax)
+                                               'residual', _show, _interactive, z11, z22, midpt, _size, apco0, _dmax, _dmin)
                     print _numiter, _count
                     if _interactive:
                         if not _numiter:
@@ -651,7 +666,7 @@ if __name__ == "__main__":
                     try:
                         _arterr2, _arterr = agnkey.agnsnoopy.errore(img, 'artlist.coo', size, truemag, fwhm0, leng0,
                                                                     False, False, _numiter, z11, z22, midpt, nax, nay,
-                                                                    xbgord0, ybgord0, _recenter, apco0, _dmax)
+                                                                    xbgord0, ybgord0, _recenter, apco0, _dmax, _dmin)
                     except:
                         print '\n### warningstamp size too small: artificail error = 0 '
                         _arterr2, _arterr = 0.0, 0.0
@@ -702,7 +717,7 @@ if __name__ == "__main__":
                     agnkey.agnsqldef.updatevalue('dataredulco', 'psfmag', truemag[0],
                                                  string.split(img, '/')[-1] + '.fits')
                     agnkey.agnsqldef.updatevalue('dataredulco', 'psfdmag', max(arterr, magerr[0]),
-                                                 string.split(img, '/')[-1] + '.fits')
+                                                string.split(img, '/')[-1] + '.fits')
                     agnkey.agnsqldef.updatevalue('dataredulco', 'psfx', centx[0] + x1 - 1,
                                                  string.split(img, '/')[-1] + '.fits')
                     agnkey.agnsqldef.updatevalue('dataredulco', 'psfy', centy[0] + y1 - 1,

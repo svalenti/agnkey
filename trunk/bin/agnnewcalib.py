@@ -13,6 +13,8 @@ import pyfits
 import numpy as np
 from astropy.io import fits
 from astropy import wcs as pywcs
+import os 
+
 """
 this task:
 - query vizier (or local catalog)
@@ -20,7 +22,7 @@ this task:
 - compute zeropoint using sn2.fits mag and catalog 
 - measure daophot aperture magnitude on target with 3 aperture 
 """
-def vizq(_ra, _dec, catalogue, radius):
+def vizq(_ra, _dec, catalogue, radius,verbose=False):
     ''' Query vizquery '''
     import os, string, re
 
@@ -38,10 +40,11 @@ def vizq(_ra, _dec, catalogue, radius):
                  ' -c.ra=' + str(_ra) + ' -c.dec=' + str(_dec) + ' -c.eq=J2000 -c.rm=' + str(radius) + \
                  ' -c.geom=b -oc.form=h -sort=_RA*-c.eq -out.add=_RAJ2000,_DEJ2000 -out.max=10000 -out=' + \
                  cat[catalogue][1] + ' -out=' + cat[catalogue][2] + '').read()
-    print 'vizquery -mime=tsv  -site=' + _site + ' -source=' + cat[catalogue][0] + \
-          ' -c.ra=' + str(_ra) + ' -c.dec=' + str(_dec) + ' -c.eq=J2000 -c.rm=' + str(radius) + \
-          ' -c.geom=b -oc.form=h -sort=_RA*-c.eq -out.add=_RAJ2000,_DEJ2000 -out.max=10000 -out=' + \
-          cat[catalogue][1] + ' -out=' + cat[catalogue][2] + ''
+    if verbose:
+        print 'vizquery -mime=tsv  -site=' + _site + ' -source=' + cat[catalogue][0] + \
+            ' -c.ra=' + str(_ra) + ' -c.dec=' + str(_dec) + ' -c.eq=J2000 -c.rm=' + str(radius) + \
+                      ' -c.geom=b -oc.form=h -sort=_RA*-c.eq -out.add=_RAJ2000,_DEJ2000 -out.max=10000 -out=' + \
+                      cat[catalogue][1] + ' -out=' + cat[catalogue][2] + ''
     aa = a.split('\n')
     bb = []
     for i in aa:
@@ -201,9 +204,10 @@ if __name__ == "__main__":
             print 'no catalog provided '
             if _filter in ['u', 'g', 'r', 'i', 'z']:
                 _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/sloan/' + _object + '*')
-                if _catalogue:
+                if len(_catalogue):
+                    _catalogue = _catalogue[0]
                     print 'use catalogue from archive for object ' + str(_object)
-                    _sloan = agnkey.agnastrodef.readtxt(_catalogue[0])
+                    _sloan = agnkey.agnastrodef.readtxt(_catalogue)
                     for _id in _sloan:
                         try:
                             _sloan[_id] = np.array(_sloan[_id], float)
@@ -224,11 +228,13 @@ if __name__ == "__main__":
                     else:
                         print 'sloan catalog found with vizq'
                         _cat = _sloan
+                        _catalogue = 'sdss7'
 
             elif _filter in ['U', 'B', 'V', 'R', 'I']:
                 _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _object + '*')
-                if _catalogue:
-                    _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
+                if len(_catalogue):
+                    _catalogue = _catalogue[0]
+                    _landolt = agnkey.agnastrodef.readtxt(_catalogue)
                     print 'use catalogue from archive for object ' + str(_object)
                     for _id in _landolt:
                         try:
@@ -240,8 +246,9 @@ if __name__ == "__main__":
                 if not _landolt:
                     if _filter in ['B', 'V']:
                         _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/apass/' + _object + '*')
-                        if _catalogue:
-                            _landolt = agnkey.agnastrodef.readtxt(_catalogue[0])
+                        if len(_catalogue):
+                            _catalogue = _catalogue[0]
+                            _landolt = agnkey.agnastrodef.readtxt(_catalogue)
                             print 'use catalogue from archive for object ' + str(_object)
                             for _id in _landolt:
                                 try:
@@ -252,8 +259,11 @@ if __name__ == "__main__":
                             _landolt = ''
                         if not _landolt:
                             _landolt = vizq(_ra0, _dec0, 'apass', 20)
+                            if _landolt:
+                                _catalogue = 'apass'
                 if _landolt:
                     _cat = _landolt
+
 
         if _cat:
             distvec, pos0, pos1 = crossmatch(_rasex, _decsex, _cat['ra'], _cat['dec'], 5)
@@ -261,7 +271,7 @@ if __name__ == "__main__":
             pos0 = []
 
         if len(pos0) >= 3:
-############################       compute zero point with aperture 2
+############################       compute zero point with aperture 1
             xx1 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
             yy1 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp2[pos0])) <= 99), np.array(_magp2[pos0]))
@@ -278,7 +288,7 @@ if __name__ == "__main__":
                 _show = False
 
             data1, std1, ZZ1 = agnkey.agnabsphotdef.zeronew(ZZ1, maxiter=10, nn=2, verbose=_verbose, show=_show)
-############################       compute zero point with aperture 3
+############################       compute zero point with aperture 2
             xx2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
             yy2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99), np.array(_magp3[pos0]))
@@ -289,7 +299,7 @@ if __name__ == "__main__":
                                 np.array(_cat[_filter + 'err'])[pos1])
             ZZ2 = np.array(xx2 - yy2)
             data2, std2, ZZ2 = agnkey.agnabsphotdef.zeronew(ZZ2, maxiter=10, nn=2, verbose=_verbose, show=_show)
-############################       compute zero point with aperture 4
+############################       compute zero point with aperture 3
             xx3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
             yy3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99), np.array(_magp4[pos0]))
@@ -303,6 +313,13 @@ if __name__ == "__main__":
 #######################################################################
             #ZZ0=ZZ3
             #std0=std3
+            if _catalogue:
+                print string.split(_catalogue,'/')[-1],'#########'
+                agnkey.agnsqldef.updatevalue('dataredulco', 'zcat', string.split(_catalogue,'/')[-1],
+                                             string.split(re.sub('sn2.', '', img), '/')[-1])
+            else:
+                print 'no catalog !!!!!!!'
+
             agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ1', float(ZZ1),
                                          string.split(re.sub('sn2.', '', img), '/')[-1])
             agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ1err', float(std1),
@@ -352,23 +369,18 @@ if __name__ == "__main__":
                 iraf.daophot(_doprint=0)
 
                 lll = [str(rasn) + '    ' + str(decsn)]
-#                hdr1 = fits.getheader(re.sub('sn2.','',img))
-#                wcs1 = pywcs.WCS(hdr1)
-#                print rasn,decsn
-#                sky = zip([rasn], [decsn])
-#                pix0 = wcs1.wcs_world2pix(sky, 1)
-#                xx10,yy10 = zip(*pix0)
-#                print xx10,yy10 
-                sss = iraf.wcsctran('STDIN', 'STDOUT', re.sub('sn2.','',img), Stdin=lll, inwcs='world', units='degrees degrees',
+                sss = iraf.wcsctran('STDIN', 'STDOUT', re.sub('sn2.','',img)+'[0]', Stdin=lll, inwcs='world', units='degrees degrees',
                                     outwcs='logical', columns='1 2', formats='%10.1f %10.1f', Stdout=1)
 
                 if _verbose:
-                    iraf.display(re.sub('sn2.','',img),fill='yes',frame=1)
-                    iraf.display(re.sub('diff.sn2.','',img),fill='yes',frame=2)
+                    iraf.display(re.sub('sn2.','',img)+'[0]',fill='yes',frame=1)
                     iraf.tvmark(1, 'STDIN', Stdin = list(sss) ,mark = "circle" , number = 'yes' ,label = 'no' ,
                                 radii = 10, nxoffse = 5, nyoffse = 5, color = 204, txsize = 2)
-                    iraf.tvmark(2, 'STDIN', Stdin = list(sss) ,mark = "circle" , number = 'yes' ,label = 'no' ,
-                                radii = 10, nxoffse = 5, nyoffse = 5, color = 204, txsize = 2)
+                    if 'diff' in img:
+                        diffimg = re.sub('diff.sn2.','',img)
+                        iraf.display(diffimg+'[0]',fill='yes',frame=2)
+                        iraf.tvmark(2, 'STDIN', Stdin = list(sss) ,mark = "circle" , number = 'yes' ,label = 'no' ,
+                                    radii = 10, nxoffse = 5, nyoffse = 5, color = 204, txsize = 2)
 
                 _gain = agnkey.util.readkey3(hdr, 'gain')
                 _ron = agnkey.util.readkey3(hdr, 'ron')
@@ -378,7 +390,7 @@ if __name__ == "__main__":
                 a1, a2, a3, a4, = float(5. / _pixelscale), float(5. / _pixelscale), float(8. / _pixelscale), float(
                     10. / _pixelscale)
 
-                zmag= 0.0
+                zmag= 0 #25
                 _datamax=45000
                 _center='no'
                 iraf.fitskypars.annulus = a4
@@ -408,16 +420,26 @@ if __name__ == "__main__":
                 #            else:
                 #                aaa=iraf.noao.digiphot.daophot.phot(re.sub('sn2.','',img),'_coord','STDOUT',veri='no',verbose='no',Stdout=1)
                 ####################################################
-                bbb = iraf.noao.digiphot.daophot.phot(re.sub('sn2.', '', img), 'STDIN', 'STDOUT', veri='no',
+                bbb = iraf.noao.digiphot.daophot.phot(re.sub('sn2.', '', img)+'[0]', 'STDIN', 'STDOUT', veri='no',
                                                       verbose='no', Stdin=[sss[-1]], Stdout=1)
                 
-                epadu = float(string.split([i for i in bbb if 'EPADU' in i][0])[3])
+                if _verbose:
+                    for line in bbb:
+                        print line
+
+                #############################
+                #epadu = float(string.split([i for i in bbb if 'EPADU' in i][0])[3])
+                #print epadu,'dddd'
+                #   keep in counts 
+                #################
+                epadu = 1
                 bbb = [i for i in bbb if i[0] != '#']
                 bbb=bbb[:-1]
                 rad3, sum3, area3, flux3, mag3, dmag3 = string.split(bbb[-1])[0:6]
                 rad2, sum2, area2, flux2, mag2, dmag2 = string.split(bbb[-2])[0:6]
                 rad1, sum1, area1, flux1, mag1, dmag1 = string.split(bbb[-3])[0:6]
 
+                #  error in IRAF  mag and error re connected 
                 if str(mag1).count('.')==2:
                     dmag1='0.'+mag1.rsplit('.',mag1.count('.')-1)[1]
                     mag1=mag1.rsplit('.',mag1.count('.')-1)[0]
@@ -430,8 +452,9 @@ if __name__ == "__main__":
 
                 MSKY, STDEV, SSKEW, NSKY, NSREJ, SIER, SERROR, _ = string.split(bbb[3])
                 try:
-                    aaa = float(flux1) / float(epadu) + float(area1) * (float(STDEV) ** 2) + (float(area1) ** 2) *\
-                          float(STDEV) ** 2 / float(NSKY)
+                    aaa = float(flux1) / float(epadu) +\
+                          float(area1) * (float(STDEV) ** 2) +\
+                          ((float(area1) ** 2) * float(STDEV) ** 2) / float(NSKY)
                     if aaa>=0:
                         error1 = np.sqrt(aaa)
                     else:
@@ -439,8 +462,9 @@ if __name__ == "__main__":
                 except:
                     error1 = 0
                 try:
-                    aaa=np.sqrt(float(flux2) / float(epadu) + float(area2) * (float(STDEV) ** 2) + (float(area2) ** 2) *\
-                                     float(STDEV) ** 2 / float(NSKY))
+                    aaa = float(flux2) / float(epadu) +\
+                          float(area2) * (float(STDEV) ** 2) +\
+                          (float(area2) ** 2) * float(STDEV) ** 2 / float(NSKY)
                     if aaa>=0:
                         error2 = np.sqrt(aaa)
                     else:
@@ -448,14 +472,109 @@ if __name__ == "__main__":
                 except:
                     error2 = 0
                 try:
-                    aaa = np.sqrt(float(flux3) / float(epadu) + float(area3) * (float(STDEV) ** 2) + (float(area3) ** 2) *\
-                                  float(STDEV) ** 2 / float(NSKY))
+                    aaa = float(flux3) / float(epadu) +\
+                          float(area3) * (float(STDEV) ** 2) +\
+                          (float(area3) ** 2) * float(STDEV) ** 2 / float(NSKY)
                     if aaa>=0:
                         error3 = np.sqrt(aaa)
                     else:
                         error3 = 0
                 except:
                     error3 = 0
+
+                print flux1, flux2, flux3
+                print error1,error2, error3 
+
+                if str(flux1)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', float(flux1) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error1)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', float(error1) / _exptime,
+                                             string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(flux2)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux2', float(flux2) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error2)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux2', float(error2) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(flux3)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux3', float(flux3) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+                if str(error3)!='nan':
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux3', float(error3) / _exptime,
+                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
+
+                if mag1 != 'INDEF':
+                    print mag1, dmag1, ZZ1
+                    print float(mag1) + float(ZZ1)
+                    try:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(mag1) + ZZ1,
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(dmag1),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(mag1),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                    except:
+                        print 'no possible mag1'
+                else:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(0.0),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+
+                if mag2 != 'INDEF':
+                    print mag2, dmag2, ZZ2
+                    print float(mag2) + float(ZZ2)
+                    try:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(mag2) + ZZ2,
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(dmag1),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(mag2),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                    except:
+                        print 'no possible mag 2'
+                else:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(0.0),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                if mag3 != 'INDEF':
+                    print mag3, dmag3, ZZ3
+                    print float(mag3) + float(ZZ3)
+                    try:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(mag3) + ZZ3,
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(dmag3),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(mag3),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                    except:
+                        print 'no possible mag3 '
+                else:
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(0.0),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(9999),
+                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
+
+                headers = {'apflux1': [float(flux1) / _exptime, ''], 'dapflux1': [float(error1) / _exptime, ''],
+                           'apflux2': [float(flux2) / _exptime, ''], 'dapflux2': [float(error2) / _exptime, ''],
+                           'apflux3': [float(flux3) / _exptime, ''], 'dapflux3': [float(error3) / _exptime, '']}
+                agnkey.util.updateheader(img, 0, headers)
+            else:
+                print 'ra and dec not defined'
+
+
+            #'appmagap1':[float(mag1)+ZZ0,''],'appmagap2':[float(mag2)+ZZ0,''],'appmagap3':[float(mag3)+ZZ0,''],\
+            #'dappmagap1':[float(dmag1),''],'dappmagap2':[float(dmag2),''],'dappmagap3':[float(dmag3),''],\
+            #'instmagap1':[float(mag1),''],'instmagap2':[float(mag2),''],'instmagap3':[float(mag3),'']
+#########################################
 #                if 'diff' in img:
 #                    if 'apfl1re' in hdr and 'dapfl1re':
 #                        print 'zeropoint there'
@@ -500,93 +619,5 @@ if __name__ == "__main__":
                         #            totalflux=(float(flux1)/_exptime)*10**(float(ZZ0)/-2.5)   #  compute total flux
                         #            print totalflux
                         #            raw_input('go on')
-                if str(flux1)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', float(flux1) / _exptime,
-                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error1)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', float(error1) / _exptime,
-                                             string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(flux2)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux2', float(flux2) / _exptime,
-                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error2)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux2', float(error2) / _exptime,
-                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(flux3)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux3', float(flux3) / _exptime,
-                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error3)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux3', float(error3) / _exptime,
-                                                 string.split(re.sub('sn2.', '', img), '/')[-1])
-
-                if mag1 != 'INDEF':
-                    print mag1, ZZ1
-                    print float(mag1) + float(ZZ1)
-                    try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(mag1) + ZZ1,
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(dmag1),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(mag1),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                    except:
-                        print 'no possible mag1'
-                else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(0.0),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-
-                if mag2 != 'INDEF':
-                    print mag2, ZZ2
-                    print float(mag2) + float(ZZ2)
-                    try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(mag2) + ZZ2,
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(dmag1),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(mag2),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                    except:
-                        print 'no possible mag 2'
-                else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(0.0),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                if mag3 != 'INDEF':
-                    print mag3, ZZ3, dmag3
-                    print float(mag3) + float(ZZ3)
-                    try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(mag3) + ZZ3,
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(dmag3),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(mag3),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                    except:
-                        print 'no possible mag3 '
-                else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(0.0),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(9999),
-                                                     string.split(re.sub('sn2.', '', img), '/')[-1])
-
-                headers = {'apflux1': [float(flux1) / _exptime, ''], 'dapflux1': [float(error1) / _exptime, ''],
-                           'apflux2': [float(flux2) / _exptime, ''], 'dapflux2': [float(error2) / _exptime, ''],
-                           'apflux3': [float(flux3) / _exptime, ''], 'dapflux3': [float(error3) / _exptime, '']}
-
-                agnkey.util.updateheader(img, 0, headers)
-            else:
-                print 'ra and dec not defined'
-
-            #'appmagap1':[float(mag1)+ZZ0,''],'appmagap2':[float(mag2)+ZZ0,''],'appmagap3':[float(mag3)+ZZ0,''],\
-            #'dappmagap1':[float(dmag1),''],'dappmagap2':[float(dmag2),''],'dappmagap3':[float(dmag3),''],\
-            #'instmagap1':[float(mag1),''],'instmagap2':[float(mag2),''],'instmagap3':[float(mag3),'']
+#######################################################
         

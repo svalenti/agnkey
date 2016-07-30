@@ -10,6 +10,7 @@ import os, sys, shutil, subprocess, string
 import time
 from optparse import OptionParser
 from pyraf import iraf
+from astropy.io import fits as pyfits 
 import pyfits
 import agnkey
 import traceback
@@ -33,6 +34,15 @@ def runsex(img, fwhm, thresh, pix_scale):  ## run_sextractor  fwhm in pixel
         if r[0] != '#' and len(r.strip()) > 0: \
                 cparam.append(r.split()[0])
 
+#    print 'here'
+#    print "sex " + img + ".fits -catalog_name tmp.cat" + \
+#        " -c  " + agnkey.__path__[0] +\
+#        "/standard/sex/default2.sex  -PARAMETERS_NAME " + agnkey.__path__[0] +\
+#        "/standard/sex/default2.param" + " -STARNNW_NAME " + agnkey.__path__[0] +\
+#        "/standard/sex/default2.nnw" + " -PIXEL_SCALE " + str(pix_scale) + \
+#        " -DETECT_MINAREA " + str(mina) + " -DETECT_THRESH  " + str(thresh) + \
+#        " -ANALYSIS_THRESH  " + str(thresh) + " -PHOT_FLUXFRAC 0.5" + \
+#        " -SEEING_FWHM " + str(seeing)
     pid = subprocess.Popen("sex " + img + ".fits -catalog_name tmp.cat" + \
                            " -c  " + agnkey.__path__[0] +
                            "/standard/sex/default2.sex  -PARAMETERS_NAME " + agnkey.__path__[0] +
@@ -43,6 +53,8 @@ def runsex(img, fwhm, thresh, pix_scale):  ## run_sextractor  fwhm in pixel
                            " -SEEING_FWHM " + str(seeing), stdout=subprocess.PIPE, shell=True)
 
     output, error = pid.communicate()
+    print output
+    print error
 
     csex = open("tmp.cat")
     tab = {}
@@ -54,8 +66,7 @@ def runsex(img, fwhm, thresh, pix_scale):  ## run_sextractor  fwhm in pixel
                 tab[cparam[i]].append(float(r.split()[i]))
     for k in cparam: tab[k] = np.array(tab[k])
 
-    xdim, ydim = iraf.hselect(img, 'i_naxis1,i_naxis2', 'yes', Stdout=1) \
-        [0].split()
+    xdim, ydim = iraf.hselect(img+'.fits[0]', 'i_naxis1,i_naxis2', 'yes', Stdout=1)[0].split()
 
     xcoo, ycoo, ra, dec, magbest, classstar, fluxrad, bkg = [], [], [], [], [], [], [], []
     for i in range(len(tab['X_IMAGE'])):
@@ -112,7 +123,7 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
 
     iraf.delete('_psf2.ma*', verify=False)
 
-    iraf.phot(img, '_psf2.coo', '_psf2.mag', interac=False, verify=False, verbose=False)
+    iraf.phot(img+'[0]', '_psf2.coo', '_psf2.mag', interac=False, verify=False, verbose=False)
 
     iraf.daopars.psfrad = a4
     iraf.daopars.functio = psffun
@@ -123,8 +134,8 @@ def psffit2(img, fwhm, psfstars, hdr, _datamax=45000, psffun='gauss', fixapertur
     iraf.daopars.recenter = _center
     iraf.daopars.varorder = varord
     iraf.delete("_als,_psf.grp,_psf.nrj", verify=False)
-    iraf.group(img, '_psf2.mag', img + '.psf', '_psf.grp', verify=False, verbose=False)
-    iraf.nstar(img, '_psf.grp', img + '.psf', '_als', '_psf.nrj', verify=False, verbose=False)
+    iraf.group(img+'[0]', '_psf2.mag', img + '.psf', '_psf.grp', verify=False, verbose=False)
+    iraf.nstar(img+'[0]', '_psf.grp', img + '.psf', '_als', '_psf.nrj', verify=False, verbose=False)
     photmag = iraf.txdump("_psf2.mag", 'xcenter,ycenter,id,mag,merr', expr='yes', Stdout=1)
     fitmag = iraf.txdump("_als", 'xcenter,ycenter,id,mag,merr', expr='yes', Stdout=1)
     return photmag, fitmag
@@ -171,7 +182,7 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.photpars.zmag = zmag
 
     iraf.delete('_psf.ma*,' + img + '.psf.fit?,_psf.ps*,_psf.gr?,_psf.n*,_psf.sub.fit?', verify=False)
-    iraf.phot(img, '_psf.coo', '_psf.mag', interac=False, verify=False, verbose=False)
+    iraf.phot(img+'[0]', '_psf.coo', '_psf.mag', interac=False, verify=False, verbose=False)
 
     iraf.daopars.psfrad = a4
     iraf.daopars.functio = psffun
@@ -189,12 +200,16 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
               ' "w"-write and "q"-uit (cursor on ds9)'
         print '-' * 80
     else:
-        iraf.pstselect(img, '_psf.mag', '_psf.pst', psfstars, interac=False, verify=False)
+        iraf.pstselect(img+'.fits[0]', '_psf.mag', '_psf.pst', psfstars, interac=False, verify=False)
 
-    iraf.psf(img, '_psf.mag', '_psf.pst', img + '.psf', '_psf.psto', '_psf.psg', interac=interactive,
+    iraf.psf(img+'.fits[0]', '_psf.mag', '_psf.pst', img + '.psf', '_psf.psto', '_psf.psg', interac=interactive,
              verify=False, verbose=False)
-    iraf.group(img, '_psf.mag', img + '.psf', '_psf.grp', verify=False, verbose=False)
-    iraf.nstar(img, '_psf.grp', img + '.psf', '_psf.nst', '_psf.nrj', verify=False, verbose=False)
+
+#    if os.path.isfile(img + '.psf.fits'):
+#        print 'file there'
+
+    iraf.group(img+'.fits[0]', '_psf.mag', img + '.psf.fits', '_psf.grp', verify=False, verbose=False)
+    iraf.nstar(img+'.fits[0]', '_psf.grp', img + '.psf.fits', '_psf.nst', '_psf.nrj', verify=False, verbose=False)
 
     photmag = iraf.txdump("_psf.mag", 'xcenter,ycenter,id,mag,merr', expr='yes', Stdout=1)
     pst = iraf.txdump("_psf.pst", 'xcenter,ycenter,id', expr='yes', Stdout=1)
@@ -202,7 +217,7 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     return photmag, pst, fitmag
 
 
-def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='gauss', fixaperture=False,_catalog=''):
+def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='gauss', fixaperture=False,_catalog='',_datamax=''):
     try:
         import agnkey
         hdr = agnkey.util.readhdr(img + '.fits')
@@ -220,15 +235,23 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
 
         if 'kb' in instrument:  
             scale = pixelscale
-            _datamax = 45000
+            if not _datamax:
+                _datamax = 45000
         elif 'fl' in instrument:
             scale = pixelscale
-            _datamax = 120000
+            if not _datamax:
+                _datamax = 60000
         elif 'fs' in instrument:
             scale = pixelscale
-            _datamax = 65000
+            if not _datamax:
+                _datamax = 65000
         try:
-            _wcserr = agnkey.util.readkey3(hdr, 'wcserr')
+        #if 1==1:
+            if 'WCSERR' in hdr:
+                _wcserr = hdr['WCSERR']
+            elif 'WCS_ERR' in hdr:
+                _wcserr = hdr['WCS_ERR']
+            print _wcserr
             if float(_wcserr) == 0:
                 if 'kb' in instrument:  
                     seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
@@ -246,7 +269,8 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
             else:
                 seeing = float(agnkey.util.readkey3(hdr, 'PSF_FWHM'))
                 sys.exit('astrometry not good')
-        except:
+        except ValueError:
+#        except:
             sys.exit('astrometry not good')
 
         fwhm = seeing / scale
@@ -254,19 +278,20 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         if ofwhm: fwhm = float(ofwhm)
         print '    FWHM[input]  ', fwhm, ' in pixel'
 
-        xdim, ydim = iraf.hselect(img, 'i_naxis1,i_naxis2', 'yes', Stdout=1)[0].split()
+        xdim, ydim = iraf.hselect(img+'.fits[0]', 'i_naxis1,i_naxis2', 'yes', Stdout=1)[0].split()
         print img, fwhm, threshold, scale
 
         #################################################################################
         ###################        write file to compute psf     _psf.coo    ############
         #################################################################################
         if interactive:
-            iraf.display(img, 1, fill=True)
+            iraf.set(stdimage='imt1024')
+            iraf.display(img+'.fits[0]', 1, fill=True)
             iraf.delete('tmp.lo?', verify=False)
             print '_' * 80
             print '>>> Mark reference stars with "a". Then "q"'
             print '-' * 80
-            iraf.imexamine(img, 1, wcs='logical', logfile='tmp.log', keeplog=True)
+            iraf.imexamine(img+'[0]', 1, wcs='logical', logfile='tmp.log', keeplog=True)
             xyrefer = iraf.fields('tmp.log', '1,2,6,15', Stdout=1)
             xns, yns, _fws = [], [], []
 
@@ -303,16 +328,18 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
                 y1, y2 = int(ys[i] - fwhm * 3), int(ys[i] + fwhm * 3)
                 sect = '[' + str(x1) + ':' + str(x2) + ',' + str(y1) + ':' + str(y2) + ']'
                 try:
-                    fmax = iraf.imstat(img + sect, fields='max', Stdout=1)[1]
+                    fmax = iraf.imstat(img+'.fits[0]' + sect, fields='max', Stdout=1)[1]
                     ##########       cut saturated object               ########################
                     if float(fmax) < _datamax:  # not saturated
                         ff.write('%10.3f %10.3f 1 m \n' % (xs[i], ys[i]))
                 except:
-                    pass
+                    print sect
+                #    print 'problem here'
+                #    pass
             ff.close()
 
             iraf.delete('tmp.lo?,tmp.sta?,tmp.gk?', verify=False)
-            iraf.psfmeasure(img, imagecur='tmp.cursor', logfile='tmp.log', radius=int(fwhm), iter=3,
+            iraf.psfmeasure(img+'[0]', imagecur='tmp.cursor', logfile='tmp.log', radius=int(fwhm), iter=3,
                             display=False, StdoutG='tmp.gki')
 
             ff = open('tmp.log')
@@ -379,11 +406,11 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         photmag2, fitmag2 = psffit2(img, fwhm, psfstars, hdr, _datamax, psffun, fixaperture)
 
         radec = iraf.wcsctran(input='STDIN', output='STDOUT', Stdin=photmag, \
-                              Stdout=1, image=img, inwcs='logical', outwcs='world', columns="1 2", \
+                              Stdout=1, image=img+'.fits[0]', inwcs='logical', outwcs='world', columns="1 2", \
                               format='%13.3H %12.2h', min_sig=9, mode='h')[3:]
 
         radec2 = iraf.wcsctran(input='STDIN', output='STDOUT', Stdin=photmag2, \
-                               Stdout=1, image=img, inwcs='logical', outwcs='world', columns="1 2", \
+                               Stdout=1, image=img+'.fits[0]', inwcs='logical', outwcs='world', columns="1 2", \
                                format='%13.3H %12.2h', min_sig=9, mode='h')[3:]
 
         if ds9 == 0 and interactive:
@@ -432,7 +459,6 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         rap0, decp0 = [], []
         for i in range(len(radec2)):
             aa = radec2[i].split()
-            #print aa
             rap.append(aa[0])
             decp.append(aa[1])
             rap0.append(agnkey.agnabsphotdef.deg2HMS(ra=aa[0]))
@@ -453,7 +479,8 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
                     break
             smagf.append(_smagf)
             smagerrf.append(_smagerrf)
-        tbhdu = pyfits.new_table(pyfits.ColDefs([
+
+        new_cols = pyfits.ColDefs([
             pyfits.Column(name='ra', format='20A', array=np.array(rap)),
             pyfits.Column(name='dec', format='20A', array=np.array(decp)),
             pyfits.Column(name='ra0', format='E', array=np.array(rap0)),
@@ -474,7 +501,10 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
                                                                             np.array(smagf), 9999), float)),
             pyfits.Column(name='smagerrf', format='E', array=np.array(np.where((np.array(smagerrf) != 'INDEF'),
                                                                                np.array(smagerrf), 9999), float)),
-        ]))
+        ])
+        
+        tbhdu = pyfits.BinTableHDU.from_columns(new_cols)
+        
         hdu = pyfits.PrimaryHDU(header=hdr)
         thdulist = pyfits.HDUList([hdu, tbhdu])
         agnkey.util.delete(img + '.sn2.fits')
@@ -505,6 +535,8 @@ if __name__ == "__main__":
                       help='Source detection threshold \t\t\t %default')
     parser.add_option("-p", "--psfstars", dest="psfstars", default=6, type='int',
                       help='Maximum number of psf stars \t\t\t %default')
+    parser.add_option("--datamax", dest="datamax", default=0, type='float',
+                      help='Maximum number of psf stars \t\t\t %default')
     parser.add_option("-d", "--distance", dest="distance", default=5, type='int',
                       help='Minimum star separation (in unit of FWHM) \t\t %default')
     parser.add_option("--function", dest="psffun", default='gauss', type='str',
@@ -527,6 +559,7 @@ if __name__ == "__main__":
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
     _xwindow = option.xwindow
+    _datamax = option.datamax
     _catalog = option.catalog
     fixaperture = option.fixaperture
     psffun = option.psffun
@@ -536,7 +569,6 @@ if __name__ == "__main__":
 
     if _xwindow:
         from stsci.tools import capable
-
         capable.OF_GRAPHICS = False
 
     for img in imglist:
@@ -545,7 +577,8 @@ if __name__ == "__main__":
         #            img=re.sub('.fits','.clean.fits',img)
         #            print 'use the clean'
         ######################################
-        if '.fits' in img: img = img[:-5]
+        if '.fits' in img: 
+            img = img[:-5]
         if os.path.exists(img + '.sn2.fits') and not option.redo:
             print img + ': psf already calculated'
         else:
@@ -556,7 +589,7 @@ if __name__ == "__main__":
                 ds9 = 0
 
             result, fwhm = ecpsf(img, option.fwhm, option.threshold, option.psfstars,
-                                 option.distance, option.interactive, ds9, psffun, fixaperture,_catalog)
+                                 option.distance, option.interactive, ds9, psffun, fixaperture,_catalog,_datamax)
             print '\n### ' + str(result)
             if option.show:
                 agnkey.util.marksn2(img + '.fits', img + '.sn2.fits', 1, '')

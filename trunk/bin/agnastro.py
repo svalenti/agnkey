@@ -184,11 +184,13 @@ if __name__ == "__main__":
                 WCSERR = 99
             print WCSERR
             if WCSERR == 0:
-                _instrume = agnkey.util.readkey3(hdr, 'instrume')
-                if _instrume in ['fs01', 'fs02', 'fs03', 'em03', 'em01']:  # FT WCSERR keyword is WCS_ERR
+                if 'WCSERR' in hdr: 
+                    agnkey.util.updateheader(img, 0, {'WCSERR': [0, '']})
+                elif 'WCS_ERR' in hdr: 
                     agnkey.util.updateheader(img, 0, {'WCS_ERR': [0, '']})
                 else:
                     agnkey.util.updateheader(img, 0, {'WCSERR': [0, '']})
+
                 agnkey.agnsqldef.updatevalue('dataredulco', 'WCS', 0, string.split(img, '/')[-1])
                 agnkey.util.updateheader(img, 0, {'L1FWHM': [fwhmgess, 'FHWM (arcsec) - computed with sectractor']})
             else:

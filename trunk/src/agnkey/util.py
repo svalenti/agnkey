@@ -9,19 +9,19 @@ if host in ['deneb']:
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2','papc-astro-2.st-and.ac.uk',
-              'svalenti-lcogt.local','svalenti-lcogt.lco.gtn','valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
-              'Stefanos-MBP.attlocal.net',
-              'valenti-mbp-2.attlocal.net','dhcp43168.physics.ucdavis.edu','dhcp43028.physics.ucdavis.edu']:
-   host = 'SVMAC'
-   workingdirectory = '/Users/valenti/data/AGNKEY/'
-   execdirectory = '/Users/valenti/bin/'
-   rawdata = '/archive/engineering/'
-   realpass = 'configure'
 elif host in ['dark']:
    host = 'dark'
    workingdirectory = '/dark/hal/AGNKEY/'
    execdirectory = '/dark/hal/bin/'
+   rawdata = '/archive/engineering/'
+   realpass = 'configure'
+elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2',
+              'papc-astro-2.st-and.ac.uk','svalenti-lcogt.local','svalenti-lcogt.lco.gtn',
+              'valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
+              'Stefanos-MBP.attlocal.net','valenti-mbp-2.attlocal.net']:
+   host = 'SVMAC'
+   workingdirectory = '/Users/valenti/data/AGNKEY/'
+   execdirectory = '/Users/valenti/bin/'
    rawdata = '/archive/engineering/'
    realpass = 'configure'
 elif 'physics.ucdavis' in host:
@@ -33,7 +33,7 @@ elif 'physics.ucdavis' in host:
 else:
    sys.exit('system '+str(host)+' not recognize')
 
-instrument0 = {'sbig' : ['kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
+instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
                'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
@@ -182,7 +182,7 @@ def readkey3(hdr,keyword):
     else: aa=''
     try:    _instrume=hdr.get('INSTRUME').lower()
     except: _instrume='none'
-    if _instrume in ['kb05','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:    # SBIG
+    if _instrume in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:    # SBIG
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
@@ -205,7 +205,7 @@ def readkey3(hdr,keyword):
                            'type'      : 'OBSTYPE',\
                            'propid'      : 'PROPID',\
                            'telescop'  : 'TELESCOP'}
-    elif _instrume in ['fl02','fl03','fl04','fl05','fl06']:   # sinistro
+    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
@@ -369,7 +369,8 @@ def updateheader(image,dimension,headerdict):
 #   now get dictionary   08 12  2012
 ################################
         for i in headerdict.keys():
-           _header.update(i,headerdict[i][0],headerdict[i][1])
+#           _header.update(i,headerdict[i][0],headerdict[i][1])
+           _header.set(i,headerdict[i][0],headerdict[i][1])
 ###################################################
 #        _header.update(_headername,_value,commento)
         imm.flush()
@@ -791,12 +792,14 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
       _tel='extdata'
 
    if _tel in ['fts','ftn']:
-      agnkey.delete('new.fits')
+      import tempfile
+      temp_file0 = next(tempfile._get_candidate_names())
+      agnkey.delete(temp_file0)
       out_fits = pyfits.PrimaryHDU(header=hd,data=ar)
       out_fits.scale('float32',bzero=0,bscale=1)
-      out_fits.writeto('new.fits', clobber=True, output_verify='fix')
-      ar = pyfits.getdata('new.fits')
-      agnkey.delete('new.fits')
+      out_fits.writeto(temp_file0, clobber=True, output_verify='fix')
+      ar = pyfits.getdata(temp_file0)
+      agnkey.delete(temp_file0)
       gain    = hd['GAIN']
       sat     = 35000
       rdnoise = hd['RDNOISE']
@@ -978,8 +981,12 @@ def checksnlist(img,listfile):
                 cos((_ra - rastd) * scal))*((180/pi)*3600)
     lll = [str(rastd[argmin(dd)])+' '+str(decstd[argmin(dd)])]
     from pyraf import iraf
-    bbb=iraf.wcsctran('STDIN','STDOUT', img, Stdin = lll, inwcs = 'world', units = 'degrees degrees',
-                      outwcs = 'logical', columns = '1 2', formats = '%10.5f %10.5f', Stdout = 1)[3]
+    try:
+       bbb=iraf.wcsctran('STDIN','STDOUT', img, Stdin = lll, inwcs = 'world', units = 'degrees degrees',
+                         outwcs = 'logical', columns = '1 2', formats = '%10.5f %10.5f', Stdout = 1)[3]
+    except:
+       bbb=iraf.wcsctran('STDIN','STDOUT', img+'[0]', Stdin = lll, inwcs = 'world', units = 'degrees degrees',
+                         outwcs = 'logical', columns = '1 2', formats = '%10.5f %10.5f', Stdout = 1)[3]
     if    float(string.split(bbb)[0]) <= _xdimen and float(string.split(bbb)[1]) <= _ydimen and \
                     float(string.split(bbb)[0]) >= 0 and float(string.split(bbb)[1]) >= 0:
         #print str(std[argmin(dd)])+' in the field '+str(bbb)
@@ -1116,7 +1123,7 @@ def sendtrigger(_name, _ra, _dec, _site, _exp, _nexp, _filters, _airmass, _utsta
 
 ###############################################################################
 
-def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username,passwd,proposal,camera='sbig',_airmass=2.0,_site=''):
+def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username,passwd,proposal,camera='sbig',_airmass=2.0,_site='', mode='NORMAL'):
     import httplib
     import urllib
     import json
@@ -1143,6 +1150,14 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     _inst={'sinistro': '1M0-SCICAM-SINISTRO','sbig': '1M0-SCICAM-SBIG',
            'spectral': '2M0-SCICAM-SPECTRAL','oneof': 'oneof'}
     binx={'sbig': 2,'sinistro': 1,'spectral': 2}
+
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
 
     if camera in ['sbig', 'sinistro', 'oneof']:
         telclass = '1m0'
@@ -1180,6 +1195,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                                          "constraints": {"max_airmass": float(_airmass) },
                                          "location": _location,
                                          "molecules": molecules,
+                                         "observation_type": mode,
                                          "observation_note": "C#",
                                          "type": "request",
                                          "windows": [ {"end": _utend, "start": _utstart }  ],
@@ -1218,6 +1234,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                                          "location": _location,
                                          "molecules": molecules1,
                                          "observation_note": "C#",
+                                         "observation_type": mode,
                                          "type": "request",
                                          "windows": [ {"end": _utend, "start": _utstart }  ],
                                          "target": {"coordinate_system": "ICRS",
@@ -1237,6 +1254,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                                          "location": _location,
                                          "molecules": molecules2,
                                          "observation_note": "C#",
+                                         "observation_type": mode,
                                          "type": "request",
                                          "windows": [ {"end": _utend, "start": _utstart }  ],
                                          "target": {"coordinate_system": "ICRS",
@@ -1295,7 +1313,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
 
 
 def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,proposal,_airmass=2.0,
-                      _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs'):
+                      _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs', mode='NORMAL'):
     ''' This definition will trigger new observations using the API Web Server
         - it takes most of the input by command line
         - some input have a default value (eg telclass,airmass,binx,biny
@@ -1319,6 +1337,14 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                    (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
         if verbose: print 'JD= '+str(_JDtoday)
         return _JDtoday
+
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
 
     if _site in ['ogg','coj']:
        _location = {"telescope_class": "2m0", "site": _site}
@@ -1381,6 +1407,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                                            "constraints": {"max_airmass": float(_airmass)},
                                          "location": _location,
                                          "molecules": _molecules,
+                                         "observation_type": mode,
                                          "observation_note": "C#",
                                          "type": "request",
                                          "windows": [ {"end": _utend, "start": _utstart }  ],
@@ -1496,73 +1523,6 @@ def downloadfloydsraw(JD,username,passwd):
             else:
                _reqnumber = ''
 
-#            if ll0['filters'][kk]=='floyds':
-#                 ###########   tar file if it is a spectrum 
-#                 if ll0['tarfile'][kk]:
-#                     print 'tarfile already there: %s ' % (ll0['tarfile'][kk])
-#                 else:
-#                   print kk,track,_status,_reqnumber
-#                   if _reqnumber and _status in ['COMPLETED']:
-#                     aa=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(-1)).isoformat()
-#                     bb=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(0)).isoformat()
-#                     cc=(datetime.datetime.strptime(_dict['requests'][_reqnumber]['schedule'][0]['start'],\
-#                                                    '%Y-%m-%d %H:%M:%S')+datetime.timedelta(1)).isoformat()
-#                     aa = re.sub('-','',string.split(aa,'T')[0])
-#                     bb = re.sub('-','',string.split(bb,'T')[0])
-#                     cc = re.sub('-','',string.split(cc,'T')[0])
-#                     directory = agnkey.util.workingdirectory + 'floydsraw/'
-#                     dd=[aa,bb,cc]
-#                     print track,kk,ll0['tarfile'][kk]
-#                     print _reqnumber
-#                     print dd
-#                     for name in dd:
-#                         _tarfile = _reqnumber+'_'+name+'.tar.gz'
-#                         if os.path.isfile(directory + _tarfile):                        
-#                                 print 'file  %s already there' % (_tarfile)
-#                                 print 'UPDATE'
-#                                 agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
-#                                                              connection='agnkey',namefile0='tracknumber')
-#                                 break
-#                         else:
-#                                 line='wget --post-data "username='+re.sub('@','%40',username)+'&password='+passwd+\
-#                                     '" https://data.lcogt.net/download/package/spectroscopy/request/'+\
-#                                     _tarfile + ' --directory-prefix=' + directory
-#                                 print line      
-#                                 os.system(line)
-#                                 if os.path.isfile(directory + _tarfile):
-#                                    ##############   unzip the tar file in floydsraw2    ###########################
-#                                    os.chdir('/dark/hal/AGNKEY/tmp/')
-#                                    os.system('cp '+directory + _tarfile + ' /dark/hal/AGNKEY/tmp/ ')
-#                                    os.system('tar -zxvf '+_tarfile)
-#                                    epoch = re.sub('.tar.gz','',string.split(_tarfile,'_')[1])
-#                                    imglist=glob.glob('ogg*.fits')
-#                                    for img in imglist:
-#                                       dire = '/dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]
-#                                       if not os.path.isdir(dire):
-#                                          os.mkdir(dire)
-#                                          os.mkdir(dire+'/raw/')
-#                                       os.system('mv '+img+\
-#                                                 ' /dark/hal/AGNKEY/floydsraw2/ogg/'+string.split(img,'-')[2]+'/raw/')
-#                                    imglist=glob.glob('coj*.fits')
-#                                    for img in imglist:
-#                                       dire = '/dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]
-#                                       if not os.path.isdir(dire):
-#                                          os.mkdir(dire)
-#                                          os.mkdir(dire+'/raw/')
-#                                       os.system('mv '+img+\
-#                                                 ' /dark/hal/AGNKEY/floydsraw2/coj/'+string.split(img,'-')[2]+'/raw/')
-#                                    os.system('rm -rf /dark/hal/AGNKEY/tmp/*')
-#                                    ##### ingest raw data in the database
-#                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site ogg')
-#                                    os.system('/dark/hal/bin/agnfloyds.py -e '+epoch+' --site coj')
-#                                    #########################################################3
-#                                    print 'file  %s already there' % (_tarfile)
-#                                    print 'UPDATE'
-#                                    agnkey.agnsqldef.updatevalue('triggerslog', 'tarfile', _tarfile, track,
-#                                                                 connection='agnkey',namefile0='tracknumber')
-#                                    break
 ############################################################################
 
 def makecatalogue(imglist):
@@ -1610,49 +1570,6 @@ def makecatalogue(imglist):
     return dicti
 
 ######################################################################################################
-
-#def makecatalogue(imglist):
-#    import pyfits
-#    import agnkey
-#    filters = {}
-#    dicti = {}
-#    for img in imglist:
-#        t = pyfits.open(img)
-#        tbdata = t[1].data
-#        hdr1 = t[0].header
-#        _filter = agnkey.util.readkey3(hdr1, 'filter')
-#        _exptime = agnkey.util.readkey3(hdr1, 'exptime')
-#        _airmass = agnkey.util.readkey3(hdr1, 'airmass')
-#        _telescope = agnkey.util.readkey3(hdr1, 'telescop')
-#        _psfmag1 = agnkey.util.readkey3(hdr1, 'PSFMAG1')
-#        _psfdmag1 = agnkey.util.readkey3(hdr1, 'PSFDMAG1')
-#        _apmag1 = agnkey.util.readkey3(hdr1, 'APMAG1')
-#        print img
-#        print _filter
-#        print _psfmag1
-#        print _apmag1
-#        if _filter not in dicti:
-#            dicti[_filter] = {}
-#        if img not in dicti[_filter]:
-#            dicti[_filter][img] = {}
-#        for jj in hdr1:
-#            if jj[0:2] == 'ZP':
-#                dicti[_filter][img][jj] = agnkey.util.readkey3(hdr1, jj)
-#        dicti[_filter][img]['JD'] = agnkey.util.readkey3(hdr1, 'JD')
-#        dicti[_filter][img]['exptime'] = _exptime
-#        dicti[_filter][img]['airmass'] = _airmass
-#        dicti[_filter][img]['telescope'] = _telescope
-#        try:
-#            dicti[_filter][img]['PSFMAG1'] = float(_psfmag1)
-#            dicti[_filter][img]['APMAG1'] = float(_apmag1)
-#            dicti[_filter][img]['PSFDMAG1'] = float(_psfdmag1)
-#        except:
-#            dicti[_filter][img]['PSFMAG1'] = 9999.
-#            dicti[_filter][img]['APMAG1'] = 9999.
-#            dicti[_filter][img]['PSFDMAG1'] = 0.0
-#    return dicti
-
-################################################################################
 
 def makecatalogue2(imglist):
     import pyfits
@@ -1704,3 +1621,22 @@ def jd2date(inputjd):
    import datetime
    jd0 = 2451544.5 # On Jan 1, 2000 00:00:00
    return datetime.datetime(2000,01,01,00,00,00)+datetime.timedelta(days=inputjd-jd0)
+
+############################################################################
+
+def sendemail(fromaddr,toaddrs,subj,text):
+   import smtplib
+   print readpass['emailsmtp']
+   try:
+      message = 'To: %s \nSubject: %s\n\n%s' % (toaddrs,subj, text)
+      server = smtplib.SMTP(readpass['emailsmtp'])
+      server.starttls()
+      server.login(readpass['email'],readpass['emailpass'])
+      server.sendmail(fromaddr,toaddrs,message)
+      server.quit()
+      return 1
+   except:
+      return 0
+
+####################################3
+            

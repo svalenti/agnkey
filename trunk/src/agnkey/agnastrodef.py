@@ -1116,8 +1116,6 @@ def sextractor(img):
         import agnkey
         from agnkey.util import defsex,delete
         import os
-        from pyraf import iraf
-        from iraf import proto
         from numpy import compress,array,asarray
         import pyfits
         import tempfile
@@ -1138,25 +1136,25 @@ def sextractor(img):
         namesex=defsex(temp_file0,temp_file1)
         os.system('sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex')
         #print 'sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex'
+
+        data = np.genfromtxt(temp_file1,float)
+        num, xpix, ypix, cm, dcm, fl, cl, fw, ell, bkg, thr = zip(*data)
+
+        num   = np.array(num)
+        xpix  = np.array(xpix)
+        ypix  = np.array(ypix)
+        cm    = np.array(cm)
+        dcm   = np.array(dcm)
+        fl    = np.array(fl)
+        cl    = np.array(cl)
+        fw    = np.array(fw)
+        ell   = np.array(ell)
+        bkg   = np.array(bkg)
+        thr   = np.array(thr)
+
         delete(namesex)
         delete('_logsex')
-        xpix=iraf.proto.fields(temp_file1,fields='2',Stdout=1)
-        ypix=iraf.proto.fields(temp_file1,fields='3',Stdout=1)
-        cm=iraf.proto.fields(temp_file1,fields='4',Stdout=1)
-        cl=iraf.proto.fields(temp_file1,fields='7',Stdout=1)
-        fw=iraf.proto.fields(temp_file1,fields='8',Stdout=1)
-        ell=iraf.proto.fields(temp_file1,fields='9',Stdout=1)
-        bkg=iraf.proto.fields(temp_file1,fields='10',Stdout=1)
-        fl=iraf.proto.fields(temp_file1,fields='6',Stdout=1)
-
-        fl=compress((array(xpix)!=''),array(fl,float))
-        cl=compress((array(xpix)!=''),array(cl,float))
-        cm=compress((array(xpix)!=''),array(cm,float))
-        fw=compress((array(xpix)!=''),array(fw,float))
-        ell=compress((array(xpix)!=''),array(ell,float))
-        bkg=compress((array(xpix)!=''),array(bkg,float))
-        ypix=compress((array(xpix)!=''),array(ypix,float))
-        xpix=compress((array(xpix)!=''),array(xpix,float))
+        delete(temp_file1)
 
         try:
             ww=asarray([i for i in range(len(xpix)) if ((xpix[i]<_xdim) or (ypix[i]<_ydim))])
@@ -1182,7 +1180,7 @@ def sextractor(img):
         except: 
             xpix,ypix,fw,cl,cm,ell=[],[],[],[],[],[]
             print '\n### ERROR Filtering the sextractor detections, please check that sextractor is working ......'
-        delete(temp_file1)
+        
         return xpix,ypix,fw,cl,cm,ell,bkg,fl
 
 #############################################################################################################
@@ -1257,17 +1255,31 @@ def finewcs(img):
     import numpy as np
     from pyraf import iraf
     import os,string
+    import tempfile
+    temp_file0 = next(tempfile._get_candidate_names())
+    temp_file1 = next(tempfile._get_candidate_names())
+
     catvec=agnkey.agnastrodef.querycatalogue('2mass',img,'vizir')
-    namesex=agnkey.util.defsex('default.sex')
-    os.system('sex '+img+' -c '+namesex+' -CATALOG_NAME pippo  > _logsex')
-    aaa=np.genfromtxt('pippo',float)
+
+    namesex=defsex(temp_file0,temp_file1)
+    #os.system('sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex')
+    os.system('sex '+img+' -c '+namesex+' -CATALOG_NAME '+temp_file1+'  > _logsex')
+
+    aaa=np.genfromtxt(temp_file1,float)
     bbb=zip(*aaa)
     vector2=[str(k)+' '+str(v) for k,v in  zip(bbb[1],bbb[2])]
     colonne3=' 1   2 '
     distvec,pos0,pos1=agnkey.agnastrodef.crossmatchxy(np.array(catvec['x']),np.array(catvec['y']),np.array(bbb[1]),np.array(bbb[2]),5)  
-    if len(pos0)>20:    _order=4
-    elif len(pos0)>10:  _order=3
-    else:               _order=2
+
+    if len(pos0)>20:    
+        _order=4
+    elif len(pos0)>10:  
+        _order=3
+    else:       
+        _order=2
+
+    agnkey.delete(temp_file1)
+    agnkey.delete(temp_file0)
 
     xxx=np.array(bbb[1])[pos1]
     yyy=np.array(bbb[2])[pos1]
@@ -1348,7 +1360,7 @@ def run_astrometry(im, clobber=True,redo=False):
         cmd += '--no-plots -N '+temp_name+' '
         if clobber: cmd += '--overwrite '
         cmd += '--solved none --match none --rdls none --wcs none --corr none '
-        cmd += ' --downsample 4 '
+        cmd += ' --downsample 4 --fits-image '
         cmd += '%s' % im
         print cmd
         os.system(cmd)
@@ -1398,10 +1410,12 @@ def run_astrometry(im, clobber=True,redo=False):
                     'CD2_2'   : [ hdrt['CD2_2'] , 'no comment'],
                     'IMAGEW'  : [ hdrt['IMAGEW']  , 'Image width,  in pixels.'],
                     'IMAGEH'  : [ hdrt['IMAGEH']  , 'Image height, in pixels.']}
-            if 'WCS_ERR' in hdr:
-                dictionary['WCS_ERR'] = [0, '']
             if 'WCSERR' in hdr:
                 dictionary['WCSERR'] = [0, '']
+            elif 'WCS_ERR' in hdr:
+                dictionary['WCS_ERR'] = [0, '']
+
+            print dictionary
             agnkey.util.updateheader(im, 0, dictionary)
             agnkey.agnsqldef.updatevalue('dataredulco', 'WCS', 0, string.split(im, '/')[-1])
             os.remove(temp_name)

@@ -944,10 +944,10 @@ def obsin2(targid,_days=7):
 
     _JDn=JDnow()
 
-    command='select l.name, l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, g.windowstart, g.windowend, g.tracknumber, '+\
+    command='select l.name, l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, o.mode, g.windowstart, g.windowend, g.tracknumber, '+\
         'g.reqnumber, g.tarfile, g.status from triggers as o join triggerslog as g join lsc_sn_pos as l '+\
         'where o.id = g.triggerid and g.windowend > '+str(_JDn)+' and l.targid=o.targid and l.targid="'+str(targid)+'"'
-    command1='select l.name,l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, g.windowstart, g.windowend, g.tracknumber, '+\
+    command1='select l.name,l.targid, l.ra_sn, l.dec_sn, o.filters, o.exptime, o.mode, g.windowstart, g.windowend, g.tracknumber, '+\
         'g.reqnumber, g.tarfile, g.status from triggers as o join triggerslog as g join lsc_sn_pos as l '+\
         'where o.id = g.triggerid and g.windowend > '+str(_JDn-float(_days))+'and g.windowend < '+\
         str(_JDn)+' and l.targid=o.targid and l.targid="'+str(targid)+'"'
@@ -982,7 +982,6 @@ def obsin2(targid,_days=7):
                 else:
                     _status=''
 #                if _status=='PENDING': _status=''
-
                 if ll0['tarfile'][i]:  
                     _tarfile=ll0['tarfile'][i]
                 else:
@@ -1002,23 +1001,23 @@ def obsin2(targid,_days=7):
                             _tarfile=''
                     if _tarfile:
                         lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll0['mode'][i])+'</td><td>'+\
                               str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+\
                               '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
                               #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
                     else:
                         lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                              str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll0['mode'][i])+'</td><td>'+\
                               str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
 #                              str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
                   else:
                       lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                            str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                            str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll0['mode'][i])+'</td><td>'+\
                             str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                             #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
                 else:
                     lll0=lll0+'<tr><td>'+str(ll0['name'][i])+'</td><td>'+str(ll0['filters'][i])+'</td><td>'+str(ll0['exptime'][i])+'</td><td>'+\
-                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll0['mode'][i])+'</td><td>'+\
                           str(ll0['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                           #str(ll0['windowstart'][i])+'</td><td>'+str(ll0['windowend'][i])+'</td><td>'+\
 
@@ -1044,20 +1043,20 @@ def obsin2(targid,_days=7):
                             if _tarfile:
                                 agnkey.agnsqldef.updatevalue('triggerslog','tarfile',_tarfile,str(ll1['tracknumber'][i]),connection='agnkey',namefile0='tracknumber')
                                 lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
-                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll1['mode'][i])+'</td><td>'+\
                                       str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+\
                                       '</td><td>'+'<a href="../../AGNKEY/floydsraw/'+str(_tarfile)+'"> download tar '+'</td></tr>'
                                 #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+\
                             else:
                                 lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
-                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                                      str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll1['mode'][i])+'</td><td>'+\
                                       str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                                       #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+'</td><td>'+\
                    else:
                        pass
                 else:
                     lll1=lll1+'<tr><td>'+str(ll1['name'][i])+'</td><td>'+str(ll1['filters'][i])+'</td><td>'+str(ll1['exptime'][i])+'</td><td>'+\
-                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+\
+                          str(_date0)+'</td><td>'+str(_date1)+'</td><td>'+str(ll1['mode'][i])+'</td><td>'+\
                           str(ll1['tracknumber'][i])+'</td><td>'+str(_status)+'</td></tr>'
                     #str(ll1['windowstart'][i])+'</td><td>'+str(ll1['windowend'][i])+\
     return lll0,lll1
@@ -1426,6 +1425,10 @@ def triggercadence(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnke
          ' <option value=3> 3 </option>'+\
          ' <option value=4> 4 </option>'+\
          '</select></td></tr>'+\
+         '<tr><td> obs mode: </a> <select name="obsmode">'+\
+         '<option value="normal"> normal </option> '+\
+         '<option value="ToO"> too </option> '+\
+         '</select></td></tr>'+\
          '<tr><td> proposal: <select name="proposal">'
     for kk in proposal:
              sss=sss+'<option value="'+kk+'"> '+kk+' </option> '
@@ -1493,6 +1496,10 @@ def triggerfloydscadence(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},propos
          '<option value=2.5> 2.5 </option>'+\
          ' <option value=3> 3 </option>'+\
          ' <option value=4> 4 </option>'+\
+         '</select></td></tr>'+\
+         '<tr><td> obs mode: </a> <select name="obsmode">'+\
+         '<option value="normal"> normal </option> '+\
+         '<option value="ToO"> too </option> '+\
          '</select></td></tr>'+\
          '<tr><td> mode: </a> <select name="acmode">'+\
          '<option value="wcs" > wcs </option>'+\

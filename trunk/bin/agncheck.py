@@ -27,7 +27,7 @@ if __name__ == "__main__":
                       help='-f filter [sloan,landolt,u,g,r,i,z,U,B,V,R,I] \t [%default]')
     parser.add_option("-F", "--force", dest="force", action="store_true")
     parser.add_option("-b", "--bad", dest="bad", default='', type="str",
-                      help='-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag,quality] \t [%default]')
+                      help='-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag,quality,diff,apmag] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
                       help='-s stage [checkwcs,checkpsf,checkmag,checkquality,checkpos,checkcat,'
                            'checkmissing,checkfvd,checkclean] \t [%default]')
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         if _stage not in ['checkfast', 'checkwcs', 'checkpsf', 'checkmag', 'checkdiff', 'checkquality', 
                           'checkpos', 'checkcat', 'checkmissing', 'checkfvd', 'checkclean']: sys.argv.append('--help')
     if _bad:
-        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality']:
+        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality','diff','apmag']:
             sys.argv.append('--help')
     if _filter:
         if _filter not in ['landolt', 'sloan', 'u', 'g', 'r', 'i', 'z', 'U', 'B', 'V', 'R', 'I']:

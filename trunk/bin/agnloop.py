@@ -93,7 +93,7 @@ if __name__ == "__main__":
                       help='mode for wcs (sv,astrometry)  \t [%default]')
     parser.add_option("--combine", dest="combine", default=1e-10, type="float",
                       help='range to combine (in days)  \t [%default]')
-    parser.add_option("--datamax", dest="dmax", default=51000, type="float",
+    parser.add_option("--datamax", dest="dmax", default = 0, type="float",
                       help='data max for saturation (counts)  \t [%default]')
     parser.add_option("--yshift", dest="yshift", default=0, type="int",
                       help='y shift in the guess astrometry \t [%default]')
@@ -171,7 +171,7 @@ if __name__ == "__main__":
                           'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update']:
             sys.argv.append('--help')
     if _bad:
-        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag']:
+        if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag','diff']:
             sys.argv.append('--help')
     option, args = parser.parse_args()
     _id = option.id
@@ -307,11 +307,11 @@ if __name__ == "__main__":
 
             elif _stage == 'psf':
                 agnkey.agnloopdef.run_psf(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
-                                          XX, _fix, _catalogue, _table)
+                                          XX, _fix, _catalogue, _table, _dmax)
 
             elif _stage == 'psf2':
                 agnkey.agnloopdef.run_psf2(ll['namefile'], _threshold, _interactive, _fwhm, _show, _redo,
-                                           XX, _fix, _catalogue, _table)
+                                           XX, _fix, _catalogue, _table, _dmax)
 
             elif _stage == 'psfmag':
                 agnkey.agnloopdef.run_fit(ll['namefile'], _ras, _decs, _xord, _yord, _bkg, _size, _recenter, _ref,

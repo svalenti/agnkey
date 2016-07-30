@@ -2,12 +2,12 @@ import agnkey
 from astropy.io import fits as pyfits
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
 def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-10, magtype='mag',
                database='dataredulco',ra='',dec=''):
     import agnkey
     import datetime
-    import numpy as np
     import re
     import os
     print magtype,ra,dec
@@ -31,13 +31,13 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
         mtypeerr = 'psfdmag'
     elif magtype == 'flux1':
         mtype = 'apflux1'
-        mtypeerr = 'apflux1'
+        mtypeerr = 'dapflux1'
     elif magtype == 'flux2':
         mtype = 'apflux2'
-        mtypeerr = 'apflux2'
+        mtypeerr = 'dapflux2'
     elif magtype == 'flux3':
         mtype = 'apflux3'
-        mtypeerr = 'apflux3'
+        mtypeerr = 'dapflux3'
 
     if _field == 'landolt':
         filters0 = ['U', 'B', 'V', 'R', 'I', 'Bessell-B', 'Bessell-V', 'Bessell-R',
@@ -51,14 +51,50 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
 
     mag=ll[mtype]
     dmag=ll[mtypeerr]
-    mjd=ll['mjd']
+    hjd=ll['hjd']
     namefile=ll['namefile']
+    #namefile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
     filt=ll['filter']
     tel=ll['telescope']
     date=ll['dateobs']
     z1=ll['z1']
     z2=ll['z2']
     _magtype=ll['magtype']
+    filetype = ll['filetype'][0]
+    targid = ll['targid'][0]
+
+    ll0 = ''
+    if filetype == 3:
+        if mtype in ['apflux1','apflux2','apflux3']:
+            print 'add flux from reference'
+            #######################################################
+            command1=['select '+mtype+','+mtypeerr+',filter,instrument,namefile from dataredulco where targid='+str(targid)+' and filetype=4']
+            data1 = agnkey.agnsqldef.query(command1)
+            ll0={'namefile':[]}
+            for line in data1:
+                    ll0[line['namefile']] = {mtype:line[mtype], mtypeerr:line[mtypeerr]}
+            #########################################
+            mteplate = []
+            mteplateerr = []
+            for jj,_file in enumerate(namefile):
+                hdr = pyfits.getheader(_file)
+                if 'TEMPLATE' in hdr:
+                    if hdr['TEMPLATE'] in ll0:
+                        mteplate.append(ll0[hdr['TEMPLATE']][mtype])
+                        mteplateerr.append(ll0[hdr['TEMPLATE']][mtypeerr])
+                    else:
+                        mteplate.append(0)
+                        mteplateerr.append(0)
+                else:
+                    mteplate.append(0)
+                    mteplateerr.append(0)
+        else:
+            ll0 = ''
+            #######################################################
+
+    if ll0:
+        mag = np.array(mag,float) + np.array(mteplate,float)
+        dmag = np.array(dmag,float) + np.array(mteplateerr,float)
 
     setup={}
     for _tel in set(tel):
@@ -69,7 +105,7 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                     setup[_tel]={}
                 if _fil not in setup[_tel]:
                     setup[_tel][_fil]={}
-                mjd00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(mjd))
+                hjd00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(hjd))
                 mag00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(mag))
                 dmag00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(dmag))
                 date00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(date))
@@ -79,7 +115,8 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                 magtype00 = np.compress((np.array(filt) == _fil) & (np.array(tel) == _tel), np.array(_magtype))
 
                 ww = np.where((np.array(mag00) > -99999999)&(np.array(mag00) < 9999999))
-                mjd0 = mjd00[ww]
+
+                hjd0 = hjd00[ww]
                 mag0 = mag00[ww]
                 dmag0 = dmag00[ww]
                 date0 = date00[ww]
@@ -88,25 +125,26 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                 z20 = z200[ww]
                 magtype0 = magtype00[ww]
 
-                inds = np.argsort(mjd0)
+                inds = np.argsort(hjd0)
                 mag0 = np.take(mag0, inds)
                 dmag0 = np.take(dmag0, inds)
                 date0 = np.take(date0, inds)
                 namefile0 = np.take(namefile0, inds)
-                mjd0 = np.take(mjd0, inds)
+                hjd0 = np.take(hjd0, inds)
                 z10 = np.take(z10, inds)
                 z20 = np.take(z20, inds)
                 magtype0 = np.take(magtype0, inds)
-                # z3=
-                magtype1, mag1, dmag1, mjd1, date1, namefile1 = [], [], [], [], [], []
+
+
+                magtype1, mag1, dmag1, hjd1, date1, namefile1 = [], [], [], [], [], []
                 done = []
-                for i in range(0, len(mjd0)):
+                for i in range(0, len(hjd0)):
                     if i not in done:
-                        ww = np.asarray([j for j in range(len(mjd0)) if
-                                  (mjd0[j] - mjd0[i]) < _bin and (mjd0[j] - mjd0[i]) >= 0.0])  # abs(mjd0[j]-mjd0[i])<bin])
+                        ww = np.asarray([j for j in range(len(hjd0)) if
+                                  (hjd0[j] - hjd0[i]) < _bin and (hjd0[j] - hjd0[i]) >= 0.0])  # abs(mjd0[j]-mjd0[i])<bin])
                         for jj in ww: done.append(jj)
                         if len(ww) >= 2:
-                            mjd1.append(np.mean(mjd0[ww]))
+                            hjd1.append(np.mean(hjd0[ww]))
                             if magtype == 'fit':
                                 mag1.append(np.mean(mag0[ww]))
                             else:
@@ -117,9 +155,9 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                                 dmag1.append(0.0)
                             magtype1.append(np.std(magtype0[ww]))
                             namefile1.append(namefile0[ww])
-                            date1.append(date0[ww][0] + datetime.timedelta(np.mean(mjd0[ww]) - mjd0[ww][0]))
+                            date1.append(date0[ww][0] + datetime.timedelta(np.mean(hjd0[ww]) - hjd0[ww][0]))
                         elif len(ww) == 1:
-                            mjd1.append(mjd0[ww][0])
+                            hjd1.append(hjd0[ww][0])
                             mag1.append(mag0[ww][0])
                             magtype1.append(magtype0[ww][0])
                             dmag1.append(dmag0[ww][0])
@@ -128,10 +166,11 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                 setup[_tel][_fil]['mag'] = mag1
                 setup[_tel][_fil]['magtype'] = magtype1
                 setup[_tel][_fil]['dmag'] = dmag1
-                setup[_tel][_fil]['mjd'] = list(np.array(mjd1))
+                setup[_tel][_fil]['hjd'] = list(np.array(hjd1))
                 setup[_tel][_fil]['date'] = date1
                 setup[_tel][_fil]['namefile'] = namefile1
 
+    print setup
     if _show:
         plotfast(setup)
         try:
@@ -155,22 +194,25 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
     if _output: ff = open(_output, 'w')
     for _tel in setup:
         filters = setup[_tel].keys()
-        line0 = '# %10s\t%12s\t' % ('dateobs', 'mjd')
+        line0 = '# %10s\t%12s\t' % ('dateobs', 'hjd')
         for filt in filters0:
             if filt in filters and filt in setup[_tel].keys():
                 line0 = line0 + '%12.12s\t%12.12s\t' % (str(filt), str(filt) + 'err')
         for _fil in setup[_tel]:
-            for j in range(0, len(setup[_tel][_fil]['mjd'])):
-                line = '  %10s\t%12s\t' % (str(setup[_tel][_fil]['date'][j]), str(setup[_tel][_fil]['mjd'][j]))
+            for j in range(0, len(setup[_tel][_fil]['hjd'])):
+                line = '  %10s\t%12s\t' % (str(setup[_tel][_fil]['date'][j]), str(setup[_tel][_fil]['hjd'][j]))
                 for filt in filters0:
                     if filt in filters:
                         if filt == _fil:
                             line = line + '%12.7s\t%12.6s\t' % (
                             str(setup[_tel][_fil]['mag'][j]), str(setup[_tel][_fil]['dmag'][j]))
                         else:
-                            line = line + '%12.7s\t%12.6s\t' % ('9999', '0.0')
+                            if mtype not in ['apflux1','apflux2','apflux3']:
+                                line = line + '%12.7s\t%12.6s\t' % ('9999', '0.0')
+                            else:
+                                line = line + '%12.7s\t%12.6s\t' % ('nan', 'nan')
                 line = line + '%2s\t%6s\t\n' % (str(keytelescope[_tel]), str(_tel) + '_' + str(_fil))
-                linetot[setup[_tel][_fil]['mjd'][j]] = line
+                linetot[setup[_tel][_fil]['hjd'][j]] = line
     aaa = linetot.keys()
     if _output:
         for gg in np.sort(aaa):
@@ -195,13 +237,15 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
 
     status = []
     if mode == 1:
-        _mode = 'agncatalogue.py'
+        _mode = 'agncatalogue2.py'
         stat = 'abscat'
     elif mode == 2:
         _mode = 'agnmag.py'
         stat = 'mag'
+
     if len(extlist) > 0:
-        for img in extlist:  status.append(checkstage(img, stat))
+        for img in extlist:  
+            status.append(checkstage(img, stat))
         extlist = extlist[where(array(status) > 0)]
         status = array(status)[where(array(status) > 0)]
         f = open('_tmpext.list', 'w')
@@ -211,9 +255,13 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
             f.write(_dir + re.sub('fits', 'sn2.fits', img) + '\n')
         f.close()
     else:
-        for img in imglist:  status.append(checkstage(img, stat))
+        for img in imglist:  
+            status.append(checkstage(img, stat))
+        print imglist
+        print status
         imglist = imglist[where(array(status) > 0)]
         status = array(status)[where(array(status) > 0)]
+
 
     f = open('_tmp.list', 'w')
     for img in imglist:
@@ -476,6 +524,7 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
             _telescope = agnkey.util.readkey3(hdr, 'telescop')
             _telid = agnkey.util.readkey3(hdr, 'telid')
             _site = agnkey.util.readkey3(hdr, 'SITEID')
+            print _telescope, _telid,_site
             if _telescope in agnkey.util.telescope0['elp']:
                 tel_tag = 'LCOGT-McDonald'
                 _observatory = 'mcdonald'
@@ -494,17 +543,19 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
                     tel_tag = 'LCOGT-SSO'
                 else:
                     tel_tag = 'FTS'
-            elif _site in ['ogg']:
+            elif _site in ['coj']:
                 _observatory = 'sso'
                 tel_tag = 'FTS'
-            elif _site in ['coj']:
+            elif _site in ['ogg']:
                 _observatory = 'cfht'
                 tel_tag = 'FTN'
             else:
                 print _telescope
                 sys.exit('ERROR: site and telescope not correct')
             if 'HJD' not in hdr.keys() or _force:
-                iraf.specred.setjd(_dir + img, date='DATE-OBS', time='UTSTART', \
+                print 'hehe'
+                print _dir + img
+                iraf.specred.setjd(_dir + img+'[0]', date='DATE-OBS', time='UTSTART', \
                                    exposure='EXPTIME', ra='ra', dec='dec', epoch='', observa=_observatory)
             else:
                 print 'HJD already there'
@@ -536,7 +587,7 @@ def updatefromheader(imglist,imgheader='hjd',tablecolumn='hjd',database='datared
 ###################################################################
 
 def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
-            fix=True, catalog='', database='dataredulco'):
+            fix=True, catalog='', database='dataredulco', datamax=''):
     import agnkey
     import os
     import re
@@ -567,6 +618,11 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             cc=' --catalog '+catalog+' '
         else:
             cc=' '
+
+        if datamax:
+            dd = ' --datamax '+str(datamax) + ' '
+        else:
+            dd = ' '
 
         status = checkstage(img, 'psf')
         print status
@@ -624,7 +680,7 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             else:
                 img0 = img
                 command = 'agnpsf.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
-                    treshold) + xwindow + gg + cc
+                    treshold) + xwindow + gg + cc + dd
                 print command
                 os.system(command)
         elif status == 0:
@@ -642,7 +698,7 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
 ###################################################################
 
 def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
-            fix=True, catalog='',database='dataredulco'):
+            fix=True, catalog='',database='dataredulco',  datamax=''):
     import agnkey
     import os
     import re
@@ -672,6 +728,11 @@ def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=
             gg = ' '
         else:
             gg = ' --fix '
+        if datamax:
+            dd = ' --datamax '+str(datamax) + ' '
+        else:
+            dd = ' '
+
         status = checkstage(img, 'psf')
         print status
         if status == 1: rr = '-r'
@@ -683,7 +744,7 @@ def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=
             else:
                 img0 = img
             command = 'agnpsf2.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
-                treshold) + xwindow + gg + cc
+                treshold) + xwindow + gg + cc + dd
             print command
             os.system(command)
         elif status == 0:
@@ -730,6 +791,10 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
                 rr = '-r'
             else:
                 rr = ''
+            if dmax:
+                dd = ' --datamax '+str(dmax)+' '
+            else:
+                dd = ' '
             if _ref:
                 print img0, _ref, show
                 _ras, _decs = agnkey.agnloopdef.getcoordfromref(img0, _ref, show)
@@ -738,7 +803,7 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
 
             command = 'agnsn.py ' + _dir + img + ' ' + ii + ' ' + ss + ' ' + rr + ' -x ' + str(_xord) + ' -y ' + str(
                 _yord) + ' ' + _ras + ' ' + _decs + ' ' + cc + ' -b ' + str(_bkg) + '  -z ' + str(
-                _size) + ' --datamax ' + str(dmax)
+                _size) + dd
 
             if ggg[0]['filetype'] == 3:
                 try:
@@ -874,7 +939,7 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
     hdr1 = t[0].header
     psfx1 = agnkey.util.readkey3(hdr1, 'PSFX1')
     psfy1 = agnkey.util.readkey3(hdr1, 'PSFY1')
-    print psfx1, psfy1, 'dddd'
+    print psfx1, psfy1
     if psfx1 != None and psfy1 != None:
         lll = str(psfx1) + ' ' + str(psfy1)
         aaa = iraf.wcsctran('STDIN', 'STDOUT', _dir1 + img1, Stdin=[lll], inwcs='logical', units='degrees degrees',
@@ -1025,6 +1090,10 @@ def filtralist(ll2, _filter, _id, _name, _ra, _dec, _bad, _filetype=1):
             ww = asarray([i for i in range(len(ll1['psf'])) if (ll1['psf'][i] == 'X' )])
         elif _bad == 'quality':
             ww = asarray([i for i in range(len(ll1['quality'])) if ((ll1['quality'][i] == 1))])
+        elif _bad == 'diff':
+            maskexists = [os.path.isfile(filepath+filename.replace('.fits', '.diff.fits'))
+                            for filepath, filename in zip(ll1['wdirectory'], ll1['namefile'])]
+            ww = np.flatnonzero(np.logical_not(np.array(maskexists)))
         else:
             ww = asarray([i for i in range(len(ll1[_bad])) if (ll1[_bad][i] == 9999 )])
         if len(ww) > 0:
@@ -1504,14 +1573,13 @@ def checkfast(imglist, force=True, database='dataredulco'):
             imglist2.append(ggg[0]['wdirectory']+img)
             date.append(str(ggg[0]['dateobs']))
 
-    X, hdr = pyfits.getdata(imglist2[0], header=True)
-    _z1,_z2 = agnkey.zscale.zscale(X) 
-
-    fig = plt.figure()
-    ax = fig.add_axes([0.1,0.1,0.85,0.85])
-    image = ax.imshow(X,interpolation='nearest', origin='upper', cmap='gray_r', vmin=_z1, vmax=_z2)
-
-    for kk,img in enumerate(imglist2):
+    if len(imglist2):
+      X, hdr = pyfits.getdata(imglist2[0], header=True)
+      _z1,_z2 = agnkey.zscale.zscale(X) 
+      fig = plt.figure()
+      ax = fig.add_axes([0.1,0.1,0.85,0.85])
+      image = ax.imshow(X,interpolation='nearest', origin='upper', cmap='gray_r', vmin=_z1, vmax=_z2)
+      for kk,img in enumerate(imglist2):
             print date[kk],img
             _dir,img0 = os.path.split(img)
             #img0 = string.split(img, '/')[-1]
@@ -1670,39 +1738,41 @@ def checkquality(imglist, database='dataredulco'):
 def onkeypress2(event):
     import matplotlib.pyplot as plt
     from numpy import argmin, sqrt, mean, array, std, median
-    import agnkey, os, re
+    import agnkey, os, re, string
 
-    global idd, _mjd, _mag, _setup, _namefile, shift, _database
+    global idd, _hjd, _mag, _setup, _namefile, shift, _database
     xdata, ydata = event.xdata, event.ydata
-    dist = sqrt((xdata - _mjd) ** 2 + (ydata - _mag) ** 2)
-    ii = argmin(dist)
-    if ii in idd: idd.remove(ii)
-    print _namefile[ii]
-    print _mag[ii]
-    import os, string 
 
-    _dir = agnkey.agnsqldef.getvaluefromarchive(_database, 'namefile', _namefile[ii], 'wdirectory')
-    if 'wdirectory' in _dir[0]:
-        _dir = _dir[0]['wdirectory']
-    else:
-        _dir = ''
-    if _dir:
-        if 'diff' in _namefile[ii]:
-            if os.path.isfile(_dir + _namefile[ii]) and os.path.isfile(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii])):
-                from pyraf import iraf
-                iraf.digiphot(_doprint=0)
-                iraf.daophot(_doprint=0)
-                iraf.display(_dir + _namefile[ii], 1, fill=True, Stdout=1)
-#                iraf.display(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii]), 2, fill=True, Stdout=1)
-                iraf.display(_dir + re.sub('diff.fits', 'fits', _namefile[ii]), 2, fill=True, Stdout=1)
-        else:
-            if os.path.isfile(_dir + re.sub('.fits', '.og.fits', _namefile[ii])) and os.path.isfile(
-                    _dir + re.sub('.fits', '.rs.fits', _namefile[ii])):
-                from pyraf import iraf
-                iraf.digiphot(_doprint=0)
-                iraf.daophot(_doprint=0)
-                iraf.display(_dir + re.sub('.fits', '.og.fits', _namefile[ii]), 1, fill=True, Stdout=1)
-                iraf.display(_dir + re.sub('.fits', '.rs.fits', _namefile[ii]), 2, fill=True, Stdout=1)
+    
+    if xdata:
+      dist = sqrt((xdata - _hjd) ** 2 + (ydata - _mag) ** 2)
+      ii = argmin(dist)
+      if ii in idd: 
+          idd.remove(ii)
+      print _namefile[ii]
+      print _mag[ii]
+      _dir = agnkey.agnsqldef.getvaluefromarchive(_database, 'namefile',os.path.basename(_namefile[ii]), 'wdirectory')
+      if 'wdirectory' in _dir[0]:
+          _dir = _dir[0]['wdirectory']
+      else:
+          _dir = ''
+      if _dir:
+          if 'diff' in _namefile[ii]:
+              if os.path.isfile(_dir + _namefile[ii]) and os.path.isfile(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii])):
+                  from pyraf import iraf
+                  iraf.digiphot(_doprint=0)
+                  iraf.daophot(_doprint=0)
+                  iraf.display(_dir + _namefile[ii], 1, fill=True, Stdout=1)
+                  #                iraf.display(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii]), 2, fill=True, Stdout=1)
+                  iraf.display(_dir + re.sub('diff.fits', 'fits', _namefile[ii]), 2, fill=True, Stdout=1)
+          else:
+              if os.path.isfile(_dir + re.sub('.fits', '.og.fits', _namefile[ii])) and os.path.isfile(
+                      _dir + re.sub('.fits', '.rs.fits', _namefile[ii])):
+                  from pyraf import iraf
+                  iraf.digiphot(_doprint=0)
+                  iraf.daophot(_doprint=0)
+                  iraf.display(_dir + re.sub('.fits', '.og.fits', _namefile[ii]), 1, fill=True, Stdout=1)
+                  iraf.display(_dir + re.sub('.fits', '.rs.fits', _namefile[ii]), 2, fill=True, Stdout=1)
     if event.key in ['d']:
         if 'diff' in _namefile[ii]:
             agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', _namefile[ii])
@@ -1712,12 +1782,12 @@ def onkeypress2(event):
             agnkey.agnsqldef.updatevalue(_database, 'dapflux2', 'NULL', _namefile[ii])
             agnkey.agnsqldef.updatevalue(_database, 'dapflux3', 'NULL', _namefile[ii])
         else:
-            agnkey.agnsqldef.updatevalue(_database, 'mag', 9999, _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'psfmag', 9999, _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'apmag', 9999, _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 9999, _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 9999, _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 9999, _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'psfmag', 'NULL', _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'apmag', 'NULL', _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 'NULL', _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 'NULL', _namefile[ii])
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 'NULL', _namefile[ii])
             if _dir:
                 agnkey.util.updateheader(_dir + re.sub('.fits', '.sn2.fits', _namefile[ii]), 0,
                                          {'PSFMAG1': [9999, 'psf magnitude']})
@@ -1741,7 +1811,7 @@ def onkeypress2(event):
     print '\n### press:\n d to cancel value,\n c to check one point\n u to set the upper limit\n b to set bad quality.\n Return to exit ...'
 
     nonincl = []
-    for i in range(len(_mjd)):
+    for i in range(len(_hjd)):
         if i not in idd: nonincl.append(i)
     _symbol = 'sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*'
     _color = {'U': 'b', 'B': 'r', 'V': 'g', 'R': 'c', 'I': 'm', 'up': 'b', 'gp': 'r', 'rp': 'g', 'ip': 'c', 'zs': 'm', \
@@ -1751,25 +1821,25 @@ def onkeypress2(event):
               'Bessell-B': -1, 'Bessell-V': 0, 'Bessell-R': 1, 'Bessell-I': 2, \
               'SDSS-G': -1, 'SDSS-R': 0, 'SDSS-I': 1, 'Pan-Starrs-Z': 2}
     ii = 0
-    mag, mjd = [], []
+    mag, hjd = [], []
     for _tel in _setup:
         shift = 0
         for _fil in _setup[_tel]:
             shift = _shift[_fil]
             col = _color[_fil]
-            plt.plot(array(_setup[_tel][_fil]['mjd']), array(_setup[_tel][_fil]['mag']) + shift, _symbol[ii], color=col,
+            plt.plot(array(_setup[_tel][_fil]['hjd']), array(_setup[_tel][_fil]['mag']) + shift, _symbol[ii], color=col,
                      markersize=5)
             mag = list(mag) + list(array(_setup[_tel][_fil]['mag']) + shift)
-            mjd = list(mjd) + list(_setup[_tel][_fil]['mjd'])
+            hjd = list(hjd) + list(_setup[_tel][_fil]['hjd'])
             ii = ii + 1
 
-    plt.xlabel('MJD')
+    plt.xlabel('HJD')
     plt.ylabel('magnitude')
     _mag = mag[:]
-    _mjd = mjd[:]
-    _mjd = array(_mjd)
+    _hjd = hjd[:]
+    _hjd = array(_hjd)
     _mag = array(_mag)
-    idd = range(len(_mjd))
+    idd = range(len(_hjd))
 
     yticklabels = plt.getp(plt.gca(), 'yticklabels')
     xticklabels = plt.getp(plt.gca(), 'xticklabels')
@@ -1780,8 +1850,8 @@ def onkeypress2(event):
     leg = plt.gca().get_legend()
     ltext = leg.get_texts()
     plt.setp(ltext, fontsize=10)
-    plt.plot(_mjd, _mag, 'ok', markersize=1)
-    plt.plot(_mjd[nonincl], _mag[nonincl], 'ow')
+    plt.plot(_hjd, _mag, 'ok', markersize=1)
+    plt.plot(_hjd[nonincl], _mag[nonincl], 'ow')
 
 
 ##############################################################################
@@ -1790,8 +1860,9 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     import os
     from numpy import argmin, sqrt, mean, array, std, median, compress
 
-    global idd, _mjd, _mag, _setup, _namefile, shift, _database  #,testo,lines,pol,sss,f,fixcol,sigmaa,sigmab,aa,bb
-    if not output:   plt.ion()
+    global idd, _hjd, _mag, _setup, _namefile, shift, _database  #,testo,lines,pol,sss,f,fixcol,sigmaa,sigmab,aa,bb
+    if not output:   
+        plt.ion()
     plt.rcParams['figure.figsize'] = 9, 5
     fig = plt.figure()
     plt.axes([.15, .05, .65, .85])
@@ -1805,7 +1876,7 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     _setup = setup
     _database = database
     ii = 0
-    mag, mjd, namefile = [], [], []
+    mag, hjd, namefile = [], [], []
     for _tel in _setup:
         shift = 0
         for _fil in _setup[_tel]:
@@ -1813,26 +1884,30 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
             col = _color[_fil]
             print _tel, _fil
             jj = array(_setup[_tel][_fil][
-                'mjd'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mjd']))
+                'hjd'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mjd']))
             mm = array(_setup[_tel][_fil][
                 'mag'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mag']))
             print _fil, shift
             print mm
             plt.plot(jj, mm + shift, _symbol[ii], color=col, label=str(_tel) + ' ' + str(_fil) + ' ' + str(shift), markersize=5)
 
-            jj1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['mjd']))
+            jj1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['hjd']))
             mm1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['mag']))
             if len(mm1) > 0:
                 plt.errorbar(jj1, mm1, mm1 / 100, lolims=True, fmt=None, ecolor='k')
 
             mag = list(mag) + list(array(_setup[_tel][_fil]['mag']) + _shift[_fil])
-            mjd = list(mjd) + list(_setup[_tel][_fil]['mjd'])
+            hjd = list(hjd) + list(_setup[_tel][_fil]['hjd'])
             namefile = list(namefile) + list(_setup[_tel][_fil]['namefile'])
             ii = ii + 1
 
-    plt.xlabel('MJD')
+#    print [os.path.basename(ii) for ii in list(namefile)]
+#    print namefile
+#    print len(namefile)
+#    raw_input('ddd')
+    plt.xlabel('HJD')
     plt.ylabel('magnitude')
-    plt.xlim(min(mjd) - 5, max(mjd) + 5)
+    plt.xlim(min(hjd) - 5, max(hjd) + 5)
     yticklabels = plt.getp(plt.gca(), 'yticklabels')
     xticklabels = plt.getp(plt.gca(), 'xticklabels')
     plt.setp(xticklabels, fontsize='10')
@@ -1842,12 +1917,12 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     ltext = leg.get_texts()
     plt.setp(ltext, fontsize=10)
     _mag = mag[:]
-    _mjd = mjd[:]
+    _hjd = hjd[:]
     _namefile = namefile[:]
-    _mjd = array(_mjd)
+    _hjd = array(_hjd)
     _mag = array(_mag)
-    idd = range(len(_mjd))
-    plt.plot(_mjd, _mag, 'ok', markersize=1)
+    idd = range(len(_hjd))
+    plt.plot(_hjd, _mag, 'ok', markersize=1)
     kid = fig.canvas.mpl_connect('key_press_event', onkeypress2)
     if not output:
         plt.draw()
@@ -1960,7 +2035,7 @@ def get_list(epoch, _telescope='all', _filter='', _bad='', _name='', _id='', _ra
         for i in range(0, len(lista)):
             for jj in lista[0].keys(): ll0[jj].append(lista[i][jj])
 
-        inds = argsort(ll0['mjd'])  #  sort by mjd
+        inds = argsort(ll0['hjd'])  #  sort by mjd
         for i in ll0.keys():
             ll0[i] = take(ll0[i], inds)
 
