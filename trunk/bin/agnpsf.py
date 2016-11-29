@@ -558,6 +558,7 @@ if __name__ == "__main__":
     if len(args) < 1: sys.argv.append('--help')
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
+    print imglist
     _xwindow = option.xwindow
     _datamax = option.datamax
     _catalog = option.catalog

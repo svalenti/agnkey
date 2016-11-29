@@ -78,6 +78,8 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
+        colorefisso['fl14']=colorefisso['fl15']=colorefisso['fl16']=colorefisso['kb71']
+        colorefisso['fl11']=colorefisso['fl12']=colorefisso['fl13']=colorefisso['kb71']
     elif ss=='apass':
         colorefisso['fs01']={'BBV':-0.0,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
         colorefisso['fs02']={'BBV':-0.13,'VBV':0.0,'VVg':0.0,'gVg':0.0,'ggr':0.0,'rgr':0.0,'rri':0.0,'iri':0.0}
@@ -98,6 +100,8 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
+        colorefisso['fl14']=colorefisso['fl15']=colorefisso['fl16']=colorefisso['kb71']
+        colorefisso['fl11']=colorefisso['fl12']=colorefisso['fl13']=colorefisso['kb71']
     elif ss=='sloanprime':
         colorefisso['fs01']={'UUB':0.0,'uug':0.0,'BUB':0.0,'BBV':0.0,'VBV':0.0,'VVR':0.0,\
                              'gug':0.0,'ggr':0.0,'RVR':0.0,'RRI':0.0,'rrz':0.0,'zrz':0.0,\
@@ -150,6 +154,9 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
+        colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
+        colorefisso['fl14']=colorefisso['fl15']=colorefisso['fl16']=colorefisso['kb71']
+        colorefisso['fl11']=colorefisso['fl12']=colorefisso['fl13']=colorefisso['kb71']
     elif ss=='natural':
         colorefisso['em01']={'UUB':0.0,'uug':0.0,'BUB':0.0,'BBV':0.0,'VBV':0.0,'VVR':0.0,\
                              'gug':0.0,'ggr':0.0,'RVR':0.0,'RRI':0.0,'rrz':0.0,'zrz':0.0,\
@@ -160,6 +167,8 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fl02']=colorefisso['fl03']=colorefisso['fl04']=colorefisso['kb69']=colorefisso['kb71']
         colorefisso['fl05']=colorefisso['fl06']=colorefisso['fl07']=colorefisso['kb71']
         colorefisso['fl08']=colorefisso['fl09']=colorefisso['fl10']=colorefisso['kb71']
+        colorefisso['fl14']=colorefisso['fl15']=colorefisso['fl16']=colorefisso['kb71']
+        colorefisso['fl11']=colorefisso['fl12']=colorefisso['fl13']=colorefisso['kb71']
     print instrument
     return colorefisso[instrument]
 
@@ -171,8 +180,8 @@ def filterst(telescope):
               'ftn':{'U':'U','B':'Bessell-B','V':'Bessell-V','R':'Bessell-R','I':'Bessell-I','u':'up','g':'SDSS-G','r':'SDSS-R','i':'SDSS-I','z':'Pan-Starrs-Z','landolt':'landolt','sloan':'sloan'},
               'fts':{'U':'U','B':'Bessell-B','V':'Bessell-V','R':'Bessell-R','I':'Bessell-I','u':'up','g':'SDSS-G','r':'SDSS-R','i':'SDSS-I','z':'Pan-Starrs-Z','landolt':'landolt','sloan':'sloan'}}
     _filters['1m0-03']=_filters['1m0-04']=_filters['1m0-05']=_filters['1m0-07']=_filters['1m0-08']=_filters['lsc']
-    _filters['1m0-09']=_filters['1m0-10']=_filters['1m0-11']=_filters['1m0-12']=_filters['1m0-13']=_filters['lsc']
-    _filters['cpt']=_filters['kb']=_filters['fl']=_filters['all']=_filters['coj']=_filters['lsc']
+    _filters['1m0-09']=_filters['1m0-10']=_filters['1m0-11']=_filters['1m0-12']=_filters['1m0-13']=_filters['2m0-01']=_filters['2m0-02']=_filters['lsc']
+    _filters['cpt']=_filters['kb']=_filters['fl']=_filters['all']=_filters['coj']=_filters['fs']=_filters['lsc']
     return _filters[telescope]
 
 ###############################################################################
@@ -183,7 +192,7 @@ def filterst1(telescope):
               'ftn':{'U':'U','Bessell-B':'B','Bessell-V':'V','Bessell-R':'R','Bessell-I':'I','up':'u','SDSS-G':'g','SDSS-R':'r','SDSS-I':'i','Pan-Starrs-Z':'z','landolt':'landolt','sloan':'sloan'},
               'fts':{'U':'U','Bessell-B':'B','Bessell-V':'V','Bessell-R':'R','Bessell-I':'I','up':'u','SDSS-G':'g','SDSS-R':'r','SDSS-I':'i','Pan-Starrs-Z':'z','landolt':'landolt','sloan':'sloan'}}
     _filters['1m0-03']=_filters['1m0-04']=_filters['1m0-05']=_filters['1m0-07']=_filters['1m0-08']=_filters['lsc']
-    _filters['1m0-09']=_filters['1m0-10']=_filters['1m0-11']=_filters['1m0-12']=_filters['1m0-13']=_filters['lsc']
+    _filters['1m0-09']=_filters['1m0-10']=_filters['1m0-11']=_filters['1m0-12']=_filters['1m0-13']=_filters['2m0-01']=_filters['2m0-02']=_filters['fs']=_filters['lsc']
     _filters['cpt']=_filters['all']=_filters['coj']=_filters['lsc']
     return _filters[telescope]
 

@@ -187,8 +187,11 @@ def querycatalogue(catalogue,img,method='iraf'):
         _instrume=hdr.get('instrume')
         iraf.imcoords(_doprint=0)
         iraf.astcat(_doprint=0)
-        if _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:   _size=40
-        else:          _size=20
+        if _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                         'fl11','fl12','fl13','fl14','fl15','fl16']:
+            _size=40
+        else:          
+            _size=20
         toforget = ['imcoords','astcat','tv']
         iraf.noao.astcat.aregpars.rcrauni=''
         iraf.noao.astcat.aregpars.rcdecuni=''

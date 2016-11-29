@@ -19,7 +19,7 @@ import agnkey
 #os.environ['HOME']='../tmp/'
 
 ####################################################################################
-#    sss='<form style="background-color:orange" action="http://secure.lcogt.net/user/supernova/dev/cgi-bin/updatetable.py" enctype="multipart/form-data" method="post">'+\
+
 def trigger(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
     sss='<form style="background-color:orange" action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
         '<p> <h3 style="background-color:orange"> TRIGER NEW OBSERVATION (use carefully)  <input type="submit" value="Send"> </h3></p>'+\
@@ -434,7 +434,6 @@ def visibilityiair(_ra0,_dec0,_plot=True,xx='300',yy='200'):
 
 
 ##############################
-#ddd='<form action="http://secure.lcogt.net/user/supernova/dev/cgi-bin/updatetable.py" enctype="multipart/form-data" method="post">'+\
 def addnewobject(_form):
     ddd='<form action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
         '<input type="hidden" name="targid" value="">'+\
@@ -474,7 +473,7 @@ def addnote(_targid,SN0,SN_RA,SN_DEC,_user,_form):
         '<input type="hidden" name="type" value="add">'+\
         '<input type="hidden" name="outputformat" value="'+str(_form)+'">'+\
         '<input type="submit" value="Send"></p>'+\
-        '</form>'  # lcogtlog2.cgi
+        '</form>'  # 
     return ddd
 
 ##############################################

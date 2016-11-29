@@ -137,7 +137,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
 
    try:
       cursor = conn.cursor (MySQLdb.cursors.DictCursor)
-      if value in [True,False,'NULL']:
+      if value in [True,False,'NULL',None]:
          cursor.execute ("UPDATE "+str(table)+" set "+column+"="+str(value)+" where "+str(namefile0)+"= "+"'"+str(namefile)+"'"+"   ")
       else:
          cursor.execute ("UPDATE "+str(table)+" set "+column+"="+"'"+str(value)+"'"+" where "+str(namefile0)+"= "+"'"+str(namefile)+"'"+"   ")
@@ -244,7 +244,8 @@ def ingestdata(telescope,instrument,listepoch,_force):
    if not instrument:
       if telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','all','coj']:
                                instrumentlist = ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']
+                                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                                                 'fl11','fl12','fl13','fl14','fl15','fl16']
       elif ['fts','ftn']:      instrumentlist = ['fs01','fs02','fs03','em01','em03']
    else:                       instrumentlist = [instrument]
 
@@ -302,7 +303,8 @@ def ingestdata(telescope,instrument,listepoch,_force):
                dictionary['directory']=re.sub(dictionary['namefile'],'',img) 
          elif  telescope in ['all','lsc','elp','cpt','coj','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tar']:
                if instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                                 'fl11','fl12','fl13','fl14','fl15','fl16']:
                   hdr=readhdr(img)
 #                  if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-008'] or readkey3(hdr,'object') in ['2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk']:
                   if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-009'] or readkey3(hdr,'object') in ['PSN09554214','2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk','PTF13dzb']:
@@ -328,7 +330,8 @@ def ingestdata(telescope,instrument,listepoch,_force):
          elif  telescope in ['all','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','coj','tar']:
             if dictionary:
                if instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:
+                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                                 'fl11','fl12','fl13','fl14','fl15','fl16']:
                   if not agnkey.agnsqldef.getfromdataraw(conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile'):
                      agnkey.agnsqldef.insert_values(conn,datarawtable,dictionary)
                      print 'insert '+img
@@ -357,11 +360,17 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
       elif _telescope in ['ftn','fts']: _type='2m'
       else: sys.exit('instrument not defined, telescopen not in the list')
    else:
-      if _instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:  _type='1m'
-      elif _instrument in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:       _type='1m'
-      elif _instrument in ['fs01','fs02','fs03','em03','em01']:                                   _type='2m'
-      elif _instrument in ['en05','en06']:                                                        _type='floyds'
-      else: sys.exit('instrument or telescope not recognised')
+      if _instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:  
+         _type='1m'
+      elif _instrument in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                           'fl11','fl12','fl13','fl14','fl15','fl16']:     
+         _type='1m'
+      elif _instrument in ['fs01','fs02','fs03','em03','em01']:                                   
+         _type='2m'
+      elif _instrument in ['en05','en06']:                                                      
+         _type='floyds'
+      else: 
+         sys.exit('instrument or telescope not recognised')
 
    for img in imglist:
       exist=agnkey.agnsqldef.getfromdataraw(conn,dataredutable,'namefile', string.split(img,'/')[-1],column2='namefile')

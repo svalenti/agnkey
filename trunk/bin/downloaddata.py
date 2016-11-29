@@ -11,7 +11,7 @@ import base64
 
 def authenticate(username, password):
     '''Get the authentication token'''
-    response = requests.post('https://archive-api.lcogt.net/api-token-auth/',
+    response = requests.post('https://archive-api.lco.global/api-token-auth/',
                              data = {'username': username, 'password': password}).json()
     token = response.get('token')
     authtoken = {'Authorization': 'Token ' + token}
@@ -19,7 +19,7 @@ def authenticate(username, password):
 
 def get_metadata(authtoken={}, limit=None, **kwargs):
     '''Get the list of files meeting criteria in kwargs'''
-    url = 'https://archive-api.lcogt.net/frames/?' + '&'.join(
+    url = 'https://archive-api.lco.global/frames/?' + '&'.join(
             [key + '=' + str(val) for key, val in kwargs.items() if val is not None])
     url = url.replace('False', 'false')
     url = url.replace('True', 'true')

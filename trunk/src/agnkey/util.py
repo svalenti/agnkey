@@ -16,7 +16,7 @@ elif host in ['dark']:
    rawdata = '/archive/engineering/'
    realpass = 'configure'
 elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2',
-              'papc-astro-2.st-and.ac.uk','svalenti-lcogt.local','svalenti-lcogt.lco.gtn',
+              'papc-astro-2.st-and.ac.uk',
               'valenti-mbp-2.lco.gtn','valenti-MacBook-Pro-2.local',
               'Stefanos-MBP.attlocal.net','valenti-mbp-2.attlocal.net']:
    host = 'SVMAC'
@@ -34,7 +34,7 @@ else:
    sys.exit('system '+str(host)+' not recognize')
 
 instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
-               'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10'],
+               'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10','fl11','fl12','fl13','fl14','fl15','fl16'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
 
@@ -205,7 +205,7 @@ def readkey3(hdr,keyword):
                            'type'      : 'OBSTYPE',\
                            'propid'      : 'PROPID',\
                            'telescop'  : 'TELESCOP'}
-    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10']:   # sinistro
+    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11','fl12','fl13','fl14','fl15','fl16']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
@@ -1273,13 +1273,14 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
 
     json_user_request = json.dumps(user_request)
     params = urllib.urlencode({'username': username ,'password': passwd, 'proposal': proposal, 'request_data' : json_user_request})
-#    conn = httplib.HTTPSConnection("test.lcogt.net")
-    conn = httplib.HTTPSConnection("lcogt.net")
+    conn = httplib.HTTPSConnection("lco.global")
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
     conn.request("POST", "/observe/service/request/submit", params, headers)
     response = conn.getresponse().read()
-
     python_dict = json.loads(response)
+
+    print 'jason=  ', json_user_request
+    print 'response= ' , response
 
     try:
        if 'id' in python_dict:
@@ -1425,8 +1426,7 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     #######################################################################################
     #             triggering at the moment to the test scheduler
     #             comment this line and un-comment next line if you want to schedule for real observations
-    #conn = httplib.HTTPSConnection("test.lcogt.net")
-    conn = httplib.HTTPSConnection("lcogt.net")
+    conn = httplib.HTTPSConnection("lco.global")
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
     conn.request("POST", "/observe/service/request/submit", params, headers)
     response = conn.getresponse().read()
@@ -1468,7 +1468,7 @@ def getstatus(username,passwd,tracking_id):
     import urllib
     import json
     params = urllib.urlencode({'username': username ,'password': passwd})
-    conn = httplib.HTTPSConnection("lcogt.net")
+    conn = httplib.HTTPSConnection("lco.global")
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
     conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params, headers)
     response = conn.getresponse().read()

@@ -9,9 +9,9 @@ import glob
 from optparse import OptionParser
 import time
 import agnkey
-import pyfits
+#import pyfits
 import numpy as np
-from astropy.io import fits
+from astropy.io import fits as pyfits
 from astropy import wcs as pywcs
 import os 
 
@@ -288,6 +288,7 @@ if __name__ == "__main__":
                 _show = False
 
             data1, std1, ZZ1 = agnkey.agnabsphotdef.zeronew(ZZ1, maxiter=10, nn=2, verbose=_verbose, show=_show)
+            std1N= std1 / np.sqrt(len(data1))
 ############################       compute zero point with aperture 2
             xx2 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp3[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
@@ -299,6 +300,7 @@ if __name__ == "__main__":
                                 np.array(_cat[_filter + 'err'])[pos1])
             ZZ2 = np.array(xx2 - yy2)
             data2, std2, ZZ2 = agnkey.agnabsphotdef.zeronew(ZZ2, maxiter=10, nn=2, verbose=_verbose, show=_show)
+            std2N= std2 / np.sqrt(len(data2))
 ############################       compute zero point with aperture 3
             xx3 = np.compress((np.array(_cat[_filter])[pos1] <= 99) & ((np.array(_magp4[pos0])) <= 99),
                              np.array(_cat[_filter])[pos1])
@@ -310,9 +312,8 @@ if __name__ == "__main__":
                                 np.array(_cat[_filter + 'err'])[pos1])
             ZZ3 = np.array(xx3 - yy3)
             data3, std3, ZZ3 = agnkey.agnabsphotdef.zeronew(ZZ3, maxiter=10, nn=2, verbose=_verbose, show=_show)
+            std3N= std3 / np.sqrt(len(data3))
 #######################################################################
-            #ZZ0=ZZ3
-            #std0=std3
             if _catalogue:
                 print string.split(_catalogue,'/')[-1],'#########'
                 agnkey.agnsqldef.updatevalue('dataredulco', 'zcat', string.split(_catalogue,'/')[-1],
@@ -334,10 +335,6 @@ if __name__ == "__main__":
                                          string.split(re.sub('sn2.', '', img), '/')[-1])
             agnkey.agnsqldef.updatevalue('dataredulco', 'ZZ3err', float(std3),
                                          string.split(re.sub('sn2.', '', img), '/')[-1])
-
-#            headers = {'ZPN': [float(ZZ0), 'zeropoint'], 'ZPNERR': [float(std0), 'zeropoint std'],
-#                       'ZPNNUM': [len(data2), 'number of stars used for zeropoint']}
-#            agnkey.util.updateheader(img, 0, headers)
 
             agnkey.util.updateheader(img, 0, {'ZZ1': [ZZ1, 'zeropoint with aperture 2']})
             agnkey.util.updateheader(img, 0, {'ZZ2': [ZZ2, 'zeropoint with aperture 3']})
@@ -483,141 +480,137 @@ if __name__ == "__main__":
                     error3 = 0
 
                 print flux1, flux2, flux3
-                print error1,error2, error3 
+                print error1,error2, error3
+                print mag1,mag2,mag3
+                print dmag1,dmag2,dmag3
+                print ZZ1,ZZ2,ZZ3
+                print std1N,std2N,std3N
+                flux10 = 0
+                flux20 = 0
+                flux30 = 0
+                dflux10 = 0
+                dflux20 = 0
+                dflux30 = 0
 
-                if str(flux1)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', float(flux1) / _exptime,
+                if 'diff' in img:
+                    print 'difference image add flux from reference image'
+                    img0 = string.split(re.sub('sn2.', '', img), '/')[-1]
+                    _dir = os.path.dirname(img)+'/'
+                    hdr = pyfits.open(_dir+img0)[0].header
+                    if 'TEMPLATE' in hdr:
+                        img1= hdr['TEMPLATE']
+                        print img1
+                        #    #######################################################
+                        command1=['select *  from dataredulco where namefile = "'+str(img1)+'"']
+                        data1 = agnkey.agnsqldef.query(command1)
+
+                        flux10 = data1[0]['apflux1']
+                        flux20 = data1[0]['apflux2']
+                        flux30 = data1[0]['apflux3']
+                        dflux10 = data1[0]['dapflux1']
+                        dflux20 = data1[0]['dapflux2']
+                        dflux30 = data1[0]['dapflux3']
+
+        
+                if str(flux1)!='nan' and str(error1)!='nan':
+                    apparentflux1 = (float(flux1) / _exptime) * 10** ((-1) * ZZ1 /2.5) + flux10
+                    dapparentflux1 = np.sqrt( ( apparentflux1 * std1N)**2 + ( 10** ((-1) * ZZ1 /2.5) * (error1/_exptime) )**2 +dflux10**2)
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux1', apparentflux1,
                                                  string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error1)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', float(error1) / _exptime,
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux1', dapparentflux1,
                                              string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(flux2)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux2', float(flux2) / _exptime,
+                    print apparentflux1
+                    print dapparentflux1
+                if str(flux2)!='nan' and str(error2)!='nan':
+                    apparentflux2 = (float(flux2) / _exptime) * 10** ((-1) * ZZ2 /2.5) + flux20
+                    dapparentflux2 = np.sqrt( ( apparentflux2 * std2N)**2 + ( 10** ((-1) * ZZ2 /2.5) * (error2/_exptime) )**2 +dflux20**2)
+
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux2', apparentflux2,
                                                  string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error2)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux2', float(error2) / _exptime,
+
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux2', dapparentflux2,
                                                  string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(flux3)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux3', float(flux3) / _exptime,
+                    print apparentflux2
+                    print dapparentflux2
+                if str(flux3)!='nan' and str(error3)!='nan':
+
+                    apparentflux3 = (float(flux3) / _exptime) * 10** ((-1) * ZZ3 /2.5) + flux30
+                    dapparentflux3 = np.sqrt( ( apparentflux3 * std3N)**2 + ( 10** ((-1) * ZZ3 /2.5) * (error3/_exptime) )**2 +dflux30**2)
+
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'apflux3',  apparentflux3,
                                                  string.split(re.sub('sn2.', '', img), '/')[-1])
-                if str(error3)!='nan':
-                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux3', float(error3) / _exptime,
+
+                    agnkey.agnsqldef.updatevalue('dataredulco', 'dapflux3', dapparentflux3,
                                                  string.split(re.sub('sn2.', '', img), '/')[-1])
+                    print apparentflux3
+                    print dapparentflux3
 
                 if mag1 != 'INDEF':
-                    print mag1, dmag1, ZZ1
-                    print float(mag1) + float(ZZ1)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(mag1) + ZZ1,
+                        apparentmag1 = float(mag1) + ZZ1
+                        dapparentmag1 = np.sqrt(std1N**2 + float(dmag1)**2)
+
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', apparentmag1,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(dmag1),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', dapparentmag1,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(mag1),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
                         print 'no possible mag1'
                 else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap1', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap1', float(0.0),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap1', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
 
                 if mag2 != 'INDEF':
-                    print mag2, dmag2, ZZ2
-                    print float(mag2) + float(ZZ2)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(mag2) + ZZ2,
+                        apparentmag2 = float(mag2) + ZZ2
+                        dapparentmag2 = np.sqrt(std2N**2 + float(dmag2)**2)
+
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', apparentmag2,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(dmag1),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', dapparentmag2,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(mag2),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
                         print 'no possible mag 2'
                 else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap2', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap2', float(0.0),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap2', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                 if mag3 != 'INDEF':
-                    print mag3, dmag3, ZZ3
-                    print float(mag3) + float(ZZ3)
                     try:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(mag3) + ZZ3,
+                        apparentmag3 = float(mag3) + ZZ3
+                        dapparentmag3 = np.sqrt(std3N**2 + float(dmag3)**2)
+
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', apparentmag3,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(dmag3),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', dapparentmag3,
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(mag3),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                     except:
                         print 'no possible mag3 '
                 else:
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'appmagap3', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
                         agnkey.agnsqldef.updatevalue('dataredulco', 'dappmagap3', float(0.0),
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
-                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', float(9999),
+                        agnkey.agnsqldef.updatevalue('dataredulco', 'instmagap3', 'NULL',
                                                      string.split(re.sub('sn2.', '', img), '/')[-1])
 
-                headers = {'apflux1': [float(flux1) / _exptime, ''], 'dapflux1': [float(error1) / _exptime, ''],
-                           'apflux2': [float(flux2) / _exptime, ''], 'dapflux2': [float(error2) / _exptime, ''],
-                           'apflux3': [float(flux3) / _exptime, ''], 'dapflux3': [float(error3) / _exptime, '']}
+                headers = {'apflux1': [apparentflux1, ''], 'dapflux1': [ dapparentflux1, ''],
+                           'apflux2': [apparentflux2, ''], 'dapflux2': [ dapparentflux2, ''],
+                           'apflux3': [apparentflux3, ''], 'dapflux3': [ dapparentflux3, '']}
                 agnkey.util.updateheader(img, 0, headers)
             else:
                 print 'ra and dec not defined'
-
-
-            #'appmagap1':[float(mag1)+ZZ0,''],'appmagap2':[float(mag2)+ZZ0,''],'appmagap3':[float(mag3)+ZZ0,''],\
-            #'dappmagap1':[float(dmag1),''],'dappmagap2':[float(dmag2),''],'dappmagap3':[float(dmag3),''],\
-            #'instmagap1':[float(mag1),''],'instmagap2':[float(mag2),''],'instmagap3':[float(mag3),'']
-#########################################
-#                if 'diff' in img:
-#                    if 'apfl1re' in hdr and 'dapfl1re':
-#                        print 'zeropoint there'
-#                        FLUXref = hdr['apfl1re']
-#                        dFLUXref = hdr['dapfl1re']
-#                    else:
-#                        FLUXref = ''
-#                    if 'ZPNref' in hdr:
-#                        print 'flux there'
-#                        ZZ0ref = hdr['ZPNref']
-#                    else:
-#                        ZZ0ref = ''
-#                    if FLUXref and ZZ0ref:
-#                        #print FLUXref, dFLUXref, flux3, error3
-#                        if float(ZZ0ref) == float(ZZ0):
-#                            print 'difference image scaled to the reference, zero point of the difference ' \
-#                                  'image is the same'
-#                            magfromflux = -2.5 * np.log10((float(FLUXref)) + (float(flux3) / _exptime))
-#                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
-#                                (float(flux3) / _exptime) + float(FLUXref))
-#                        else:
-#                            magfromflux = -2.5 * np.log10(
-#                                (float(FLUXref)) * 10 ** ((float(ZZ0ref) - ZZ0) / -2.5) + (float(flux3) / _exptime))
-#                            dmagfromflux = 1.0857 * np.sqrt((error3 / _exptime) ** 2 + (float(dFLUXref)) ** 2) / (
-#                                (float(flux3) / _exptime) + float(FLUXref))
-#                            print 'difference image scaled to target image, need  zeropoint of both images'
-#
-#                        print  'this is a difference image\n I found a zeropoint and flux measurment in the ' \
-#                               'reference image'
-#                        print  "I'm going to replace tha magnitude at aperture 3 with this value"
-#                        mag3 = magfromflux
-#                        dmag3 = dmagfromflux
-#                        #print mag3, dmag3
-#                    else:
-#                        print 'Warning: this is a difference image, but I did not find a flux and zeropoint\n'
-#                        print 'for the reference image, the reference image does not include the target we ' \
-#                              'are measuring'
-                        #            mag1,dmag1=string.split(aaa[-3])[4],string.split(aaa[-3])[5]
-                        #            mag2,dmag2=string.split(aaa[-2])[4],string.split(aaa[-2])[5]
-                        #            mag3,dmag3=string.split(aaa[-1])[4],string.split(aaa[-1])[5]
-                        #            flux1,dflux1=string.split(aaa[-1])[3],string.split(aaa[-1])[3]
-                        #            totalflux=(float(flux1)/_exptime)*10**(float(ZZ0)/-2.5)   #  compute total flux
-                        #            print totalflux
-                        #            raw_input('go on')
-#######################################################
-        
+###################################################################

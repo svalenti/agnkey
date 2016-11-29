@@ -3,6 +3,7 @@ from astropy.io import fits as pyfits
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-10, magtype='mag',
                database='dataredulco',ra='',dec=''):
@@ -49,11 +50,16 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
     else:
         filters0 = ['up', 'gp', 'rp', 'ip', 'zs', 'SDSS-G', 'SDSS-R', 'SDSS-I', 'Pan-Starrs-Z']
 
+
+    ww = np.where(ll[mtype])
+    for key in ll.keys():
+        ll[key] = ll[key][ww]
+
     mag=ll[mtype]
     dmag=ll[mtypeerr]
     hjd=ll['hjd']
-    namefile=ll['namefile']
-    #namefile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+    #namefile=ll['namefile']
+    namefile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
     filt=ll['filter']
     tel=ll['telescope']
     date=ll['dateobs']
@@ -64,39 +70,70 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
     targid = ll['targid'][0]
 
     ll0 = ''
-    if filetype == 3:
-        if mtype in ['apflux1','apflux2','apflux3']:
-            print 'add flux from reference'
-            #######################################################
-            command1=['select '+mtype+','+mtypeerr+',filter,instrument,namefile from dataredulco where targid='+str(targid)+' and filetype=4']
-            data1 = agnkey.agnsqldef.query(command1)
-            ll0={'namefile':[]}
-            for line in data1:
-                    ll0[line['namefile']] = {mtype:line[mtype], mtypeerr:line[mtypeerr]}
-            #########################################
-            mteplate = []
-            mteplateerr = []
-            for jj,_file in enumerate(namefile):
-                hdr = pyfits.getheader(_file)
-                if 'TEMPLATE' in hdr:
-                    if hdr['TEMPLATE'] in ll0:
-                        mteplate.append(ll0[hdr['TEMPLATE']][mtype])
-                        mteplateerr.append(ll0[hdr['TEMPLATE']][mtypeerr])
-                    else:
-                        mteplate.append(0)
-                        mteplateerr.append(0)
-                else:
-                    mteplate.append(0)
-                    mteplateerr.append(0)
-        else:
-            ll0 = ''
-            #######################################################
-
-    if ll0:
-        mag = np.array(mag,float) + np.array(mteplate,float)
-        dmag = np.array(dmag,float) + np.array(mteplateerr,float)
+#    if mtype in ['apflux1','apflux2','apflux3']:
+        #if filetype == 3:
+        #    print 'add flux and zeropoint from reference'
+        #    #######################################################
+        #    command1=['select '+mtype+','+mtypeerr+\
+        #              ',ZZ1, ZZ2, ZZ3, filter,instrument,namefile,wdirectory from dataredulco where targid='+\
+        #              str(targid)+' and filetype=4']
+        #    data1 = agnkey.agnsqldef.query(command1)
+        #    ll0={'namefile':[]}
+        #    for line in data1:
+        #            ll0[line['namefile']] = {mtype:line[mtype], mtypeerr:line[mtypeerr]}
+        #    #########################################
+        #    mteplate = []
+        #    mteplateerr = []
+        #    for jj,_file in enumerate(namefile):
+        #        hdr = pyfits.getheader(_file)
+        #        if 'TEMPLATE' in hdr:
+        #            # adding flux from reference image
+        #            # since we scale all to temaplate the zero point is the same for all images
+        #            # no need to apply zeropoint 
+        #            if hdr['TEMPLATE'] in ll0:
+        #                mteplate.append(ll0[hdr['TEMPLATE']][mtype])
+        #                mteplateerr.append(ll0[hdr['TEMPLATE']][mtypeerr])
+        #            else:
+        #                mteplate.append(0)
+        #                mteplateerr.append(0)
+        #        else:
+        #            mteplate.append(0)
+        #            mteplateerr.append(0)
+        #elif filetype == 1:
+        #    ############################################################################
+        #    #  NOT working 
+        #    print 'add flux and zeropoint from each image'
+        #    command1=['select '+mtype+','+mtypeerr+\
+        #              ',ZZ1, ZZ2, ZZ3, ZZ1err,ZZ2err, ZZ3err, filter,instrument,namefile from dataredulco where targid='+\
+        #              str(targid)+' and filetype=1 and quality!=1 and '+mtype+' is not NULL']
+        #    data1 = agnkey.agnsqldef.query(command1)
+        #    ll0={'namefile':[]}
+        #    print mtype
+        #    for line in data1:
+        #        if '1' in mtype:
+        #            ll0[line['namefile']] = {'ZZ':float(line['ZZ1'])-25, 'dZZ':line['ZZ1err']}
+        #        elif '2' in mtype:
+        #            ll0[line['namefile']] = {'ZZ':float(line['ZZ2'])-25, 'dZZ':line['ZZ2err']}
+        #        elif '3' in mtype:
+        #            ll0[line['namefile']] = {'ZZ':float(line['ZZ3'])-25, 'dZZ':line['ZZ3err']}
+        #    mteplate = []
+        #    mteplateerr = []
+        #    for jj,_file in enumerate(namefile):
+        #        mteplate.append(10**(-0.4*(ll0[os.path.basename(_file)]['ZZ'])))
+#       #         mteplateerr.append(10**(0.4*ll0[_file]['dZZ']))
+        #        mteplateerr.append(0)
+        #    print mteplate
+        #    ##########################################################################
+#        else:
+#            ll0 = ''
+#            #######################################################
+#    if ll0:
+#        print 'add ZERO POINT TO FLUX for each night'
+#        mag = np.array(mag,float) + np.array(mteplate,float)
+#        dmag = np.array(dmag,float) + np.array(mteplateerr,float)
 
     setup={}
+    setup['mtype']=mtype
     for _tel in set(tel):
         for _fil in set(filt):
             aaa=np.asarray((np.array(filt) == _fil) & (np.array(tel) == _tel))
@@ -170,9 +207,9 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                 setup[_tel][_fil]['date'] = date1
                 setup[_tel][_fil]['namefile'] = namefile1
 
-    print setup
     if _show:
         plotfast(setup)
+        print setup['mtype']
         try:
             plotfast(setup)
         except:
@@ -186,13 +223,14 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
 
     keytelescope = {'1m0-03': '3', '1m0-04': '4', '1m0-05': '5', '1m0-06': '6', '1m0-07': '7', '1m0-08': '8',
                     '1m0-09': '9', '1m0-10': '10', '1m0-11': '11', '1m0-12': '12', '1m0-13': '13', 'fts': '14',
-                    'ftn': '15', 'other': '20','2m0a':'14','2m0b':'15'}
+                    'ftn': '15', 'other': '20','2m0a':'14','2m0b':'15', '2m0-01':'14','2m0-02':'15'}
     if _tel not in keytelescope.keys():
         _tel = 'other'
 
     linetot = {}
     if _output: ff = open(_output, 'w')
     for _tel in setup:
+      if  _tel!='mtype':
         filters = setup[_tel].keys()
         line0 = '# %10s\t%12s\t' % ('dateobs', 'hjd')
         for filt in filters0:
@@ -204,8 +242,8 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                 for filt in filters0:
                     if filt in filters:
                         if filt == _fil:
-                            line = line + '%12.7s\t%12.6s\t' % (
-                            str(setup[_tel][_fil]['mag'][j]), str(setup[_tel][_fil]['dmag'][j]))
+                            line = line + '%12.10f\t%12.10f\t' % (
+                            setup[_tel][_fil]['mag'][j], setup[_tel][_fil]['dmag'][j])
                         else:
                             if mtype not in ['apflux1','apflux2','apflux3']:
                                 line = line + '%12.7s\t%12.6s\t' % ('9999', '0.0')
@@ -257,8 +295,6 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
     else:
         for img in imglist:  
             status.append(checkstage(img, stat))
-        print imglist
-        print status
         imglist = imglist[where(array(status) > 0)]
         status = array(status)[where(array(status) > 0)]
 
@@ -553,7 +589,6 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
                 print _telescope
                 sys.exit('ERROR: site and telescope not correct')
             if 'HJD' not in hdr.keys() or _force:
-                print 'hehe'
                 print _dir + img
                 iraf.specred.setjd(_dir + img+'[0]', date='DATE-OBS', time='UTSTART', \
                                    exposure='EXPTIME', ra='ra', dec='dec', epoch='', observa=_observatory)
@@ -1751,62 +1786,61 @@ def onkeypress2(event):
           idd.remove(ii)
       print _namefile[ii]
       print _mag[ii]
-      _dir = agnkey.agnsqldef.getvaluefromarchive(_database, 'namefile',os.path.basename(_namefile[ii]), 'wdirectory')
-      if 'wdirectory' in _dir[0]:
-          _dir = _dir[0]['wdirectory']
-      else:
-          _dir = ''
+      _dir= os.path.dirname(_namefile[ii])+'/'
+      filename = os.path.basename(_namefile[ii])
       if _dir:
-          if 'diff' in _namefile[ii]:
-              if os.path.isfile(_dir + _namefile[ii]) and os.path.isfile(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii])):
+          if 'diff' in filename:
+              if os.path.isfile(_dir + filename) and os.path.isfile(_dir + re.sub('diff.fits', 'ref.fits', filename)):
                   from pyraf import iraf
                   iraf.digiphot(_doprint=0)
                   iraf.daophot(_doprint=0)
-                  iraf.display(_dir + _namefile[ii], 1, fill=True, Stdout=1)
-                  #                iraf.display(_dir + re.sub('diff.fits', 'ref.fits', _namefile[ii]), 2, fill=True, Stdout=1)
-                  iraf.display(_dir + re.sub('diff.fits', 'fits', _namefile[ii]), 2, fill=True, Stdout=1)
+                  iraf.display(_dir + filename, 1, fill=True, Stdout=1)
+                  iraf.display(_dir + re.sub('diff.fits', 'fits', filename), 2, fill=True, Stdout=1)
           else:
-              if os.path.isfile(_dir + re.sub('.fits', '.og.fits', _namefile[ii])) and os.path.isfile(
-                      _dir + re.sub('.fits', '.rs.fits', _namefile[ii])):
+              if os.path.isfile(_dir + re.sub('.fits', '.og.fits', filename)) and os.path.isfile(
+                      _dir + re.sub('.fits', '.rs.fits', filename)):
                   from pyraf import iraf
                   iraf.digiphot(_doprint=0)
                   iraf.daophot(_doprint=0)
-                  iraf.display(_dir + re.sub('.fits', '.og.fits', _namefile[ii]), 1, fill=True, Stdout=1)
-                  iraf.display(_dir + re.sub('.fits', '.rs.fits', _namefile[ii]), 2, fill=True, Stdout=1)
+                  iraf.display(_dir + re.sub('.fits', '.og.fits', filename), 1, fill=True, Stdout=1)
+                  iraf.display(_dir + re.sub('.fits', '.rs.fits', filename), 2, fill=True, Stdout=1)
+
     if event.key in ['d']:
-        if 'diff' in _namefile[ii]:
-            agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'apflux2', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'apflux3', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'dapflux1', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'dapflux2', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'dapflux3', 'NULL', _namefile[ii])
+        if _setup['mtype'] in ['apflux1','apflux2','apflux3']:
+            print 'flux to null'
+            agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'apflux2', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'apflux3', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'dapflux1', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'dapflux2', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'dapflux3', 'NULL', filename)
         else:
-            agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'psfmag', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'apmag', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 'NULL', _namefile[ii])
-            agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 'NULL', _namefile[ii])
+            print 'mag to null'
+            agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'psfmag', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'apmag', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 'NULL', filename)
+            agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 'NULL', filename)
             if _dir:
-                agnkey.util.updateheader(_dir + re.sub('.fits', '.sn2.fits', _namefile[ii]), 0,
+                agnkey.util.updateheader(_dir + re.sub('.fits', '.sn2.fits', filename), 0,
                                          {'PSFMAG1': [9999, 'psf magnitude']})
-                agnkey.util.updateheader(_dir + re.sub('.fits', '.sn2.fits', _namefile[ii]), 0,
+                agnkey.util.updateheader(_dir + re.sub('.fits', '.sn2.fits', filename), 0,
                                          {'APMAG1': [9999, 'ap magnitude']})
     elif event.key in ['u']:
-        agnkey.agnsqldef.updatevalue(_database, 'magtype', -1, _namefile[ii])
+        agnkey.agnsqldef.updatevalue(_database, 'magtype', -1, filename)
         print '\n### set as a limit'
     elif event.key in ['b']:
-        agnkey.agnsqldef.updatevalue(_database, 'quality', 1, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'mag', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'psfmag', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'apmag', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'apflux1', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'apflux2', 9999, _namefile[ii])
-        agnkey.agnsqldef.updatevalue(_database, 'apflux3', 9999, _namefile[ii])
+        agnkey.agnsqldef.updatevalue(_database, 'quality', 1, filename)
+        agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'psfmag', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'apmag', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'appmagap1', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'appmagap2', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'appmagap3', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'apflux2', 'NULL', filename)
+        agnkey.agnsqldef.updatevalue(_database, 'apflux3', 'NULL', filename)
         print '\n### set bad quality'
     print '\n### press:\n d to cancel value,\n c to check one point\n u to set the upper limit\n b to set bad quality.\n Return to exit ...'
 
@@ -1820,9 +1854,17 @@ def onkeypress2(event):
     _shift = {'U': -2, 'B': -1, 'V': 0, 'R': 1, 'I': 2, 'up': -2, 'gp': -1, 'rp': 0, 'ip': 1, 'zs': 2, \
               'Bessell-B': -1, 'Bessell-V': 0, 'Bessell-R': 1, 'Bessell-I': 2, \
               'SDSS-G': -1, 'SDSS-R': 0, 'SDSS-I': 1, 'Pan-Starrs-Z': 2}
+
+    if 'mtype' in _setup.keys():
+        if _setup['mtype'] in ['apflux1','apflux2','apflux3']:            
+            _shift = {'U': 0, 'B': 0, 'V': 0, 'R': 0, 'I': 0, 'up': 0, 'gp': 0, 'rp': 0, 'ip': 0, 'zs': 0, \
+                      'Bessell-B': 0, 'Bessell-V': 0, 'Bessell-R': 0, 'Bessell-I': 0, \
+                      'SDSS-G': 0, 'SDSS-R': 0, 'SDSS-I': 0, 'Pan-Starrs-Z': 0}
+
     ii = 0
     mag, hjd = [], []
     for _tel in _setup:
+      if _tel!='mtype':
         shift = 0
         for _fil in _setup[_tel]:
             shift = _shift[_fil]
@@ -1863,9 +1905,15 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     global idd, _hjd, _mag, _setup, _namefile, shift, _database  #,testo,lines,pol,sss,f,fixcol,sigmaa,sigmab,aa,bb
     if not output:   
         plt.ion()
+
+    _setup = setup
+    _database = database
+
     plt.rcParams['figure.figsize'] = 9, 5
     fig = plt.figure()
     plt.axes([.15, .05, .65, .85])
+    
+
     _symbol = 'sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*sdo+34<>^*'
     _color = {'U': 'b', 'B': 'r', 'V': 'g', 'R': 'c', 'I': 'm', 'up': 'b', 'gp': 'r', 'rp': 'g', 'ip': 'c', 'zs': 'm', \
               'Bessell-B': 'r', 'Bessell-V': 'g', 'Bessell-R': 'c', 'Bessell-I': 'm', \
@@ -1873,11 +1921,17 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     _shift = {'U': -2, 'B': -1, 'V': 0, 'R': 1, 'I': 2, 'up': -2, 'gp': -1, 'rp': 0, 'ip': 1, 'zs': 2, \
               'Bessell-B': -1, 'Bessell-V': 0, 'Bessell-R': 1, 'Bessell-I': 2, \
               'SDSS-G': -1, 'SDSS-R': 0, 'SDSS-I': 1, 'Pan-Starrs-Z': 2}
-    _setup = setup
-    _database = database
+
+    if 'mtype' in _setup.keys():
+        if _setup['mtype'] in ['apflux1','apflux2','apflux3']:            
+            _shift = {'U': 0, 'B': 0, 'V': 0, 'R': 0, 'I': 0, 'up': 0, 'gp': 0, 'rp': 0, 'ip': 0, 'zs': 0, \
+                      'Bessell-B': 0, 'Bessell-V': 0, 'Bessell-R': 0, 'Bessell-I': 0, \
+                      'SDSS-G': 0, 'SDSS-R': 0, 'SDSS-I': 0, 'Pan-Starrs-Z': 0}
+
     ii = 0
     mag, hjd, namefile = [], [], []
     for _tel in _setup:
+      if _tel!='mtype':
         shift = 0
         for _fil in _setup[_tel]:
             shift = _shift[_fil]
@@ -1887,8 +1941,6 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
                 'hjd'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mjd']))
             mm = array(_setup[_tel][_fil][
                 'mag'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mag']))
-            print _fil, shift
-            print mm
             plt.plot(jj, mm + shift, _symbol[ii], color=col, label=str(_tel) + ' ' + str(_fil) + ' ' + str(shift), markersize=5)
 
             jj1 = compress(array(_setup[_tel][_fil]['magtype']) < 0, array(_setup[_tel][_fil]['hjd']))
@@ -1901,10 +1953,6 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
             namefile = list(namefile) + list(_setup[_tel][_fil]['namefile'])
             ii = ii + 1
 
-#    print [os.path.basename(ii) for ii in list(namefile)]
-#    print namefile
-#    print len(namefile)
-#    raw_input('ddd')
     plt.xlabel('HJD')
     plt.ylabel('magnitude')
     plt.xlim(min(hjd) - 5, max(hjd) + 5)
@@ -2043,7 +2091,6 @@ def get_list(epoch, _telescope='all', _filter='', _bad='', _name='', _id='', _ra
         ll0['dec'] = []
         if 'ra0' not in ll0.keys():
             for i in ll0['namefile']:
-                print i
                 ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'datarawlco', 'namefile', i, '*')
                 ll0['ra'].append(ggg[0]['ra0'])
                 ll0['dec'].append(ggg[0]['dec0'])

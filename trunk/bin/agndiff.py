@@ -11,15 +11,16 @@ import pyfits
 import numpy as np
 from optparse import OptionParser, OptionGroup
 import tempfile
+import pywcs
 
-def crossmatchtwofiles(img1, img2, radius=3,substamplist='substamplist'):
+def crossmatchtwofiles(img1, img2, radius=3):
     ''' This module is crossmatch two images:
         It run sextractor transform the pixels position of the the sources in coordinates and crossmatch them  
         The output is a dictionary with the objects in common
     '''
-    import agnkey
-    import pywcs
+
     from numpy import array, argmin, min, sqrt
+    import agnkey
 
     hd1 = pyfits.getheader(img1)
     hd2 = pyfits.getheader(img2)
@@ -40,8 +41,10 @@ def crossmatchtwofiles(img1, img2, radius=3,substamplist='substamplist'):
     # dict={}
     dict = {'ra1': xra1[pos1], 'dec1': xdec1[pos1], 'ra2': xra2[pos2], 'dec2': xdec2[pos2],
             'xpix1': xpix1[pos1], 'ypix1': ypix1[pos1], 'xpix2': xpix2[pos2], 'ypix2': ypix2[pos2]}
-    np.savetxt(substamplist, zip(xpix1[pos1], ypix1[pos1]), fmt='%10.10s\t%10.10s')
-    return substamplist, dict
+
+    out = next(tempfile._get_candidate_names())+'.list'
+    np.savetxt(out, zip(xpix1[pos1], ypix1[pos1]), fmt='%10.10s\t%10.10s')
+    return out, dict
 
 
 
@@ -186,7 +189,8 @@ if __name__ == "__main__":
                         temp_file3 = next(tempfile._get_candidate_names())
                         temp_file0 = next(tempfile._get_candidate_names())
 
-                        temp_file1, dict = crossmatchtwofiles(_dir + imgtarg0, _dirtemp + imgtemp0, 4,temp_file1)
+                        temp_file1, dict = crossmatchtwofiles(_dir + imgtarg0, _dirtemp + imgtemp0, 4)
+
                         xra1, xdec1, xra2, xdec2, xpix1, ypix1, xpix2, ypix2 = dict['ra1'], dict['dec1'], dict['ra2'], \
                                                                                dict['dec2'], dict['xpix1'], \
                                                                                dict['ypix1'], dict['xpix2'], \
@@ -333,7 +337,7 @@ if __name__ == "__main__":
                             _convolve=''
 
                         if afssc:
-                            temp_file2, xpix1, ypix1, xpix2, ypix2 = crossmatchtwofiles(imgtarg, imgtemp,3, temp_file2)
+                            temp_file2, xpix1, ypix1, xpix2, ypix2 = crossmatchtwofiles(imgtarg, imgtemp,3)
                             _afssc = ' -cmp ' + str(temp_file2) + ' -afssc 1 '
                         else:
                             _afssc = ''
