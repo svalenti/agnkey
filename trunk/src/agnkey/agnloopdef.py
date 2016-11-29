@@ -1,16 +1,19 @@
 import agnkey
-from astropy.io import fits as pyfits
+
+try:     from astropy.io import fits as pyfits
+except:  import pyfits
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import re
+import string
 
 def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-10, magtype='mag',
                database='dataredulco',ra='',dec=''):
     import agnkey
     import datetime
-    import re
-    import os
     print magtype,ra,dec
     if magtype == 'mag':
         mtype = 'mag'
@@ -267,9 +270,6 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
 def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=False, database='dataredulco',
             _field='slaon'):
     import agnkey
-    import os
-    import re
-    import string
     import glob
     from numpy import where, array
 
@@ -331,7 +331,7 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
 
 def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalogue='', database='dataredulco',mode='sv'):
     import agnkey
-    import os, string, glob, re
+    import glob
     direc = ''
     for ggg in imglist:
         _dir,img = os.path.split(ggg)
@@ -398,8 +398,7 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
 def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=False, redo=False, show=False, _cutmag=99,
              database='dataredulco', _calib=''):
     import agnkey
-    import re
-    import os, string, glob  # MySQLdb,
+    import glob
 
     direc = agnkey.__path__[0]
     for img in imglist:
@@ -478,9 +477,6 @@ def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=Fa
 
 def run_apmag(imglist, database='dataredulco', _ra='', _dec='', _catalog='', verbose=False):
     import agnkey
-    import os
-    import re
-    import string
     import glob
 
     for ggg in imglist:
@@ -512,9 +508,6 @@ def run_apmag(imglist, database='dataredulco', _ra='', _dec='', _catalog='', ver
 def run_cosmic(imglist, database='dataredulco', _sigclip=4.5, _sigfrac=0.2, _objlim=4, _force=False):
     import agnkey
     direc = agnkey.__path__[0]
-    import os
-    import re
-    import string
     import glob
 
     for ggg in imglist:
@@ -548,7 +541,7 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
     iraf.imred(_doprint=0)
     iraf.specred(_doprint=0)
     direc = agnkey.__path__[0]
-    import os, string, glob
+    import glob
 
     for ggg in imglist:
         _dir,img = os.path.split(ggg)
@@ -603,7 +596,6 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
             print img, ' not found'
 
 def updatefromheader(imglist,imgheader='hjd',tablecolumn='hjd',database='dataredulco'):
-    import os
     for img0 in imglist:
         _dir,img = os.path.split(img0)
         if _dir:
@@ -624,9 +616,6 @@ def updatefromheader(imglist,imgheader='hjd',tablecolumn='hjd',database='datared
 def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
             fix=True, catalog='', database='dataredulco', datamax=''):
     import agnkey
-    import os
-    import re
-    import string
 
     for img in imglist:
         if interactive:
@@ -735,8 +724,6 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
 def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=False, xwindow='',
             fix=True, catalog='',database='dataredulco',  datamax=''):
     import agnkey
-    import os
-    import re
 
     for img in imglist:
         if interactive:
@@ -797,10 +784,6 @@ def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=
 def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _recenter=False, _ref='', interactive=False,
             show=False, redo=False, dmax=51000, database='dataredulco'):
     import agnkey
-    import os
-    import re
-    import string
-    import pyfits  #MySQLdb,
 
     direc = agnkey.__path__[0]
     for img in imglist:
@@ -875,8 +858,6 @@ def checkstage(img, stage, database='dataredulco'):
     #   2  done and possible to do again
     #   3  local sequence catalogue available  
     import agnkey
-    import os
-    import re
 
     status = 0
     ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
@@ -939,9 +920,6 @@ def checkstage(img, stage, database='dataredulco'):
 ####################################################################################
 def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2.sn2  import pyraf outside
     import agnkey
-    import pyfits
-    import string
-    import re
     from numpy import zeros, array, median, compress
     from pyraf import iraf
 
@@ -1034,7 +1012,7 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
 
 def filtralist(ll2, _filter, _id, _name, _ra, _dec, _bad, _filetype=1):
     from numpy import array, asarray
-    import string, re, os, sys
+    import sys
     import agnkey
 
     ll1 = {}
@@ -1158,9 +1136,6 @@ def filtralist(ll2, _filter, _id, _name, _ra, _dec, _bad, _filetype=1):
 
 def run_local(imglist, _field, _interactive=False, database='dataredulco'):
     import agnkey
-    import re
-    import os
-    import string
     import glob
 
     #direc = agnkey.__path__[0]
@@ -1190,8 +1165,6 @@ def run_local(imglist, _field, _interactive=False, database='dataredulco'):
 def position(imglist, ra1, dec1, show=False):
     import agnkey
     from pyraf import iraf
-    import pyfits
-    import string
     from numpy import array, zeros, median, argmin, cos, abs, pi, mean
 
     iraf.imcoords(_doprint=0)
@@ -1260,8 +1233,6 @@ def position(imglist, ra1, dec1, show=False):
 #########################################################################
 def checkcat(imglist, database='dataredulco'):
     import agnkey
-    import os, string  #MySQLdb,
-    import re
 
     for img in imglist:
         status = checkstage(img, 'checkpsf')
@@ -1297,9 +1268,6 @@ def checkcat(imglist, database='dataredulco'):
 
 def checkpsf(imglist, database='dataredulco'):
     import agnkey
-    import os
-    import string  #MySQLdb,
-    import re
 
     direc = agnkey.__path__[0]
     from pyraf import iraf
@@ -1349,9 +1317,7 @@ def checkpsf(imglist, database='dataredulco'):
 
 def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
     import agnkey
-    import os, string  #MySQLdb,
     import glob
-    import re
 
     direc = agnkey.__path__[0]
     from pyraf import iraf
@@ -1445,10 +1411,6 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
 
 def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True, redo=False, _output=''):
     import agnkey
-    import os
-    import string
-    import pyfits  #MySQLdb
-    import re
     import numpy as np
     import pylab as plt
     import pywcs
@@ -1527,8 +1489,6 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
 
 def checkclean(imglist, force=True, database='dataredulco'):
     import agnkey
-    import os, string  #MySQLdb,
-    import re
     import time
     plt.ion()
 
@@ -1595,8 +1555,6 @@ def checkclean(imglist, force=True, database='dataredulco'):
 def checkfast(imglist, force=True, database='dataredulco'):
     import agnkey
     import time
-    import os, string
-    import re
     plt.ion()
 
     imglist2=[]
@@ -1663,9 +1621,6 @@ def checkfast(imglist, force=True, database='dataredulco'):
 
 def checkmag(imglist, database='dataredulco'):
     import agnkey
-    import re
-    import os, string  #MySQLdb,
-    #     import  mysqldef #import updatevalue
     direc = agnkey.__path__[0]
     from pyraf import iraf
 
@@ -1712,8 +1667,6 @@ def checkmag(imglist, database='dataredulco'):
 
 def checkpos(imglist, _ra, _dec, database='dataredulco'):
     import agnkey
-    import re
-    import os, string  #,MySQLdb
     #     import  mysqldef #import updatevalue
     imglist2 = []
     for img in imglist:
@@ -1733,8 +1686,7 @@ def checkpos(imglist, _ra, _dec, database='dataredulco'):
 
 def checkquality(imglist, database='dataredulco'):
     import agnkey
-    import os, string  #MySQLdb
-    #     import  mysqldef #import updatevalue
+
     direc = agnkey.__path__[0]
     from pyraf import iraf
 
@@ -1773,7 +1725,7 @@ def checkquality(imglist, database='dataredulco'):
 def onkeypress2(event):
     import matplotlib.pyplot as plt
     from numpy import argmin, sqrt, mean, array, std, median
-    import agnkey, os, re, string
+    import agnkey
 
     global idd, _hjd, _mag, _setup, _namefile, shift, _database
     xdata, ydata = event.xdata, event.ydata
@@ -1899,7 +1851,6 @@ def onkeypress2(event):
 ##############################################################################
 def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     import matplotlib.pyplot as plt
-    import os
     from numpy import argmin, sqrt, mean, array, std, median, compress
 
     global idd, _hjd, _mag, _setup, _namefile, shift, _database  #,testo,lines,pol,sss,f,fixcol,sigmaa,sigmab,aa,bb
@@ -2062,7 +2013,7 @@ def chosecolor(allfilter, usegood=False, _field=''):
 def get_list(epoch, _telescope='all', _filter='', _bad='', _name='', _id='', _ra='', _dec='', database='dataredulco',
              filetype=1):
     from numpy import argsort, take
-    import string, re, sys
+    import sys
     import agnkey
     #     from agnkey.mysqldef import getlistfromraw
     import datetime
@@ -2108,7 +2059,7 @@ def get_list(epoch, _telescope='all', _filter='', _bad='', _name='', _id='', _ra
 def check_missing(lista, database='dataredulco'):
     import agnkey
     from numpy import argsort, take
-    import string, re, sys, os
+    import sys
     import datetime
 
     if len(lista) > 0:
@@ -2124,9 +2075,8 @@ def check_missing(lista, database='dataredulco'):
 
 
 def checkfilevsdatabase(lista, database='dataredulco'):
-    #     import  mysqldef #import getlistfromraw,getfromdataraw
     import agnkey
-    import os, string, re, sys
+    import sys
 
     if lista:
         if len(lista['namefile']) > 0:
@@ -2188,11 +2138,10 @@ def checkfilevsdatabase(lista, database='dataredulco'):
 #########################################################################################
 def run_merge(imglist, _redu=False):
     import agnkey
-
     direc = agnkey.__path__[0]
     from numpy import where, array
     import agnsqldef
-    import os, string, glob  #, MySQLdb,
+    import glob
 
     status = []
     stat = 'psf'
@@ -2226,7 +2175,7 @@ def run_diff(listtar, listtemp, _show=False, _force=False, _normalize='i'):
     direc = agnkey.__path__[0]
     from numpy import where, array
     import agnsqldef
-    import os, string, glob 
+    import glob 
 
     status = []
     stat = 'psf'
@@ -2256,7 +2205,7 @@ def run_template(listtemp, show=False, _force=False, _interactive=False,
     import agnkey
     direc = agnkey.__path__[0]
     from numpy import where, array
-    import os, string, glob
+    import glob
 
     status = []
     stat = 'psf'
@@ -2294,33 +2243,6 @@ def run_template(listtemp, show=False, _force=False, _interactive=False,
 
 #########################################
 
-#def run_template(listtemp, show=False, _force=False):
-#    import agnkey
-#    direc = agnkey.__path__[0]
-#    from numpy import where, array
-#    import agnsqldef
-#    import os, string, glob  #MySQLdb,
-#    status = []
-#    stat = 'psf'
-#    for img in listtemp:  status.append(checkstage(string.split(img, '/')[-1], stat))
-#    listtemp = listtemp[where(array(status) > 0)]
-#    status = array(status)[where(array(status) > 0)]
-#    f = open('_temp.list', 'w')
-#    for jj in range(0, len(listtemp)):
-#        f.write(listtemp[jj] + '\n')
-#    f.close()
-#    if show:
-#        ii = ' --show '
-#    else:
-#        ii = ''
-#    if _force:
-#        ff = ' -f '
-#    else:
-#        ff = ' '
-#    command = 'agnmaketempl.py _temp.list --clean ' + ii + ff
-#    print command
-#    os.system(command)
-#####################################################################
 def getsky(data):
     """
   Determine the sky parameters for a FITS data extension. 
@@ -2372,7 +2294,6 @@ def getsky(data):
 
 def checkdiff(imglist, database='dataredulco'):
     import agnkey 
-    import os
     from pyraf import iraf
     iraf.digiphot(_doprint=0)
     iraf.daophot(_doprint=0)

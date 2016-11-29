@@ -1120,8 +1120,9 @@ def sextractor(img):
         from agnkey.util import defsex,delete
         import os
         from numpy import compress,array,asarray
-        import pyfits
+        from astropy.io import fits as pyfits
         import tempfile
+
         temp_file0 = next(tempfile._get_candidate_names())
         temp_file1 = next(tempfile._get_candidate_names())
 

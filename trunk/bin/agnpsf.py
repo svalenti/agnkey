@@ -10,8 +10,10 @@ import os, sys, shutil, subprocess, string
 import time
 from optparse import OptionParser
 from pyraf import iraf
-from astropy.io import fits as pyfits 
-import pyfits
+
+try:     from astropy.io import fits as pyfits 
+except:  import pyfits
+
 import agnkey
 import traceback
 import numpy as np

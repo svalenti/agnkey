@@ -7,8 +7,10 @@ import string
 import re
 import sys
 import agnkey
-import pyfits
 from optparse import OptionParser
+
+try:      from astropy.io import fits as pyfits
+except:   import pyfits
 
 
 def checkast(imglist):

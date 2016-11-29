@@ -9,9 +9,11 @@ import glob
 from optparse import OptionParser
 import time
 import agnkey
-#import pyfits
 import numpy as np
-from astropy.io import fits as pyfits
+
+try:     from astropy.io import fits as pyfits
+except:  import pyfits
+
 from astropy import wcs as pywcs
 import os 
 

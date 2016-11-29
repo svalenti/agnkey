@@ -572,9 +572,10 @@ def delfromdb(SN,SN_RA,SN_DEC,_targid,ii,_user,_form):
 
 def archivereducedspectrum(img):
     import string,re
-    import pyfits
-    hdr = pyfits.getheader(img)
+    from astropy.io import fits as pyfits
     import agnkey
+
+    hdr = pyfits.getheader(img)
     from agnkey.agnabsphotdef import deg2HMS
     try:     _targid=agnkey.agnsqldef.targimg(img)
     except:  _targid=''
@@ -673,7 +674,7 @@ def archivereducedspectrum(img):
 ########################################
 
 def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
-    import pyfits
+    from astropy.io import fits as pyfits
     import agnkey
     import numpy as np
     import re,string,sys,os

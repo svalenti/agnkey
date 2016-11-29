@@ -4,6 +4,10 @@
 import socket
 import sys
 host = socket.gethostname()
+
+try:     from astropy.io import fits as pyfits
+except:  import pyfits
+
 if host in ['deneb']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
@@ -103,14 +107,13 @@ def ReadAscii2(ascifile):
 def readlist(listfile):
     from agnkey.util import correctcard
     import string,os,sys,re,glob
-    from pyfits import open as opn
     if '*' in listfile:
         imglist=glob.glob(listfile)
     elif ',' in listfile:
         imglist = string.split(listfile,sep=',')
     else:
         try:
-            hdulist= opn(listfile)
+            hdulist= pyfits.open(listfile)
         except:
             hdulist=[]
         if hdulist:
@@ -126,12 +129,12 @@ def readlist(listfile):
                  if not ff=='\n' and ff[0]!='#':
                     ff=re.sub('\n','',ff)
                     try:
-                       hdulist= opn(ff)
+                       hdulist= pyfits.open(ff)
                        imglist.append(ff)
                     except:
                        try:
                           correctcard(ff)
-                          hdulist= opn(ff)
+                          hdulist= pyfits.open(ff)
                           imglist.append(ff)
                        except:
                            pass
@@ -163,8 +166,7 @@ def delete(listfile):
             except:       pass
 ###############################################################
 def readhdr(img):
-   from pyfits import open as popen
-   try:    hdr=popen(img)[0].header
+   try:    hdr =pyfits.open(img)[0].header
    except:
       from agnkey.util import correctcard
       try:
@@ -172,14 +174,12 @@ def readhdr(img):
       except:
          import sys
          sys.exit('image '+str(img)+' is corrupted, delete it and start again')
-      hdr=popen(img)[0].header
+      hdr = pyfits.open(img)[0].header
    return hdr
 
 def readkey3(hdr,keyword):
     import re,string,sys
-    import pyfits
-    if int(re.sub('\.','',str(pyfits.__version__))[:2])<=30:  aa='HIERARCH '
-    else: aa=''
+    aa = ''
     try:    _instrume=hdr.get('INSTRUME').lower()
     except: _instrume='none'
     if _instrume in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:    # SBIG
@@ -331,10 +331,9 @@ def writeinthelog(text,logfile):
     f.close()
 ################################################
 def correctcard(img):
-    from  pyfits import open as popen
     from numpy  import asarray
     import re
-    hdulist=popen(img)
+    hdulist = pyfits.open(img)
     a=hdulist[0]._verify('fix')
     _header=hdulist[0].header
     for i in range(len(a)):
@@ -348,8 +347,8 @@ def correctcard(img):
             headername.append(j[0])
             newheader.append(j[1])
         hdulist.close()
-        imm=popen(img,mode='update')
-        _header=imm[0].header
+        imm = pyfits.open(img,mode='update')
+        _header = imm[0].header
         for i in ww:
             if headername[i]:
                 try:
@@ -360,9 +359,8 @@ def correctcard(img):
         imm.close()
 ######################################################################################################
 def updateheader(image,dimension,headerdict):
-    from pyfits import open as opp
     try:
-        imm=opp(image,mode='update')
+        imm = pyfits.open(image,mode='update')
         _header=imm[dimension].header
 ################################
 #   change way to update to speed up the process
@@ -381,7 +379,7 @@ def updateheader(image,dimension,headerdict):
         print 'warning: problem to update header, try to correct header format ....'
         correctcard(image)
         try:
-            imm=opp(image,mode='update')
+            imm=pyfits.open(image,mode='update')
             _header=imm[dimension].header
 ###################################################
             for i in headerdict.keys():
@@ -487,7 +485,6 @@ def readstandard(standardfile):
 #################################################################################################
 def readspectrum(img):
     from numpy import array
-    import pyfits
     import string
     fl = ''
     lam = ''
@@ -721,7 +718,6 @@ def limmag(img):
 ##########################################################################
 def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
     from pyraf import iraf
-    import pyfits
     from numpy import array   #,log10
     import agnkey
     iraf.noao(_doprint=0)
@@ -778,7 +774,6 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
 def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    import time
    start=time.time()
-   import pyfits
    import agnkey
    import re,os,string
    import numpy as np
@@ -867,7 +862,6 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
 def Docosmicold(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    import time
    start=time.time()
-   import pyfits
    import agnkey
    import re,os,string
    import numpy as np
@@ -1526,7 +1520,6 @@ def downloadfloydsraw(JD,username,passwd):
 ############################################################################
 
 def makecatalogue(imglist):
-    import pyfits
     import agnkey
     from numpy import array, zeros
     filters={}
@@ -1572,7 +1565,6 @@ def makecatalogue(imglist):
 ######################################################################################################
 
 def makecatalogue2(imglist):
-    import pyfits
     import agnkey
     from numpy import array, zeros
     filters={}

@@ -136,7 +136,10 @@ def onclick(event):
 
 
 def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit',redo=False,show=False,cutmag=-1,database='dataredulco',_calib='sloan'):
-    import pyfits
+
+    try:       from astropy.io import fits as pyfits
+    except:    import pyfits
+
     import agnkey
     import math
     import sys,re,string,os

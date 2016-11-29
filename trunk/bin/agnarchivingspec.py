@@ -18,10 +18,12 @@ import sys
 import glob
 import os
 from optparse import OptionParser
-import pyfits
+
+try:      from astropy.io import fits as pyfits
+except:   import pyfits
+
 import datetime
 import agnkey
-
 #################################################################################
 
 def JDnow(datenow='', verbose=False):
@@ -40,7 +42,6 @@ def JDnow(datenow='', verbose=False):
 
 def archivereducedspectrum(img):
     import string, re
-    import pyfits
     hdr = pyfits.getheader(img)
     from agnkey.agnabsphotdef import deg2HMS
 
@@ -140,7 +141,6 @@ def archivereducedspectrum(img):
 ########################################
 
 def targimg(img):
-    import pyfits
     import agnkey
     from agnkey.agnabsphotdef import deg2HMS
 
@@ -176,9 +176,7 @@ def targimg(img):
 
 
 def uploadspectrum(img, _output, _force):
-    import pyfits
     import agnkey
-
     note = 'input= ' + img + '\n'
     hdr = pyfits.open(img)[0].header
     if 'TELID' in hdr:

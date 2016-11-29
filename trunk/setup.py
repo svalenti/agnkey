@@ -17,7 +17,10 @@ except:
 try:
     find_module('pyfits')
 except:
-    sys.exit('### Error: python module pyfits not found')
+    try:
+        find_module('astropy')
+    except:
+        sys.exit('### Error: python module pyfits not found')
 
 try:
     find_module('pyraf')
@@ -66,7 +69,7 @@ setup(
     license = 'LICENSE.txt',
     description = 'agnkey is a package to reduce 1m0 SN data',
     long_description = open('README.txt').read(),
-    requires = ['numpy','pyfits','pyraf','matplotlib','MySQLdb','ephem'],
+    requires = ['numpy','astropy','pyraf','matplotlib','MySQLdb','ephem'],
     packages = ['agnkey'],
     package_dir = {'':'src'},
     package_data = {'agnkey' : ["standard/astrometry/*cat","standard/astrometry/*cfg", "standard/*txt", "standard/stdlist/*txt",

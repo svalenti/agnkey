@@ -7,11 +7,14 @@ import re
 import sys
 import agnkey
 import time
-import pyfits
 import numpy as np
 from optparse import OptionParser, OptionGroup
 import tempfile
 import pywcs
+
+try:      from astropy.io import fits as pyfits
+except:   import pyfits
+
 
 def crossmatchtwofiles(img1, img2, radius=3):
     ''' This module is crossmatch two images:

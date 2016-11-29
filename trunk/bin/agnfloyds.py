@@ -1,32 +1,33 @@
 #!/usr/bin/env python
+description="> Ingest raw floyds data from fast reducton  " 
+usage= "%prog -e epoch"
 
 import os,string,re,sys,glob
 import datetime
 import agnkey
-import pyfits
-
-description="> Ingest raw floyds data from fast reducton  " 
-usage= "%prog -e epoch"
 from optparse import OptionParser
+import numpy as np
+
+try:       from astropy.io import fits as pyfits
+except:    import pyfits
+
 
 def makeplot(img,_show=False):
-  import os,string,pyfits
-  import numpy as np
   import pylab as plt
-  import agnkey,re
-  hdr=pyfits.open(img)
-  X=hdr[0].data
-  _sky,_sig=agnkey.agnloopdef.getsky(X)
-  _z1=_sky-_sig
-  _z2=_sky+_sig*50
+
+  hdr = pyfits.open(img)
+  X = hdr[0].data
+  _sky,_sig = agnkey.agnloopdef.getsky(X)
+  _z1 = _sky-_sig
+  _z2 = _sky+_sig*50
   
   plt.clf()
   fig1 = plt.figure(figsize=(6.0, 1.8))
   try:
-    im=plt.imshow(X, cmap='gray', norm=None, aspect=None, interpolation='nearest',alpha=None, vmin=float(_z1), vmax=float(_z2), origin='upper', extent=None)
+    im = plt.imshow(X, cmap='gray', norm=None, aspect=None, interpolation='nearest',alpha=None, vmin=float(_z1), vmax=float(_z2), origin='upper', extent=None)
   except:
-    im=plt.imshow(X, cmap='gray', norm=None, aspect=None, interpolation='nearest',alpha=None, vmin=0, vmax=1000, origin='upper', extent=None)
-  output=re.sub('.fits','.png',img)
+    im = plt.imshow(X, cmap='gray', norm=None, aspect=None, interpolation='nearest',alpha=None, vmin=0, vmax=1000, origin='upper', extent=None)
+  output = re.sub('.fits','.png',img)
   if os.path.isfile(output):   os.system('rm '+output)
   if _show==True:
     plt.ion()
@@ -39,12 +40,7 @@ def makeplot(img,_show=False):
 
 
 def readkeyflo(hdr,keyword):
-    import re,string,sys
-    import pyfits
-    if pyfits.__version__:
-         if int(re.sub('\.','',str(pyfits.__version__))[:2])<=30:  aa='HIERARCH '
-         else: aa=''
-    else:  aa=''
+    aa = ''
     try:    _instrume=hdr.get('INSTRUME').lower()
     except: _instrume='none'
     if _instrume in ['en05','en06']:
@@ -283,9 +279,9 @@ if __name__=='__main__':
 
       # make plot
       for img in imglist:
-        hdr=pyfits.getheader(img)
+        hdr = pyfits.getheader(img)
         if  hdr.get('OBSTYPE')=='SPECTRUM':
-          html=makeplot(img,False)
+          html = makeplot(img,False)
           print html
 
 
