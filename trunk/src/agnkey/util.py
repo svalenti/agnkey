@@ -1117,7 +1117,8 @@ def sendtrigger(_name, _ra, _dec, _site, _exp, _nexp, _filters, _airmass, _utsta
 
 ###############################################################################
 
-def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username,passwd,proposal,camera='sbig',_airmass=2.0,_site='', mode='NORMAL'):
+def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username,passwd,proposal,camera='sbig',\
+                 _airmass=2.0, _lunar=20, _site='', mode='NORMAL'):
     import httplib
     import urllib
     import json
@@ -1186,7 +1187,8 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                      "requests": [ { "operator": "single",
                                      "type": "compound_request",
                                      "requests": [ {
-                                         "constraints": {"max_airmass": float(_airmass) },
+                                         "constraints": {"max_airmass": float(_airmass),
+                                                         "min_lunar_distance": _lunar},
                                          "location": _location,
                                          "molecules": molecules,
                                          "observation_type": mode,
@@ -1276,6 +1278,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     print 'jason=  ', json_user_request
     print 'response= ' , response
 
+
     try:
        if 'id' in python_dict:
           tracking_number = str(python_dict['id'])
@@ -1300,9 +1303,10 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                     ' ' + ','.join(filtervec) + ' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
                     str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' ' + str(_seeing) + ' ' + str(_sky) + \
                     ' ' + str(_instrument) + ' ' + str(priority) + ' 0  0'
-       return lineout
     except:
-       return python_dict
+       lineout = ''
+
+    return lineout, python_dict, json_user_request, response
 
 ################################################################################
 
