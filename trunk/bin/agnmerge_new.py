@@ -8,6 +8,7 @@ import re
 import sys
 import agnkey
 from optparse import OptionParser
+import subprocess
 import numpy as np
 
 try:      
@@ -19,8 +20,7 @@ except:
 def checkast(imglist):
     import agnkey
     import pywcs
-    from numpy import median, array, compress, abs, std, argmin, isnan, sqrt
-
+#    from numpy import median, array, compress, abs, std, argmin, isnan, sqrt
     hdr0 = agnkey.util.readhdr(imglist[0])
     # ######  check with sources the accuracy of the astrometry
     wcs = pywcs.WCS(hdr0)
@@ -36,20 +36,20 @@ def checkast(imglist):
         xpix1, ypix1 = zip(*pix1)  # pixel position of the obj in image 0
         xdist, ydist = [], []
         for i in range(len(xpix1)):
-            dist = sqrt((xpix1[i] - xsex) ** 2 + (ypix1[i] - ysex) ** 2)
-            idist = argmin(dist)
+            dist = np.sqrt((xpix1[i] - xsex) ** 2 + (ypix1[i] - ysex) ** 2)
+            idist = np.argmin(dist)
             if dist[idist] < max_sep:
                 xdist.append(xpix1[i] - xsex[idist])
                 ydist.append(ypix1[i] - ysex[idist])
-        xoff, xstd = round(median(xdist), 2), round(std(xdist), 2)
-        yoff, ystd = round(median(ydist), 2), round(std(ydist), 2)
+        xoff, xstd = round(np.median(xdist), 2), round(np.std(xdist), 2)
+        yoff, ystd = round(np.median(ydist), 2), round(np.std(ydist), 2)
         _xdist, _ydist = array(xdist), array(ydist)
-        __xdist = compress((abs(_xdist - xoff) < 3 * xstd) & (abs(_ydist - yoff) < 3 * ystd), _xdist)
-        __ydist = compress((abs(_xdist - xoff) < 3 * xstd) & (abs(_ydist - yoff) < 3 * ystd), _ydist)
-        xoff, xstd = round(median(__xdist), 2), round(std(__xdist), 2)
-        yoff, ystd = round(median(__ydist), 2), round(std(__ydist), 2)
-        if isnan(xoff): xoff, xstd = 0, 0
-        if isnan(yoff): yoff, ystd = 0, 0
+        __xdist = np.compress((np.abs(_xdist - xoff) < 3 * xstd) & (np.abs(_ydist - yoff) < 3 * ystd), _xdist)
+        __ydist = np.compress((np.abs(_xdist - xoff) < 3 * xstd) & (np.abs(_ydist - yoff) < 3 * ystd), _ydist)
+        xoff, xstd = round(np.median(__xdist), 2), round(np.std(__xdist), 2)
+        yoff, ystd = round(np.median(__ydist), 2), round(np.std(__ydist), 2)
+        if np.isnan(xoff): xoff, xstd = 0, 0
+        if np.isnan(yoff): yoff, ystd = 0, 0
         print xoff, xstd, len(__xdist)
         print yoff, ystd
         #if abs(xoff)>=1:        
@@ -67,17 +67,24 @@ if __name__ == "__main__":
                       help=' check images registration \t\t\t [%default]')
     parser.add_option("-f", "--force", dest="force", action="store_true", default=False,
                       help=' force archiving \t\t\t [%default]')
+    parser.add_option("--sampling", dest="sampling", default='BILINEAR', type=str,
+                      help='--sampling  BILINEAR, LANCZOS3  \t [%default]')
+    parser.add_option("--combinetype", dest="combinetype", default='WEIGHTED', type=str,
+                      help='--combinetype  WEIGHTED, MEDIAN  \t [%default]')
+
     option, args = parser.parse_args()
     if len(args) < 1:
         sys.argv.append('--help')
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
-    from numpy import where, mean
 
     _checkast = option.check
     force = option.force
-    saturation = 40000
+    saturation = 77000
+    _sampling = option.sampling
+    _combinetype = option.combinetype
 
+    filetype = 1
     lista = {}
     for img in imglist:
         hdr = agnkey.util.readhdr(img)
@@ -91,14 +98,15 @@ if __name__ == "__main__":
     for f in lista:
         for o in lista[f]:
             imglist1 = lista[f][o]
+            imglist2 = [i+'[0]'  for i in imglist]
             hdr0 = agnkey.util.readhdr(imglist1[0])
             _tel = agnkey.util.readkey3(hdr0, 'TELID')
             _gain = agnkey.util.readkey3(hdr0, 'gain')
             _ron = agnkey.util.readkey3(hdr0, 'ron')
-            _instrume = agnkey.util.readkey3(hdr0, 'instrume')
             _saturate = agnkey.util.readkey3(hdr0, 'saturate')
+            _instrume = agnkey.util.readkey3(hdr0, 'instrume')
 
-            _ra, _dec, _SN0 = agnkey.util.checksnlist(img, 'supernovaelist.txt')
+            _ra, _dec, _SN0 = agnkey.util.checksnlist(imglist1[0], 'supernovaelist.txt')
             _tt = ''
             JD = []
             airmass = []
@@ -117,11 +125,10 @@ if __name__ == "__main__":
             _datename = re.sub('-','',string.split(str(_date))[0])
 
             if not _ra and not _dec:
-                _ra, _dec, _SN0, _tt = agnkey.util.checksndb(img, 'lsc_sn_pos')
+                _ra, _dec, _SN0, _tt = agnkey.util.checksndb(imglist1[0], 'lsc_sn_pos')
             if _tt == 'STD':
                 _ra = ''
                 _dec = ''
-
             if not _ra and not _dec:
                 _ra = agnkey.util.readkey3(hdr0, 'RA')
                 _dec = agnkey.util.readkey3(hdr0, 'DEC')
@@ -147,58 +154,129 @@ if __name__ == "__main__":
                           hdr0['instrume'] + '_' + hdr0['DAY-OBS'] + '_' + o + '_' + f + '.fits'
             print outname
 
-            imglist2 = ''
-            imglistnoise = ''
-            imgmask = ''
-            imglist22 = []
+            # make mask images
             for gg in imglist1:
-                kkk = agnkey.agnastrodef.finewcs(gg)
-                print gg
-                output, mask, satu = agnkey.util.Docosmic(gg)  #  cosmic correction on a fly ....not really fly
-                hdm = pyfits.getheader(output)
-                dmask = pyfits.getdata(mask)
-                dsat = pyfits.getdata(satu)
-                #ar1=where(arm>saturation,2,0)
-                out_fits = pyfits.PrimaryHDU(header=hdm, data=dsat + dmask)
-                out_fits.writeto(re.sub('.fits', '.mask.fits', string.split(gg, '/')[-1]), clobber=True,
-                                 output_verify='fix')
-                imglist2 = imglist2 + ',' + output
-                imgmask = imgmask + ',' + re.sub('.fits', '.mask.fits', string.split(gg, '/')[-1])
-                imglistnoise = imglistnoise + ',' + re.sub('.fits', '.noise.fits', string.split(gg, '/')[-1])
-                imglist22.append(output)
-                #  check registration among images
-            if _checkast:    checkast(imglist22)
+                outputmask = re.sub('.fits', '.mask.fits', gg)
+                if not os.path.isfile(outputmask):
+                    output, mask, satu = agnkey.util.Docosmic(gg)  #  cosmic correction on a fly ....not really fly
+                    hdm = pyfits.getheader(output)
+                    dmask = pyfits.getdata(mask)
+                    dsat = pyfits.getdata(satu)
+                    #ar1=where(arm>saturation,2,0)
+                    out_fits = pyfits.PrimaryHDU(header=hdm, data=dsat + dmask)
+                    out_fits.writeto(outputmask, clobber=True, output_verify='fix')
+                else:
+                    print 'mask already there ',outputmask
 
-            line = 'swarp ' + imglist2[1:] + ' -IMAGEOUT_NAME ' + str(outname) + ' -WEIGHTOUT_NAME ' + \
-                   re.sub('.fits','',outname) + '.weight.fits -RESAMPLE_DIR ' + \
-                   './ -RESAMPLE_SUFFIX .swarptemp.fits -COMBINE Y -RESAMPLING_TYPE LANCZOS3 -VERBOSE_TYPE NORMAL ' \
-                   '-SUBTRACT_BACK Y  -INTERPOLATE Y ' + \
-                   '-PIXELSCALE_TYPE MANUAL,MANUAL -COMBINE_TYPE MEDIAN -PIXEL_SCALE ' + str(pixelscale) + ',' + \
-                   str(pixelscale) + ' -IMAGE_SIZE ' + str(_imagesize) + ',' + str(_imagesize) + \
-                   ' -CENTER_TYPE MANUAL,MANUAL -CENTER ' + str(_ra) + ',' + str(_dec) + ' -RDNOISE_DEFAULT ' + \
-                   str(_ron) + ' -GAIN_KEYWORD NONONO ' + '-GAIN_DEFAULT ' + str(_gain) + \
-                   ' -WEIGHT_TYPE MAP_WEIGHT -WEIGHT_THRESH 0.5 -WEIGHT_IMAGE ' + str(imgmask[1:])
-            #            if _tel in ['fts','ftn']:                 line=line+' -IMOUT_BITPIX 16 -IMOUT_BSCALE 1.0 -IMOUT_BZERO 32768.0'
+            imgmask = [re.sub('.fits','.mask.fits',i) for i in imglist1]
+            aa = [i for i in imgmask if os.path.isfile(i)]
+            if len(aa) != len(imglist1):
+                print 'not all images have mask'
+                imgmask = [] 
 
-            line2 = 'swarp ' + imglist2[1:] + ' -IMAGEOUT_NAME  ' + re.sub('.fits', '', outname) + '.noise.fits' + \
-                    ' -WEIGHTOUT_NAME ' + re.sub('.fits', '', outname) + '.mask.fits' + \
-                    ' -SM_MKNOISE Y -BPMAXWEIGHTFRAC 0.2 ' + \
-                    '-BPADDFRAC2NOISE 0.1 -RESAMPLE_DIR ./ -RESAMPLE_SUFFIX .swarptemp.fits -COMBINE Y -RESAMPLING_' \
-                    'TYPE LANCZOS3 -VERBOSE_TYPE NORMAL ' + \
-                    '-SUBTRACT_BACK N  -INTERPOLATE Y -PIXELSCALE_TYPE MANUAL,MANUAL -PIXEL_SCALE ' + str(pixelscale) +\
-                    ',' + str(pixelscale) + ' -IMAGE_SIZE ' + str(_imagesize) + ',' + str(_imagesize) + \
-                    ' -CENTER_TYPE MANUAL,MANUAL -CENTER ' + str(_ra) + ',' + str(_dec) + \
-                    ' -WEIGHT_TYPE MAP_WEIGHT -WEIGHT_THRESH 0.5 ' + '-WEIGHT_IMAGE ' + str(imgmask[1:]) + \
-                    ' -RDNOISE_DEFAULT ' + str(_ron) + ' -GAIN_KEYWORD NONONO -GAIN_DEFAULT ' + str(_gain)
-            #             if _tel in ['fts','ftn']:                 line2=line2+' -IMOUT_BITPIX 16 -IMOUT_BSCALE 1.0 -IMOUT_BZERO 32768.0'
+            ###########################################################################################
+            #
+            # Swarp subtract the sky so we want to record the sky level
+            #
+            skylevel = []
+            print 'get sky level from input images'
+            for img1 in imglist1:
+                ar = pyfits.getdata(img1)
+                skylevel.append(np.mean(ar))
 
-            print line
-            print line2
-            os.system(line)
+            #########################################################
+            if filetype!=3:
+                os.system('sex -dd > default.sex')
+                os.system('scamp -dd > default.scamp')
+                for img1 in imglist1:
+                    img10 = os.path.basename(img1)
+                    if os.path.isfile(re.sub('.fits','.cat',img10)):
+                        os.remove(re.sub('.fits','.cat',img10))
+                    if os.path.isfile(re.sub('.fits','.head',img10)):
+                        os.remove(re.sub('.fits','.head',img10))
+                        
+                    linesex = '/usr/bin/sex ' + img1+ '[0]'  + ' -CATALOG_NAME ' + re.sub('.fits','.cat',img10) + ' -PARAMETERS_NAME ' + agnkey.__path__[0] +\
+                            '/standard/sex/default_m.param  -FILTER_NAME '  + agnkey.__path__[0] + '/standard/sex/default_m.conv ' +\
+                            ' -CATALOG_TYPE      FITS_LDAC -STARNNW_NAME ' + agnkey.__path__[0] +  '/standard/sex/default_m.nnw ' +\
+                            ' -PIXEL_SCALE ' + str(pixelscale)
 
-            hd = pyfits.getheader(outname)
-            ar = pyfits.getdata(outname)
-            ar = where(ar <= 0, mean(ar[where(ar > 0)]), ar)
+                    print linesex
+                    subprocess.call(linesex, shell=True)
+                
+#                raw_input('sextractor run')
+                imgcatalog = [re.sub('.fits','.cat', os.path.basename(i)) for i in imglist1]
+                np.savetxt('_scamp_list',imgcatalog,fmt='%s')                                                                                   
+                linescamp = 'scamp ' + '@_scamp_list ' + ' -CHECKPLOT_TYPE NONE'
+                print linescamp
+                os.system(linescamp)
+#                raw_input('scamp run')
+            else:
+                print 'merging difference images'
+
+            if filetype!=3:
+                line = 'swarp ' + ','.join(imglist2) + '  -CHECKPLOT_TYPE NONE -IMAGEOUT_NAME ' + str(outname) + ' -WEIGHTOUT_NAME ' + \
+                       re.sub('.fits', '', outname) + '.weight.fits -RESAMPLE_DIR ' + \
+                       './ -RESAMPLE_SUFFIX .swarptemp.fits -COMBINE Y -RESAMPLING_TYPE ' + _sampling + ' -VERBOSE_TYPE NORMAL ' +\
+                       '-SUBTRACT_BACK Y  -INTERPOLATE Y -PIXELSCALE_TYPE MANUAL,MANUAL -COMBINE_TYPE '+str(_combinetype)+\
+                       ' -PIXEL_SCALE ' + str(pixelscale) + ',' + str(pixelscale) + ' -IMAGE_SIZE ' + str(_imagesize) + ',' +\
+                       str(_imagesize) + ' -CENTER_TYPE MANUAL,MANUAL -CENTER ' + str(_ra) + ',' + str(_dec) +\
+                       ' -RDNOISE_DEFAULT ' + str(_ron) + ' -GAIN_KEYWORD NONONO ' + '-GAIN_DEFAULT ' +\
+                       str(_gain)+ ' -OVERSAMPLING 1 ' 
+                if imgmask:
+                    line = line+' -WEIGHT_TYPE MAP_WEIGHT -WEIGHT_THRESH 0.5 -WEIGHT_IMAGE ' +  ','.join(imgmask)
+                else:
+                    print '######\n WARNING NO MASK FRAMES HAVE BEEN PROVIDED\nPLEASE RUN COMSMIC and MERGE AGAIN\n'
+
+                print line
+                os.system(line)
+            ###################################################################################
+                line2 = 'swarp ' + ','.join(imglist2) + ' -IMAGEOUT_NAME  ' + re.sub('.fits', '', outname) + '.noise.fits' + \
+                        ' -WEIGHTOUT_NAME ' + re.sub('.fits', '', outname) + '.mask.fits' \
+                        + ' -SM_MKNOISE Y -BPMAXWEIGHTFRAC 0.2 ' + '-BPADDFRAC2NOISE 0.1 -RESAMPLE_DIR' \
+                        ' ./ -RESAMPLE_SUFFIX .swarptemp.fits -COMBINE Y -RESAMPLING_TYPE ' + _sampling + ' -VERBOSE_TYPE NORMAL '+\
+                        '-SUBTRACT_BACK N  -INTERPOLATE Y -PIXELSCALE_TYPE MANUAL,MANUAL -PIXEL_SCALE ' + str(pixelscale)+\
+                        ',' + str(pixelscale) + ' -IMAGE_SIZE ' + str(_imagesize) + ',' + str(_imagesize) + \
+                        ' -CENTER_TYPE MANUAL,MANUAL -CENTER ' + str(_ra) + ',' + str(_dec) + \
+                        ' -RDNOISE_DEFAULT ' + str(_ron) + ' -GAIN_KEYWORD NONONO -GAIN_DEFAULT ' + str(_gain) + ' -OVERSAMPLING 1 ' 
+                #    if imgmask:
+                #        line2 = line2 + ' -WEIGHT_TYPE MAP_WEIGHT -WEIGHT_THRESH 0.5 ' + '-WEIGHT_IMAGE ' + ','.join(imgmask)
+                os.system(line2)
+
+                maskimg = re.sub('.fits', '', outname) + '.mask.fits'
+                noiseimg = re.sub('.fits', '', outname) + '.noise.fits'
+                varimg = re.sub('.fits', '', outname) + '.weight.fits'
+
+                hd = pyfits.getheader(outname)
+                ar = pyfits.getdata(outname)
+                arweight = pyfits.getdata(maskimg)
+                arnoise = pyfits.getdata(noiseimg)
+                armask  = pyfits.getdata(varimg)
+                #  add to the mask the region with weight =0 
+                armask = np.where(arweight == 0, 1, armask)
+                ar = np.where(arweight == 0, np.mean(ar[np.where(ar > 0)]), ar)
+
+            else:
+                line2 = 'swarp ' + ','.join(imglist1) + ' -IMAGEOUT_NAME  ' + outname
+                os.system(line2)
+
+                maskimg = re.sub('.fits', '', outname) + '.mask.fits'
+                noiseimg = re.sub('.fits', '', outname) + '.noise.fits'
+                varimg = re.sub('.fits', '', outname) + '.weight.fits'
+
+                hd = pyfits.getheader(outname)
+                ar = pyfits.getdata(outname)
+
+#                out_fits = pyfits.PrimaryHDU(header=hd, data=ar-ar)
+#                out_fits.writeto(varimg, clobber=True, output_verify='fix')
+#                out_fits = pyfits.PrimaryHDU(header=hd, data=ar-ar)
+#                out_fits.writeto(maskimg, clobber=True, output_verify='fix')
+#                out_fits = pyfits.PrimaryHDU(header=hd, data=ar-ar)
+#                out_fits.writeto(noiseimg, clobber=True, output_verify='fix')
+                
+                arweight = pyfits.getdata(maskimg)
+                arnoise = pyfits.getdata(noiseimg)
+                armask  = pyfits.getdata(varimg)
+
             keyw = ['OBJECT', 'DATE', 'ORIGIN', 'EXPTIME', 'HDUCLAS1', 'HDUCLAS2', 'HDSTYPE', 'DATADICV', 'HDRVER',
                     'SITEID', 'SITE', 'MJD-OBS', 'MJD', 'ENCID', 'ENCLOSUR', 'TELID', 'TELESCOP', 'LATITUDE',
                     'LONGITUD', 'HEIGHT', 'OBSGEO-X', 'OBSGEO-Y', 'OBSGEO-Z', 'OBSTYPE', 'FRAMENUM', 'MOLTYPE',
@@ -232,39 +310,56 @@ if __name__ == "__main__":
                     'L1SIGMA', 'L1SKYBRT', 'L1PHOTOM', 'L1ZP', 'L1ZPERR', 'L1ZPSRC', 'L1FWHM', 'L1ELLIP',
                     'L1ELLIPA', 'L1QCVER', 'L1QOBCON', 'L1QIMGST', 'L1QCATST', 'L1QPHTST', 'L1PUBPRV', 'L1PUBDAT',
                     'L1SEEING']
-            for jj in keyw:
-                try:
-                    hd.update(jj, hdr0[jj], hdr0.comments[jj])
-                except:
-                    pass
+#            for jj in keyw:
+#                try:
+#                    if jj == 'DATE-OBS':
+#                        print jj
+#                    hd.update(jj, hdr0[jj], hdr0.comments[jj])
+#                except IOError as e:
+#                    print "I/O error({0}): {1}".format(e.errno, e.strerror)
 
-
+ 
+            if len(skylevel):
+                hd['SKYLEVEL'] = (np.mean(skylevel), 'average sky level')
             hd['AIRMASS']  = (_airmass,   'airmass')
             hd['jd']       = (_jd,       'JD')
-            hd['RA']       = (_ra,        'RA')
-            hd['DEC']      = (_dec,       'DEC')
+            hd['RA']       = (agnkey.util.readkey3(hdr0, 'ra'),        'RA')
+            hd['DEC']      = (agnkey.util.readkey3(hdr0, 'dec'),       'DEC')
+            hd['FILTER']   = (_filter,       'filter')
+            hd['FILTER1']   = (_filter,       'filter')
+            hd['FILTER2']   = ('air',       'filter')
+            hd['FILTER3']   = ('air',       'filter')
             hd['DATE-OBS'] = (_dateobs,   'date of observation')
             hd['GAIN']     = (_gain,      'gain')
+            hd['PIXSCALE'] = (pixelscale, 'arcsec per pixel')
             hd['SATURATE'] = (_saturate,  'saturation level ')
+            hd['WCSERR'] = (0,  'wcs ')
+            hd['L1FWHM'] = (agnkey.util.readkey3(hdr0, 'L1FWHM'),  'fwhm ')
+            hd['INSTRUME'] = (agnkey.util.readkey3(hdr0, 'INSTRUME'),  'intrument ')
+            hd['RDNOISE'] = (agnkey.util.readkey3(hdr0, 'RDNOISE'),  'readout noise ')
+            hd['SITEID'] = (agnkey.util.readkey3(hdr0, 'SITEID'),  'site ID ')
+            hd['TELID'] = (agnkey.util.readkey3(hdr0, 'TELID'),  'readout noise ')
+            hd['TELESCOP'] = (agnkey.util.readkey3(hdr0, 'TELESCOP'),  'TELESCOP ')
 
 
             out_fits = pyfits.PrimaryHDU(header=hd, data=ar)
             out_fits.writeto(outname, clobber=True, output_verify='fix')
-            os.system(line2)  # make noise image
+#            os.system(line2)  # make noise image
 
-            print outname
             hd = pyfits.getheader(outname)
             _targid = agnkey.agnsqldef.targimg(outname)
             _tel = agnkey.util.readkey3(hd, 'telid')
             dictionary = {'dateobs': agnkey.util.readkey3(hd, 'date-obs'),
-                          'exptime': agnkey.util.readkey3(hd, 'exptime'), 'filter': agnkey.util.readkey3(hd, 'filter'),
-                          'mjd': agnkey.util.readkey3(hd, 'mjd'), 'telescope': agnkey.util.readkey3(hd, 'telescop'),
+                          'exptime': agnkey.util.readkey3(hd, 'exptime'), 'filter': agnkey.util.readkey3(hdr0, 'filter'),
+                          'mjd': agnkey.util.readkey3(hd, 'MJD-OBS'), 'telescope': agnkey.util.readkey3(hdr0, 'telescop'),
                           'airmass': agnkey.util.readkey3(hd, 'airmass'), 'objname': agnkey.util.readkey3(hd, 'object'),
                           'ut': agnkey.util.readkey3(hd, 'ut'), 'wcs': agnkey.util.readkey3(hd, 'wcserr'),
-                          'instrument': agnkey.util.readkey3(hd, 'instrume'), 'ra0': agnkey.util.readkey3(hd, 'RA'),
+                          'instrument': agnkey.util.readkey3(hdr0, 'instrume'), 'ra0': agnkey.util.readkey3(hd, 'RA'),
                           'dec0': agnkey.util.readkey3(hd, 'DEC')}
             dictionary['namefile'] = string.split(outname, '/')[-1]
             dictionary['targid'] = _targid
+            print dictionary
+
             if _tel in ['fts', 'ftn']:
                 #                 dictionary['wdirectory']='/science/supernova/data/fts/'+agnkey.util.readkey3(hd,'date-night')+'/'
                 dictionary['wdirectory'] = agnkey.util.workingdirectory + \
@@ -273,6 +368,7 @@ if __name__ == "__main__":
                 dictionary['wdirectory'] = agnkey.util.workingdirectory + '1mtel/' + \
                                            agnkey.util.readkey3(hd, 'date-night') + '/'
             dictionary['filetype'] = 2
+
             ###################    insert in dataredulco
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, 'dataredulco', 'namefile',
                                                   string.split(outname, '/')[-1], '*')

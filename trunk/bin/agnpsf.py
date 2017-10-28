@@ -522,7 +522,8 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         os.chmod(img + '.sn2.fits', 0664)
         os.chmod(img + '.psf.fits', 0664)
         result = 1
-    except:
+    except IOError as e:
+        print e
         result = 0
         fwhm = 0.0
         traceback.print_exc()

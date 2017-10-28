@@ -1365,8 +1365,8 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
                 aaa = iraf.wcsctran('STDIN', 'STDOUT', _dir + img, Stdin=list(bbb), inwcs='world',
                                     units='degrees degrees', outwcs='logical', columns='1 2', formats='%10.5f %10.5f',
                                     Stdout=1)
-                iraf.tvmark(1, 'STDIN', Stdin=list(aaa), mark="cross", number='yes', label='no', radii=1, nxoffse=5,
-                            nyoffse=5, color=204, txsize=1)
+                iraf.tvmark(1, 'STDIN', Stdin=list(aaa), mark="cross", number='yes', label='no', radii=5, nxoffse=5,
+                            nyoffse=5, color=204, txsize=5)
 
             else:
                 catvec = agnkey.agnastrodef.querycatalogue('usnoa2', _dir + img, 'vizir')
@@ -2163,7 +2163,7 @@ def run_merge(imglist, _redu=False):
     #     if _fix: ff=' -c '
     #     else:    ff=''
     #     tt=' -t '+_type+' '
-    command = 'agnmerge.py _tmp.list ' + ii  #+tt+ff
+    command = 'agnmerge_new.py _tmp.list ' + ii  #+tt+ff
     print command
     os.system(command)
 

@@ -4,6 +4,7 @@ usage = "%prog  -e epoch [-s stage -n name -f filter -d idnumber]\n available st
 
 import string
 import re
+import os
 import sys
 from numpy import take, argsort, asarray, array
 from optparse import OptionParser
@@ -47,7 +48,7 @@ if __name__ == "__main__":
                            'merge,diff,template,apmag,update] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
                       help='-s stage [wcs,psf,psf2,psfmag,zcat,abscat,mag,getmag,merge,diff,' +
-                           'makestamp,template,apmag,cosmic,idlstart] \t [%default]')
+                           'makestamp,template,apmag,cosmic,idlstart,copy] \t [%default]')
     parser.add_option("--RAS", dest="ras", default='', type="str",
                       help='-RAS  ra    \t [%default]')
     parser.add_option("--DECS", dest="decs", default='', type="str",
@@ -168,7 +169,7 @@ if __name__ == "__main__":
         sys.argv.append('--help')
     if _stage:
         if _stage not in ['wcs', 'psf', 'psf2', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
-                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update']:
+                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update','copy']:
             sys.argv.append('--help')
     if _bad:
         if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag','diff']:
@@ -256,7 +257,7 @@ if __name__ == "__main__":
         listepoch = [re.sub('-', '', str(i)) for i in
                      [start + datetime.timedelta(days=x) for x in range(0, 1 + (stop - start).days)]]
 
-    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart','diff','update']:
+    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart','diff','update','copy']:
         if len(listepoch) == 1:
             lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(listepoch[0]),
                                                     '', '*', _telescope)
@@ -321,6 +322,18 @@ if __name__ == "__main__":
                 listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                 agnkey.agnloopdef.run_wcs(listfile, _interactive, _redo, _xshift, _yshift, _catalogue,_table,_mode)
 
+            elif _stage == 'copy':
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                for imgname in listfile:
+                    if _clean:
+                        if os.path.isfile(re.sub('.fits','.clean.fits',imgname)):
+                            print('cp '+re.sub('.fits','.clean.fits',imgname)+' ./')
+                            os.system('cp '+re.sub('.fits','.clean.fits',imgname)+' ./')
+                        else:
+                            print('warning: cosmic rejection not done: '+imgname)
+                    else:
+                            os.system('cp ' + imgname + ' ./')
+                            print('cp ' + imgname + ' ./')
             elif _stage == 'makestamp':
                 listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                 if _show:
@@ -383,7 +396,7 @@ if __name__ == "__main__":
                             inds = argsort(ll00['mjd'])  #  sort by jd
                             for i in ll00.keys():
                                 ll00[i] = take(ll00[i], inds)
-                            lltemp = agnkey.agnloopdef.filtralist(ll00, _filter, _id, _name, _ra, _dec, _bad, 4)
+                            lltemp = agnkey.agnloopdef.filtralist(ll00, _filter, '', _name, _ra, _dec, _bad, 4)
                         else:
                             sys.exit('template not found')
 

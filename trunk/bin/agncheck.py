@@ -30,7 +30,7 @@ if __name__ == "__main__":
                       help='-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag,quality,diff,apmag] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
                       help='-s stage [checkwcs,checkpsf,checkmag,checkquality,checkpos,checkcat,'
-                           'checkmissing,checkfvd,checkclean] \t [%default]')
+                           'checkmissing,checkfvd,checkclean,checkfast] \t [%default]')
     parser.add_option("--filetype", dest="filetype", default=1, type="int",
                       help='filetype  1 [single], 2 [merge], 3 differences \t [%default]')
     parser.add_option("--z1", dest="z1", default=None, type="int",

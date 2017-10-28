@@ -200,8 +200,8 @@ def querycatalogue(catalogue,img,method='iraf'):
         iraf.noao.astcat.aregpars.rcdec=_dec
         iraf.noao.astcat.aregpars.rrawidt=_size
         iraf.noao.astcat.aregpars.rdecwid=_size
-        delete('tmp.catalogue')
-        delete('tmp.catalogue.pix')
+        agnkey.util.delete('tmp.catalogue')
+        agnkey.util.delete('tmp.catalogue.pix')
         if catalogue not in ['usnoa2','usnob1','2mass','apass']:
             if os.path.isfile(agnkey.__path__[0]+'/standard/cat/'+catalogue):
                 stdcoo=agnkey.agnastrodef.readtxt(agnkey.__path__[0]+'/standard/cat/'+catalogue)
@@ -1137,7 +1137,7 @@ def sextractor(img):
         else: _ydim=4010
 
         #_saturation=45000
-        namesex=defsex(temp_file0,temp_file1)
+        namesex = agnkey.util.defsex(temp_file0,temp_file1)
         os.system('sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex')
         #print 'sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex'
 
@@ -1263,9 +1263,9 @@ def finewcs(img):
     temp_file0 = next(tempfile._get_candidate_names())
     temp_file1 = next(tempfile._get_candidate_names())
 
-    catvec=agnkey.agnastrodef.querycatalogue('2mass',img,'vizir')
+    catvec = agnkey.agnastrodef.querycatalogue('2mass',img,'vizir')
 
-    namesex=defsex(temp_file0,temp_file1)
+    namesex = agnkey.util.defsex(temp_file0,temp_file1)
     #os.system('sex '+img+' -c '+namesex+' -CLEAN YES -SATUR_LEVEL '+str(_saturation)+' > _logsex')
     os.system('sex '+img+' -c '+namesex+' -CATALOG_NAME '+temp_file1+'  > _logsex')
 
@@ -1282,8 +1282,8 @@ def finewcs(img):
     else:       
         _order=2
 
-    agnkey.delete(temp_file1)
-    agnkey.delete(temp_file0)
+    agnkey.util.delete(temp_file1)
+    agnkey.util.delete(temp_file0)
 
     xxx=np.array(bbb[1])[pos1]
     yyy=np.array(bbb[2])[pos1]

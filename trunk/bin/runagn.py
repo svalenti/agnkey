@@ -179,8 +179,13 @@ if __name__ == "__main__":
         #  upload req info in logtable
     _JDn = agnkey.agnsqldef.JDnow() - 10
     username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
-    print _JDn, username, passwd
-    agnkey.util.downloadfloydsraw(_JDn, username, passwd)
+    token = agnkey.util.readpass['token']
+#    print _JDn, username, passwd
+#    try:
+    agnkey.util.downloadfloydsraw(_JDn, token)
+#    except:
+#        print 'does not work'
+#        raw_input('stop here')
 
     if _ingest:
         print '\n### ingest raw data \n'

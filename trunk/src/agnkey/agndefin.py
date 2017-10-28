@@ -1,4 +1,4 @@
-#!/dark/usr/anaconda/bin/python
+#!/dark/usr/anaconda2/bin/python
 #/usr/bin/env python
 import sys,os,cgi,string,glob
 
@@ -1365,8 +1365,8 @@ def load_lc_data(db,targid,plottype='flot',magtype='psfmag',_ft=1):
 
 ########################################################################################################################
 def triggercadence(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
-    sss='<form style="background-color:white" action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
-        '<p> <h3 style="background-color:white"> TRIGER NEW OBSERVATION (ONLY TESTING, NOT READY)  <input type="submit" value="Send"> </h3></p>'+\
+    sss='<form style="background-color:#F5F5DC" action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
+        '<p> <h3 style="background-color:#F5F5DC"> TRIGER NEW OBSERVATION  <input type="submit" value="Send"> </h3></p>'+\
         '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\
         '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\
         '<input type="hidden" name="SN_DEC" value="'+str(SN_DEC)+'">'+\
@@ -1416,15 +1416,9 @@ def triggercadence(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnke
          '<option value="elp">elp</option>   <option value="coj">coj</option> <option value="cpt">cpt</option>'+\
          '</select></td></tr>'+\
          '<tr><td> cadence [days]: </a>'+\
-         '<input name="cadence" size="4" maxlength="4" type="text" />'+\
-         '<tr><td> airmass limit: </a> <select name="airmass">'+\
-         '<option value=2> 2 </option> '+\
-         '<option value=2.5> 2.5 </option> '+\
-         ' <option value=1.2> 1.2 </option>'+\
-         '<option value=1.5> 1.5 </option>'+\
-         ' <option value=3> 3 </option>'+\
-         ' <option value=4> 4 </option>'+\
-         '</select></td></tr>'+\
+         '<input name="cadence" size="4" maxlength="4" type="text" /></td></tr>'+\
+         '<tr><td> airmass limit: </a>'+\
+         '<input name="airmass" size="4" maxlength="4" default="1.6" type="text" /></td></tr>'+\
          '<tr><td> obs mode: </a> <select name="obsmode">'+\
          '<option value="normal"> normal </option> '+\
          '<option value="ToO"> too </option> '+\
@@ -1444,8 +1438,8 @@ def triggercadence(SN0,SN_RA,SN_DEC,_targid,_form,observations={},proposal=agnke
 #################################
 ######################################################################################################
 def triggerfloydscadence(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},proposal=agnkey.util.readpass['proposal']):
-    sss='<form style="background-color:white " action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
-        '<p> <h3 style="background-color:white "> TRIGER NEW OBSERVATION (ONLY TESTING, NOT READY)   <input type="submit" value="Send"> </h3></p>'+\
+    sss='<form style="background-color:#F5F5DC " action="agnupdatetable.py" enctype="multipart/form-data" method="post">'+\
+        '<p> <h3 style="background-color:#F5F5DC "> TRIGER NEW OBSERVATION   <input type="submit" value="Send"> </h3></p>'+\
         '<input type="hidden" name="sn_name" value='+str(SN0)+'>'+\
         '<input type="hidden" name="SN_RA" value="'+str(SN_RA)+'">'+\
         '<input type="hidden" name="SN_DEC" value="'+str(SN_DEC)+'">'+\
@@ -1488,15 +1482,9 @@ def triggerfloydscadence(SN0,SN_RA,SN_DEC,_targetid,_form,observations={},propos
          '<option value="6.0">6.0</option>'+\
          '</select></td></tr>'+\
          '<tr><td> cadence [days]: </a>'+\
-         '<input name="cadence" size="4" maxlength="4" type="text" />'+\
-         '<tr><td> airmass limit: </a> <select name="airmass">'+\
-         '<option value=2> 2 </option>'+\
-         '<option value=1.2> 1.2 </option>'+\
-         '<option value=1.5> 1.5 </option>'+\
-         '<option value=2.5> 2.5 </option>'+\
-         ' <option value=3> 3 </option>'+\
-         ' <option value=4> 4 </option>'+\
-         '</select></td></tr>'+\
+         '<input name="cadence" size="4" maxlength="4" type="text" /></td></tr>'+\
+         '<tr><td> airmass limit: </a>'+\
+         '<input name="airmass" size="4" maxlength="4" default="1.6" type="text" /></td></tr>'+\
          '<tr><td> obs mode: </a> <select name="obsmode">'+\
          '<option value="normal"> normal </option> '+\
          '<option value="ToO"> too </option> '+\

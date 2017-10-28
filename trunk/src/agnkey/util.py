@@ -4,6 +4,9 @@
 import socket
 import sys
 host = socket.gethostname()
+import time
+import datetime
+import requests
 
 try:     from astropy.io import fits as pyfits
 except:  import pyfits
@@ -180,8 +183,10 @@ def readhdr(img):
 def readkey3(hdr,keyword):
     import re,string,sys
     aa = ''
-    try:    _instrume=hdr.get('INSTRUME').lower()
-    except: _instrume='none'
+    try:    
+       _instrume=hdr.get('INSTRUME').lower()
+    except: 
+       _instrume='none'
     if _instrume in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:    # SBIG
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
@@ -311,7 +316,8 @@ def readkey3(hdr,keyword):
                   delta=0.5
                else:
                   delta=0.5
-            except:   delta=0.5
+            except:   
+               delta=0.5
             import datetime
             _date=readkey3(hdr,'DATE-OBS')
             a=(datetime.datetime.strptime(string.split(_date,'.')[0],"20%y-%m-%dT%H:%M:%S")-datetime.timedelta(delta)).isoformat()
@@ -1118,7 +1124,7 @@ def sendtrigger(_name, _ra, _dec, _site, _exp, _nexp, _filters, _airmass, _utsta
 ###############################################################################
 
 def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username,passwd,proposal,camera='sbig',\
-                 _airmass=2.0, _lunar=20, _site='', mode='NORMAL'):
+                 _airmass=2.0, lunar=20, _site='', mode='NORMAL'):
     import httplib
     import urllib
     import json
@@ -1176,7 +1182,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     if camera in ['sbig', 'sinistro', 'spectral']:
        molecules=[]
        for i in range(0,len(filtervec)):
-          molecules.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": int(binx[camera]), "bin_y": int(binx[camera]),
+          molecules.append({"ag_mode": "OPTIONAL", "bin_x": int(binx[camera]), "bin_y": int(binx[camera]),
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": _inst[camera], "priority": 1,
                             "type": "EXPOSE"})
@@ -1188,7 +1194,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
                                      "type": "compound_request",
                                      "requests": [ {
                                          "constraints": {"max_airmass": float(_airmass),
-                                                         "min_lunar_distance": _lunar},
+                                                         "min_lunar_distance": lunar},
                                          "location": _location,
                                          "molecules": molecules,
                                          "observation_type": mode,
@@ -1208,14 +1214,14 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     elif camera in ['oneof']:
        molecules1=[]
        for i in range(0,len(filtervec)):
-          molecules1.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": 2, "bin_y": 2,
+          molecules1.append({"ag_mode": "OPTIONAL", "bin_x": 2, "bin_y": 2,
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": "SCICAM", "priority": 1,
                             "type": "EXPOSE"})
 
        molecules2=[]
        for i in range(0,len(filtervec)):
-          molecules2.append({"ag_mode": "OPTIONAL", "ag_name": "", "bin_x": 1, "bin_y": 1,
+          molecules2.append({"ag_mode": "OPTIONAL", "bin_x": 1, "bin_y": 1,
                             "defocus": 0.0, "exposure_count": int(nexpvec[i]), "exposure_time": float(expvec[i]),
                             "filter": fildic[telclass][filtervec[i]], "instrument_name": "1M0-SCICAM-SINISTRO", "priority": 1,
                             "type": "EXPOSE"})
@@ -1311,7 +1317,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
 ################################################################################
 
 
-def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,proposal,_airmass=2.0,
+def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,proposal,_airmass=2.0, lunar =20,
                       _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs', mode='NORMAL'):
     ''' This definition will trigger new observations using the API Web Server
         - it takes most of the input by command line
@@ -1357,42 +1363,46 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
     else:
        ac_mode =  "BRIGHTEST"
        _radius = 4.0 
+       
+# spectra_slit     filter
+# ag_filter remove
+# ag_exp_time remove
 
     if _calibration == 'all':
-        _molecules = [{"exposure_time": 20.0, "spectra_slit": slitvec[_slit], "ag_filter": "",
-                      "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
+        _molecules = [{"exposure_time": 20.0, "filter": slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM",
                       "type": "LAMP_FLAT", "exposure_count": 1, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "OPTIONAL", "readout_mode": "", "bin_y": 1, "bin_x": 1},
-                     {"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 3, "instrument_name": "2M0-FLOYDS-SCICAM",
+                     {"exposure_time": _exp, "filter":  slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM",
                       "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
-                     {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 4, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
+                     {"exposure_time": 60.0, "filter":  slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
                       "ag_exp_time": 10.0, "spectra_lamp": "",
                       "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
-                     {"exposure_time": 20.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 5, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "LAMP_FLAT",
+                     {"exposure_time": 20.0, "filter":  slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM", "type": "LAMP_FLAT",
                       "exposure_count": 1, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}]
     elif _calibration=='after':
-        _molecules= [{"exposure_time": _exp,  "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
+        _molecules= [{"exposure_time": _exp,  "filter":  slitvec[_slit],
+                      "instrument_name": "2M0-FLOYDS-SCICAM",
                       "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
-                     {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 2, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
+                     {"exposure_time": 60.0, "filter":  slitvec[_slit], "ag_filter": "",
+                      "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
                       "ag_exp_time": 10.0, "spectra_lamp": "",
                       "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1},
-                     {"exposure_time": 20.0, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 3, "instrument_name": "2M0-FLOYDS-SCICAM", "type": "LAMP_FLAT",
+                     {"exposure_time": 20.0, "filter":  slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM", "type": "LAMP_FLAT",
                       "exposure_count": 1, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}]
     else:
-        _molecules= [{"exposure_time": _exp, "spectra_slit":  slitvec[_slit], "ag_filter": "",
-                      "priority": 1, "instrument_name": "2M0-FLOYDS-SCICAM",
+        _molecules= [{"exposure_time": _exp, "filter":  slitvec[_slit], 
+                      "instrument_name": "2M0-FLOYDS-SCICAM",
                       "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
                       "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
                       "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}]
@@ -1473,9 +1483,315 @@ def getstatus(username,passwd,tracking_id):
     python_dict = json.loads(response)
     return python_dict
 
+#########################################################################################
+
+#############
+def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,proposal,_airmass=2.0, lunar=20,\
+                          _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs', mode='NORMAL'):
+    ''' This definition will trigger new observations using the API Web Server
+        - it takes most of the input by command line
+        - some input have a default value (eg telclass,airmass,binx,biny
+        - if site is specify will triger a specific telescope, otherwise will trigger on the full network
+        - filters, number of exposure per filter, exposure time are vector of the same lenght
+    '''
+    import string
+    from datetime import datetime
+
+    _slit = str(_slit)
+
+    def JDnow(datenow='',verbose=False):
+        import datetime
+        import time
+        _JD0 = 2455927.5
+        if not datenow:
+            datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
+                                        time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
+                   (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        if verbose: print 'JD= '+str(_JDtoday)
+        return _JDtoday
+
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
+
+    if _site in ['ogg','coj']:
+       location = {"telescope_class": "2m0", "site": _site}
+    else:
+       location = {"telescope_class": "2m0"}
+    slitvec={ '1.6': "slit_1.6as", '2.0': "slit_2.0as", '0.9': "slit_0.9as", '6.0': "slit_6.0as", '1.2': "slit_1.2as"}
+    
+    if _type == 'wcs':
+       ac_mode =  "WCS"
+       _radius = 0.0 
+    else:
+       ac_mode =  "BRIGHTEST"
+       _radius = 5.0 
+
+    print '############'
+    print _slit
+    print slitvec
+    print slitvec[_slit], 
+    molecule_lamp = {"exposure_time": 20.0, "spectra_slit": slitvec[_slit],
+                     "instrument_name": "2M0-FLOYDS-SCICAM",
+                     "type": "LAMP_FLAT", "exposure_count": 1, "ag_exp_time": 10.0,
+                     "spectra_lamp": "", "ag_mode": "OPTIONAL", "readout_mode": "", "bin_y": 1, "bin_x": 1}
+
+    molecule_spectrum = {"exposure_time": _exp, "spectra_slit":  slitvec[_slit], 
+                         "instrument_name": "2M0-FLOYDS-SCICAM",
+                         "acquire_mode": ac_mode, "acquire_radius_arcsec": _radius,
+                         "type": "SPECTRUM", "exposure_count": nexp, "ag_exp_time": 10.0,
+                         "spectra_lamp": "", "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}
+
+    molecule_arc = {"exposure_time": 60.0, "spectra_slit":  slitvec[_slit], 
+                    "instrument_name": "2M0-FLOYDS-SCICAM", "type": "ARC", "exposure_count": 1,
+                    "ag_exp_time": 10.0, "spectra_lamp": "",
+                    "ag_mode": "ON", "readout_mode": "", "bin_y": 1, "bin_x": 1}
+
+    if _calibration == 'all':
+       molecules = [molecule_arc, molecule_lamp, molecule_spectrum, molecule_lamp, molecule_arc]
+    elif _calibration =='after':
+       molecules = [molecule_spectrum, molecule_lamp, molecule_arc]
+    else:
+       molecules = [molecule_spectrum]
+
+
+        
+    target = {
+        'name': _name,
+        'type': 'SIDEREAL',
+        'ra': float(_ra),
+        'dec': float(_dec),
+        'epoch': 2000,
+        ###### not required
+        "equinox": "J2000",
+        "rot_angle": 0.0,
+        "proper_motion_ra": 0.0,
+        "acquire_mode": "ON",
+        "rot_mode": "VFLOAT",
+        "parallax": 0.0,  
+        "proper_motion_dec": 0.0 
+    }
+                                   
+    windows = [{
+        'start': _utstart,
+        'end': _utend
+    }]
+
+    # Additional constraints to be added to this request 
+    constraints = {
+        'max_airmass': _airmass,
+        'min_lunar_distance': lunar
+    }
+
+    user_request = {
+        'group_id': _name,  # The title
+        'proposal': proposal,
+        'ipp_value': 1.00,
+        'operator': 'SINGLE',
+        'observation_type': mode,
+        'requests': [{
+            'target': target,
+            'molecules': molecules,
+            'windows': windows,
+            'location': location,
+            'constraints': constraints
+        }]
+    }
+
+    response = requests.post(
+        'https://observe.lco.global/api/userrequests/',
+        headers={'Authorization': 'Token ' + token},
+        json = user_request
+    )
+
+    ########################################################
+    python_dict = response.json()
+    try:
+        if 'id' in python_dict:
+           tracking_number=str(python_dict['id'])
+        else:
+           tracking_number=str('0')
+        
+        _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+        _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+        input_datesub = JDnow(verbose=False)
+        input_str_smjd = JDnow(_start,verbose=False)
+        input_str_emjd = JDnow(_end,verbose=False)
+        _seeing = 9999
+        _sky = 9999
+        _instrument = '2m0'
+        priority = 1
+        
+        try:
+           lineout = str(input_datesub)+' '+str(input_str_smjd)+' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' ' + str(_exp) + '   ' + str(_airmass) + '   ' + str(proposal) + ' '+str(username) + \
+                     ' ' + str(_seeing) + ' ' + str(_sky) + ' ' + str(priority) + ' ' + str(tracking_number) + '  0'
+        except:
+           lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' '+str(_exp)+'   '+ str(_airmass)+'   ' + str(proposal) + ' ' + str(username) + ' ' + \
+                     str(_seeing) + ' '+str(_sky) + ' ' + str(priority) + ' 0  0'
+        return lineout, python_dict
+    except:
+       return '', python_dict
+
+#####################################################################
+def getstatus_new(token,tracking_id):
+    ss = requests.get('https://observe.lco.global/api/userrequests/' + tracking_id + '/', headers={'Authorization': 'Token ' + token})
+    return ss.json()
+
+###################################################################
+def sendtrigger2_new(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username, token,proposal,camera='sbig',_airmass=2.0,lunar = 20, 
+                     _site='', mode='NORMAL'):
+    import string,re
+    import numpy as np
+    from datetime import datetime
+    def JDnow(datenow='',verbose=False):
+        import datetime
+        import time
+        _JD0=2455927.5
+        if not datenow:
+            datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
+                                        time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
+        _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
+                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
+        if verbose: print 'JD= '+str(_JDtoday)
+        return _JDtoday
+
+    fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
+                   'u': 'up','g': 'gp', 'r': 'rp', 'i': 'ip', 'z': 'zs',
+                   'up': 'up', 'gp': 'gp', 'rp': 'rp', 'ip': 'ip', 'zs': 'zs'}}
+    fildic['2m0'] = fildic['1m0']
+
+    _inst={'sinistro': '1M0-SCICAM-SINISTRO','sbig': '1M0-SCICAM-SBIG',
+           'spectral': '2M0-SCICAM-SPECTRAL','oneof': 'oneof'}
+    binx={'sbig': 2,'sinistro': 1,'spectral': 2}
+
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
+
+    if camera in ['sbig', 'sinistro']:
+        telclass = '1m0'
+    else:
+        telclass = '2m0'
+
+#################################### adding dither
+    if camera in ['sinistro']:
+       pixel = 10
+       pixarc = 0.387 * 2.
+       delta = pixel * pixarc / 3600. # 10 pixel in degree for sinisto camera
+       scal = np.pi/180.
+       _ra = float(_ra) + ( delta * np.cos(float(_dec) * scal) )
+       _dec = float(_dec) + delta 
+####################################
+
+    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj']:
+        location = { "telescope_class": telclass, 'site' : _site}
+    else:
+        location = { "telescope_class": telclass}
+
+    if camera in ['sbig', 'sinistro', 'spectral']:
+       molecules=[]
+       for i in range(0,len(filtervec)):
+           molecules.append(
+               {   ##########   require 
+                   "type": "EXPOSE",
+                   "instrument_name": _inst[camera],
+                   "filter": fildic[telclass][filtervec[i]],
+                   "exposure_time": float(expvec[i]),
+                   "exposure_count": int(nexpvec[i]),
+                   ##########    not required 
+                   "priority": 1,
+                   "ag_mode": "OPTIONAL",
+                   "ag_name": "",
+                   "bin_x": int(binx[camera]),
+                   "bin_y": int(binx[camera]),
+                   "defocus": 0.0, 
+               }
+           )
+
+       target = {
+           'name': _name,
+           'type': 'SIDEREAL',
+           'ra': float(_ra),
+           'dec': float(_dec),
+           'epoch': 2000
+       }
+                                   
+       windows = [{
+           'start': _utstart,
+           'end': _utend
+       }]
+
+       # Additional constraints to be added to this request
+       constraints = {
+           'max_airmass': _airmass,
+           'min_lunar_distance': lunar
+       }
+
+       user_request = {
+           'group_id': _name,  # The title
+           'proposal': proposal,
+           'ipp_value': 1.00,
+           'operator': 'SINGLE',
+           'observation_type': mode,
+           'requests': [{
+               'target': target,
+               'molecules': molecules,
+               'windows': windows,
+               'location': location,
+               'constraints': constraints
+           }]
+       }
+
+    response = requests.post(
+        'https://observe.lco.global/api/userrequests/',
+        headers={'Authorization': 'Token ' + token},
+        json = user_request
+    )
+    
+    #################################################################
+    python_dict = response.json()
+    try:
+       if 'id' in python_dict:
+          tracking_number = str(python_dict['id'])
+       else:
+          tracking_number = str('0')
+       _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+       _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+       input_datesub = JDnow(verbose=False)
+       input_str_smjd = JDnow(_start,verbose=False)
+       input_str_emjd = JDnow(_end,verbose=False)
+       _seeing = 9999
+       _sky = 9999
+       _instrument = telclass
+       priority = 1
+       try:
+          lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd) + '   ' + str(_site)+\
+                    ' ' + ','.join(filtervec)+' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                    str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' '+str(_seeing) + ' ' + str(_sky) + \
+                    ' '+str(_instrument) + ' '+str(priority) + ' '+str(tracking_number) + '  0'
+       except:
+          lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' ' + str(input_str_emjd) + '   ' + str(_site) + \
+                    ' ' + ','.join(filtervec) + ' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                    str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' ' + str(_seeing) + ' ' + str(_sky) + \
+                    ' ' + str(_instrument) + ' ' + str(priority) + ' 0  0'
+       return lineout, python_dict
+    except:
+       return '', python_dict   
+
 ########################################################################################
 
-def downloadfloydsraw(JD,username,passwd):
+def downloadfloydsraw(JD,token):
     import agnkey
     import os
     import string
@@ -1496,12 +1812,13 @@ def downloadfloydsraw(JD,username,passwd):
                 ll0[jj].append(lista[i][jj])
 
         for kk,track in enumerate(ll0['tracknumber']):
-            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-
+#            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
+            _dict = agnkey.util.getstatus_new(token,str(track).zfill(10))
             print track
             #################   update status
             if 'state' in _dict.keys(): 
                 _status=_dict['state']
+                print _status
                 if ll0['status'][kk]!=_status:
                     print ll0['status'][kk],_status
                     print 'update status'
@@ -1512,12 +1829,13 @@ def downloadfloydsraw(JD,username,passwd):
 
             #################   update reqnumber
             if 'requests' in _dict.keys():
-                _reqnumber = _dict['requests'].keys()[0]
-                if str(ll0['reqnumber'][kk]).zfill(10)!= _reqnumber:
-                    print str(ll0['reqnumber'][kk]).zfill(10), _reqnumber
-                    print 'update reqnumber'
-                    agnkey.agnsqldef.updatevalue('triggerslog', 'reqnumber', _reqnumber, track,
-                                                 connection='agnkey',namefile0='tracknumber')
+               print str(ll0['reqnumber'][kk]).zfill(10)
+               _reqnumber = str(_dict['requests'][-1]['id']).zfill(10)
+               if str(ll0['reqnumber'][kk]).zfill(10)!= _reqnumber:
+                  print str(ll0['reqnumber'][kk]).zfill(10), _reqnumber
+                  print 'update reqnumber'
+                  agnkey.agnsqldef.updatevalue('triggerslog', 'reqnumber', _reqnumber, track,
+                                               connection='agnkey',namefile0='tracknumber')
             else:
                _reqnumber = ''
 
