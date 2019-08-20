@@ -42,7 +42,7 @@ else:
 
 instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
                'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10','fl11',\
-                             'fl12','fl13','fl14','fl15','fl16', 'fa16','fa11','fa05','fa03','fa12','fa15'],
+                             'fl12','fl13','fl14','fl15','fl16', 'fa16','fa11','fa07','fa06','fa05','fa03','fa12','fa15'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
 
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
@@ -95,7 +95,7 @@ readpass=readpasswd(workingdirectory,realpass)
 #except:
 #   conn=''
 #   '\### warning: problem with the database'
-#######################################################################
+###############################ron########################################
 
 def ReadAscii2(ascifile):
    import string
@@ -213,7 +213,7 @@ def readkey3(hdr,keyword):
                            'propid'      : 'PROPID',\
                            'telescop'  : 'TELESCOP'}
     elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11','fl12','fl13','fl14','fl15','fl16',\
-                       'fa05','fa03','fa16','fa11','fa14','fa15']:   # sinistro
+                       'fa05','fa03','fa06','fa12','fa07','fa16','fa11','fa14','fa15']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
