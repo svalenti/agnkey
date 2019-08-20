@@ -243,6 +243,10 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
             scale = pixelscale
             if not _datamax:
                 _datamax = 60000
+        elif 'fa' in instrument:
+            scale = pixelscale
+            if not _datamax:
+                _datamax = 60000
         elif 'fs' in instrument:
             scale = pixelscale
             if not _datamax:
@@ -258,6 +262,8 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
                 if 'kb' in instrument:  
                     seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
                 elif 'fl' in instrument:     
+                    seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
+                elif 'fa' in instrument:     
                     seeing = float(agnkey.util.readkey3(hdr, 'L1FWHM')) * .75
                 elif 'fs' in instrument: 
                     if 'L1FWHM' in hdr:

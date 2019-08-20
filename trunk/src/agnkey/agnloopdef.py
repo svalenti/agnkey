@@ -3,8 +3,8 @@ import agnkey
 try:     from astropy.io import fits as pyfits
 except:  import pyfits
 
-import matplotlib
-import matplotlib.pyplot as plt
+#import matplotlib
+#import matplotlib.pyplot as plt
 import numpy as np
 import os
 import re
@@ -1065,11 +1065,14 @@ def filtralist(ll2, _filter, _id, _name, _ra, _dec, _bad, _filetype=1):
         else:
             for jj in ll1.keys(): ll1[jj] = []
     if _id:  # ID
-        try:
-            xx = '0000'[len(_id):] + _id
-            ww = asarray([i for i in range(len(ll1['filter'])) if ((_id in string.split(ll1['namefile'][i], '-')[3]))])
-        except:
+        if _id in ['e90','e91','e10']:
             ww = asarray([i for i in range(len(ll1['filter'])) if (_id in ll1['namefile'][i])])
+        else:
+            try:
+                xx = '0000'[len(_id):] + _id
+                ww = asarray([i for i in range(len(ll1['filter'])) if ((_id in string.split(ll1['namefile'][i], '-')[3]))])
+            except:
+                ww = asarray([i for i in range(len(ll1['filter'])) if (_id in ll1['namefile'][i])])
         if len(ww) > 0:
             for jj in ll1.keys(): ll1[jj] = array(ll1[jj])[ww]
         else:
@@ -1410,9 +1413,9 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
 #############################################################################
 
 def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True, redo=False, _output=''):
+    import matplotlib.pyplot as plt
     import agnkey
     import numpy as np
-    import pylab as plt
     import pywcs
     import time
 
@@ -1488,6 +1491,7 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
 
 
 def checkclean(imglist, force=True, database='dataredulco'):
+    import matplotlib.pyplot as plt
     import agnkey
     import time
     plt.ion()
@@ -1553,6 +1557,7 @@ def checkclean(imglist, force=True, database='dataredulco'):
 
 
 def checkfast(imglist, force=True, database='dataredulco'):
+    import matplotlib.pyplot as plt
     import agnkey
     import time
     plt.ion()
@@ -2336,3 +2341,30 @@ def checkdiff(imglist, database='dataredulco'):
 
 
 #############################################################
+def run_remove(listfile, _filetype, _redo):
+    import os
+    import string
+    import re
+    if len(listfile)>=10:
+        print listfile
+        answ = raw_input('are you sure you want to remove all this files ? [[y]/n] ')
+        if not answ: 
+            answ = 'y'
+    else:
+        answ = 'y'
+
+    if answ in ['y','yes','Y']:
+        for img in listfile:
+            print img,os.path.basename(img)
+            os.system('rm '+ re.sub('.fits','',img)+'*')
+            print '## dataredulco'
+            agnkey.agnsqldef.deleteredufromarchive(os.path.basename(img), 'dataredulco', 'namefile')
+            #print '## reference image'
+            #agnkey.dlt40sql.deleteredufromarchive(dlt40.dlt40sql.conn, os.path.basename(img), 'referenceimages', 'filename')
+            #print '## candidates'
+            #dlt40.dlt40sql.deleteredufromarchive(dlt40.dlt40sql.conn, os.path.basename(img), 'candidates', 'filename')
+            #print '## fake'
+            #dlt40.dlt40sql.deleteredufromarchive(dlt40.dlt40sql.conn, os.path.basename(img), 'fakecandidates', 'filename')
+            #print '## sources'
+            #dlt40.dlt40sql.deleteredufromarchive(dlt40.dlt40sql.conn, os.path.basename(img), 'sources', 'filename')
+    return        

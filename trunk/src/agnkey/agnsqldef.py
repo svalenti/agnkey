@@ -21,6 +21,7 @@ def dbConnect(lhost, luser, lpasswd, ldb):
                               user = luser,
                             passwd = lpasswd,
                                 db = ldb)
+      conn.autocommit(True)
    except MySQLdb.Error, e:
       print "Error %d: %s" % (e.args[0], e.args[1])
       sys.exit (1)
@@ -134,6 +135,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
 
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection(connection)
    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
+   conn.autocommit(True)
 
    try:
       cursor = conn.cursor (MySQLdb.cursors.DictCursor)

@@ -47,8 +47,8 @@ if __name__ == "__main__":
                       help="-b bad stage [wcs,psf,psfmag,zcat,abscat,mag,goodcat,getmag," +
                            'merge,diff,template,apmag,update] \t [%default]')
     parser.add_option("-s", "--stage", dest="stage", default='', type="str",
-                      help='-s stage [wcs,psf,psf2,psfmag,zcat,abscat,mag,getmag,merge,diff,' +
-                           'makestamp,template,apmag,cosmic,idlstart,copy] \t [%default]')
+                      help='-s stage [wcs,psf,psf2,psfmag,zcat,abscat,mag,getmag,merge,diff,mergeall' +
+                           'makestamp,template,apmag,cosmic,idlstart,copy,remove] \t [%default]')
     parser.add_option("--RAS", dest="ras", default='', type="str",
                       help='-RAS  ra    \t [%default]')
     parser.add_option("--DECS", dest="decs", default='', type="str",
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         sys.argv.append('--help')
     if _stage:
         if _stage not in ['wcs', 'psf', 'psf2', 'psfmag', 'zcat', 'abscat', 'mag', 'local', 'getmag',
-                          'merge', 'diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update','copy']:
+                          'merge', 'mergeall','diff', 'template', 'apmag', 'makestamp', 'cosmic', 'idlstart','update','copy','remove']:
             sys.argv.append('--help')
     if _bad:
         if _bad not in ['wcs', 'psf', 'psfmag', 'zcat', 'abscat', 'mag', 'goodcat', 'quality', 'apmag','diff']:
@@ -257,7 +257,8 @@ if __name__ == "__main__":
         listepoch = [re.sub('-', '', str(i)) for i in
                      [start + datetime.timedelta(days=x) for x in range(0, 1 + (stop - start).days)]]
 
-    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'apmag', 'cosmic', 'idlstart','diff','update','copy']:
+    if not _stage or _stage in ['local', 'getmag', 'wcs', 'psf', 'psf2', 'psfmag', 'makestamp', 'mergeall','apmag',\
+                                'cosmic', 'idlstart','diff','update','copy','remove']:
         if len(listepoch) == 1:
             lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(listepoch[0]),
                                                     '', '*', _telescope)
@@ -334,6 +335,9 @@ if __name__ == "__main__":
                     else:
                             os.system('cp ' + imgname + ' ./')
                             print('cp ' + imgname + ' ./')
+            elif _stage == 'remove':
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                agnkey.agnloopdef.run_remove(listfile, _filetype, _redo)
             elif _stage == 'makestamp':
                 listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                 if _show:
@@ -372,6 +376,10 @@ if __name__ == "__main__":
             elif _stage == 'idlstart':
                 listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
                 agnkey.agnloopdef.run_idlstart(listfile, _table, _redo)
+
+            elif _stage == 'mergeall':
+                listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]
+                agnkey.agnloopdef.run_merge(array(listfile), _redo)
 
             elif _stage == 'update':
                 listfile = [k + v for k, v in zip(ll['wdirectory'], ll['namefile'])]

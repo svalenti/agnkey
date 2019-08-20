@@ -19,7 +19,7 @@ if host in ['deneb']:
 elif host in ['dark']:
    host = 'dark'
    workingdirectory = '/dark/hal/AGNKEY/'
-   execdirectory = '/dark/hal/bin/'
+   execdirectory = '/dark/hal/anaconda2/envs/dlt40/bin/'
    rawdata = '/archive/engineering/'
    realpass = 'configure'
 elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2',
@@ -41,8 +41,10 @@ else:
    sys.exit('system '+str(host)+' not recognize')
 
 instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
-               'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10','fl11','fl12','fl13','fl14','fl15','fl16'],
+               'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10','fl11',\
+                             'fl12','fl13','fl14','fl15','fl16', 'fa16','fa11','fa05','fa03','fa12','fa15'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
+
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
 
 telescope0={'lsc' : ['1m0-04', '1m0-05', '1m0-09'], 'elp' : ['1m0-08'], 'cpt': ['1m0-10','1m0-12','1m0-13'],
@@ -210,7 +212,8 @@ def readkey3(hdr,keyword):
                            'type'      : 'OBSTYPE',\
                            'propid'      : 'PROPID',\
                            'telescop'  : 'TELESCOP'}
-    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11','fl12','fl13','fl14','fl15','fl16']:   # sinistro
+    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11','fl12','fl13','fl14','fl15','fl16',\
+                       'fa05','fa03','fa16','fa11','fa14','fa15']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\

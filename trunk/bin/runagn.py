@@ -16,50 +16,6 @@ from optparse import OptionParser
 start = time.time()
 
 coomandsn = {'LSQ12fxd': '-c -x 3 -y 3 --bkg 3 --size 6',
-             'PSNJ081753': '-c -x 3 -y 3 --bkg 4 --size 8',
-             'SN2013ak:': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'SN2013L': '-c -x 4 -y 4 --bkg 3 --size 4 --datamax 47000',
-             'PSNJ0621': '-c -x 4 -y 4 --bkg 5 --size 8',
-             'PSNJ1053': '-x 3 -y 3 --bkg 4 --size 8  --datamax 51000 --ref elp1m008-kb74-20130115-0322-e90.sn2.fits',
-             'PSNJ0333': '-x 4 -y 4 --size 8 --bkg 4 --datamax 65000 --ref lsc1m005-kb78-20121102-0107-e90.sn2.fits',
-             'PSNJ083745': '-c -x 3 -y 3 --bkg 3 --size 6',
-             'PSNJ182501': '-c -x 5 -y 5 --bkg 3 --size 5',
-             'PSNPGC027573': '-c -x 3 -y 3 --bkg 4 --size 6',
-             'PSNJ081753': '-c -x 5 -y 5 --bkg 3 --size 5',
-             'OGLE16': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'LSQ13zm': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'LSQ13aco': '-x 4 -y 4 --bkg 2 --size 4 --ref elp1m008-kb74-20130427-0131-e90.sn2.fits',
-             'LSQ13acf': '-c -x 5 -y 5 --bkg 3 --size 4',
-             'LSQ13aav': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'LSQ13xh': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'LSQ13xy': '-c -x 3 -y 3 --bkg 3 --size 4',
-             'LSQ13xy': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'LSQ13abf': '-c -x 3 -y 3 --bkg 2 --size 4',
-             'LSQ13aje': '-c -x 5 -y 5 --bkg 2 --size 4',
-             'LSQ13aiz': '-c -x 3 -y 3 --bkg 4 --size 6',
-             'LSQ13ajb': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'LSQ13ajp': '-c -x 3 -y 3 --bkg 3 --size 6',
-             'LSQ13ajo': '-c -x 3 -y 3 --bkg 3 --size 4',
-             'LSQ13ajg': '-x 5 -y 5 --bkg 2 --size 4 -ref lsc1m005-kb78-20130515-0027-e90.sn2.fits',
-             'PSN223702': '-x 3 -y 3 --bkg 2 --size 4 --ref elp1m008-kb74-20130502-0292-e90.sn2.fits',
-             'PSN205408': '-c -x 3 -y 3 --bkg 3 --size 6',
-             'PSN171722': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'PSNJ1739': '-x 5 -y 5 --bkg 2 --size 3 --ref lsc1m004-kb77-20130215-0225-e90.sn2.fits',
-             'PSN132651': '-c -x 4 -y 4 --bkg 3 --size 5',
-             'PSNJ111856': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'PSN205753': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'LSQ13bhl': '-c -x 3 -y 3 --bkg 3 --size 4',
-             'LSQ13bgk': '-c -x 3 -y 3 --bkg 3 --size 4',
-             'LSQ13bgg': '-c -x 3 -y 3 --bkg 3 --size 4',
-             'SN2013en': '-c -x 3 -y 3 --bkg 3 --size 5',
-             'PSN142115': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'PTF13ayw': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'PSN024508': '-c -x 4 -y 4 --bkg 3 --size 4',
-             'PSN092656': ' -x 5 -y 5 --bkg 2 --size 3 --ref lsc1m009-kb73-20130515-0095-e90.sn2.fits',
-             'PSN220221': '-c -x 5 -y 5 --bkg 3 --size 4',
-             'PSN165902': '-c -x 3 -y 3 --bkg 4 --size 6',
-             'PSN233746': '-c -x 3 -y 3 --bkg 4 --size 6',
-             'PTF13dqy': '-c -x 3 -y 3 --bkg 4 --size 6',
              'LSQ13cnl': '-c -x 4 -y 4 --bkg 3 --size 5 --ref cpt1m012-kb75-20131008-0126-e90.sn2.fits'
     }
 
@@ -69,8 +25,8 @@ def runin(epoch,_type):
     start = string.split(epoch,'-')[0][0:4]+'-'+string.split(epoch,'-')[0][4:6]+'-'+string.split(epoch,'-')[0][6:8]
     end = string.split(epoch,'-')[1][0:4]+'-'+string.split(epoch,'-')[1][4:6]+'-'+string.split(epoch,'-')[1][6:8]
     try:
-        print 'downloaddata.py -r '+_type+' -s '+start + ' -e '+ end
-        os.system('downloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
+        print '/dark/hal/anaconda2/envs/dlt40/bin/agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end
+        os.system('/dark/hal/anaconda2/envs/dlt40/bin/agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
     except:
         print 'problem with ingestion'
 
@@ -86,13 +42,13 @@ def zerostandard(standard, epoch, field, telescope='lsc'):
         if len(catalogue) >= 1:
             aa = re.sub(agnkey.__path__[0] + '/' + 'standard/cat/', '', catalogue[0])
             print '\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
-                  ' -s zcat --catalogue ' + aa + ' --cutmag -6 -T ' + telescope
-            os.system('agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
-                      ' -s zcat --catalogue ' + aa + ' --cutmag -6 -T ' + telescope)
+                  ' -s zcat --catalog ' + aa + ' --cutmag -6 -T ' + telescope
+            os.system(agnkey.util.execdirectory+'agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
+                      ' -s zcat --catalog ' + aa + ' --cutmag -6 -T ' + telescope)
         else:
             print '\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
                   ' -s zcat --cutmag -6 -T ' + telescope
-            os.system('agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
+            os.system(agnkey.util.execdirectory+'agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
                       ' -s zcat --cutmag -6 -T ' + telescope)
     except:
         print 'problem with zeropoint'
@@ -125,11 +81,9 @@ if __name__ == "__main__":
 
     if _xwindow:
         from stsci.tools import capable
-
         capable.OF_GRAPHICS = False
         XX = ' -X '
         import matplotlib
-
         matplotlib.use('Agg')
     else:
         XX = ''
@@ -175,17 +129,12 @@ if __name__ == "__main__":
         fil = ['landolt', 'sloan']
 
 
-
         #  upload req info in logtable
     _JDn = agnkey.agnsqldef.JDnow() - 10
     username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
     token = agnkey.util.readpass['token']
-#    print _JDn, username, passwd
-#    try:
+
     agnkey.util.downloadfloydsraw(_JDn, token)
-#    except:
-#        print 'does not work'
-#        raw_input('stop here')
 
     if _ingest:
         print '\n### ingest raw data \n'
@@ -206,24 +155,24 @@ if __name__ == "__main__":
     ##########################################################################
     #    added for new idl pipeline
     print '\n####  add hjd, when missing '
-    os.system('agnloop.py -e ' + epoch + ' -s idlstart ')
-    os.system('agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s idlstart ')
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
     #############################################################################
 
     print '\n####  compute  astrometry, when missing '
     #  compute astrometry when tim astrometry failed
-    os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
 
     #  try again or set to bad image
-    os.system('agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
 
     #####################################################
     print '\n####  compute  psf, when missing '
-    os.system('agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
 
     ######################################################
     #    added for new calibration
-    os.system('agnloop.py -e ' + epoch + ' -s apmag ')  #  compute psf
+    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s apmag ')  #  compute psf
 
 
     ll = agnkey.agnloopdef.get_list(epoch, 'all', '', '', '', '', '', '', 'dataredulco', _filetype)
@@ -332,14 +281,14 @@ if __name__ == "__main__":
                 print obj + ': object not calibrated in landolt'
                 for _std in standard:
                     for _tel in ['elp', 'lsc', 'cpt']:
-                        os.system('agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
+                        os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
                                   ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
             if field == 'sloan':
                 #               if obj not in sloancal:
                 print obj + ': object not calibrated in sloan'
                 for _std in standard:
                     for _tel in ['elp', 'lsc', 'cpt']:
-                        os.system('agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
+                        os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
                                   ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
     # run psffit on all objects
     for field in fil:
@@ -347,10 +296,10 @@ if __name__ == "__main__":
             if obj not in standard:
                 print '###', obj
                 if obj in coomandsn.keys():
-                    os.system('agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                    os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                               ' -s psfmag -c  ' + coomandsn[obj])
                 else:
-                    os.system('agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                    os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                               ' -s psfmag -c  -x 3 -y 3 --bkg 4 --size 7 ')
 
     print '\n### landolt fields:\n' + str(landoltcal)
@@ -364,14 +313,14 @@ if __name__ == "__main__":
                     if obj in landoltcal:
                         print '###', obj
                         try:
-                            os.system('agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                       ' -s mag --type fit')
                         except:
                             pass
                     elif obj in apasscal:
                         print '###', obj
                         try:
-                            os.system('agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
+                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
                                       ' -s mag --type fit')
                         except:
                             pass
@@ -379,14 +328,14 @@ if __name__ == "__main__":
                     if obj in sloancal:
                         print '###', obj
                         try:
-                            os.system('agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                       ' -s mag --type fit')
                         except:
                             pass
                     elif obj in apasscal:
                         print '###', obj
                         try:
-                            os.system('agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
+                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
                                       ' -s mag --type fit')
                         except:
                             pass
@@ -394,7 +343,7 @@ if __name__ == "__main__":
 
     # make stamps for all new images
     try:
-        os.system('agnloop.py -e ' + str(epoch) + ' -s makestamp' + ' ' + XX)
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + str(epoch) + ' -s makestamp' + ' ' + XX)
     except:
         print 'warning makestap did not work'
 

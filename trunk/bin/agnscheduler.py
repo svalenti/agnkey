@@ -7,7 +7,7 @@ import datetime,time,ephem
 import requests
 
 
-def getstatus_all(token,status,date,user='stefano_valenti1',proposal='KEY2014A-002'):
+def getstatus_all(token,status,date,user='stefano_valenti1',proposal='KEY2018B-001'):
     req = 'https://observe.lco.global/api/userrequests/' + '?limit=1000&'+\
           'proposal=' + proposal + '&'+\
           'created_after=' + date + '&'+\
@@ -117,15 +117,18 @@ if len(data3):
                 _status = 'COMPLETED'
                 #_status = updatetriggerslog(data2)
 
-        print data2['id'], _jd , _status, data2['windowend']
-        if _status == 'PENDING' and _jd - data2['windowend'] > 0.9:
+        print data2['id'], _jd , _status, 
+        print _jd - data2['windowend']
+        if _status == 'PENDING' and _jd - data2['windowend'] > 0.1:
                 print 'warning this observation is still PENDING but window is over'
+                #raw_input('stop here')
                 agnkey.agnsqldef.updatevalue('triggerslog', 'status', 'UNSCHEDULABLE', data2['id'],
                                              connection='agnkey',namefile0='id')
 
 command3 = ['select t.*,l.name,l.ra_sn,l.dec_sn from triggers as t join lsc_sn_pos as l where active = 1 and l.id = t.targid']
 data = agnkey.agnsqldef.query(command3)
 
+#raw_input('here')
 
 Warningdictionary={}
 if len(data):
@@ -159,11 +162,13 @@ if len(data):
                 if track in result:
                     _status = result[track][0]
                     _reqnumber = result[track][1]
-                    agnkey.agnsqldef.updatevalue('triggerslog', 'status', _status, track,
-                                                 connection='agnkey', namefile0='tracknumber')
+                    if _status!='UNSCHEDULABLE':
+                        agnkey.agnsqldef.updatevalue('triggerslog', 'status', _status, track,
+                                                     connection='agnkey', namefile0='tracknumber')
                     if _reqnumber:
                         agnkey.agnsqldef.updatevalue('triggerslog', 'reqnumber', _reqnumber, track,
                                                      connection='agnkey', namefile0='tracknumber')
+#                    raw_input('hehe')
                 else:
                     print 'Warning: trigger not found'
                     #_status = updatetriggerslog(data2)
@@ -183,16 +188,16 @@ if len(data):
             else:
                 print 'last observation '+str(float(_jd)-float(jd0))+' days ago'
                 print 'cadence '+str(ll['cadence'][jj])   # .1 to take in account the trigger time
-                if float(ll['cadence'][jj]) <= 1:
+                if float(ll['cadence'][jj]) <= 2:
                     if float(_jd)-float(jd0) > .001:
                         print 'cadence less or equal to one day'
                         print 'last window ended, trigger'
                         trigger=True
-                elif 1 < float(ll['cadence'][jj]) <= 2:
-                    print 'cadence between 1 and 2 days'
-                    print 'trigger if it is cadence-.3 days from end of the window'
-                    if float(ll['cadence'][jj])-.3 <= float(_jd)-float(jd0):
-                        trigger=True
+#                elif 1 < float(ll['cadence'][jj]) <= 2:
+#                    print 'cadence between 1 and 2 days'
+#                    print 'trigger if it is cadence-.3 days from end of the window'
+#                    if float(ll['cadence'][jj])-.3 <= float(_jd)-float(jd0):
+#                        trigger=True
                 else: 
                     print 'trigger if it is cadence-.3 days from end of the window'
                     if float(ll['cadence'][jj])-.3 <= float(_jd)-float(jd0):
@@ -327,3 +332,4 @@ if len(Warningdictionary):
 
     agnkey.util.sendemail(_from,_to1,_subject,text)
 
+#raw_input('stop here')

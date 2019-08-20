@@ -8,6 +8,9 @@ import os
 import sys
 import string
 import re
+try:     from astropy.io import fits as pyfits 
+except:  import pyfits
+
 from pyfits import getheader
 from optparse import OptionParser
 
