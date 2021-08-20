@@ -188,7 +188,7 @@ def querycatalogue(catalogue,img,method='iraf'):
         iraf.imcoords(_doprint=0)
         iraf.astcat(_doprint=0)
         if _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                         'fl11','fl12','fl13','fl14','fl15','fl16']:
+                         'fl11','fl12','fl13','fl14','fl15','fl16','fl20']:
             _size=40
         else:          
             _size=20
@@ -609,6 +609,8 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
         kk=agnkey.sites.extintion('mauna')
     elif _telescope in ['coj','1m0-11','fts','Faulkes Telescope South']:
         kk=agnkey.sites.extintion('siding')
+    elif _telescope in ['tfn']:
+        kk=agnkey.sites.extintion('ctio')
 #    kk={'U':0.63,'u':0.70,'B':0.32,'g':0.26,'V':0.18,'r':0.15,'R':0.13,'i':0.08,'I':0.07,'z':0.06}
     if 1==1:
         if catalogue:

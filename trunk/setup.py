@@ -63,7 +63,7 @@ setup(
     author_email = 'svalenti@lcogt.net',
     scripts=['bin/queryipac.py', 'bin/agnabsphot.py', 'bin/runagn.py', 'bin/agndiff.py', 'bin/agnarchivingspec.py',
              'bin/agnastro.py', 'bin/agncatalogue.py', 'bin/agncatalogue2.py', 'bin/agncheck.py',
-             'bin/agnloop.py','bin/agnpsf2.py','bin/agnscheduler.py',
+             'bin/agnloop.py','bin/agnpsf2.py','bin/agnscheduler_V3.py',
              'bin/agnmerge.py', 'bin/agnmerge_new.py', 'bin/agnmaketempl.py', 'bin/agnfloyds.py', 'bin/agnnewcalib.py','bin/agndownloaddata.py',
              'bin/agnmaglocal.py', 'bin/agnmag.py', 'bin/agnpsf.py', 'bin/agnsn.py','bin/agntestheader.py'],
     url = 'lcogt.net',

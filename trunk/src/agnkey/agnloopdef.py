@@ -560,6 +560,10 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
             elif _telescope in agnkey.util.telescope0['cpt']:
                 tel_tag = 'LCOGT-SAAO'
                 _observatory = 'sso'
+            #####  this is not correct, not sure about tnf values    
+            elif _telescope in agnkey.util.telescope0['tfn']:
+                tel_tag = 'LCOGT-tenerife'
+                _observatory = 'tfn'
             elif _telescope in agnkey.util.telescope0['ogg']:
                 _observatory = 'cfht'
                 tel_tag = 'FTN'

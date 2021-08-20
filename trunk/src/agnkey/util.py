@@ -8,18 +8,20 @@ import time
 import datetime
 import requests
 
-try:     from astropy.io import fits as pyfits
-except:  import pyfits
+try:
+   from astropy.io import fits as pyfits
+except:
+   import pyfits
 
 if host in ['deneb']:
    workingdirectory='/AGNECHO/AGNKEY/'
    execdirectory='/home/cv21/bin/'
    rawdata='/archive/engineering/'
    realpass='configure'
-elif host in ['dark']:
+elif host in ['phys-dark']:
    host = 'dark'
    workingdirectory = '/dark/hal/AGNKEY/'
-   execdirectory = '/dark/hal/anaconda2/envs/dlt40/bin/'
+   execdirectory = '/dark/anaconda/anaconda27/envs/halenv/bin/'
    rawdata = '/archive/engineering/'
    realpass = 'configure'
 elif host in ['engs-MacBook-Pro-4.local','valenti-macb1ook.physics.ucsb.edu','valenti-mbp-2',
@@ -42,17 +44,17 @@ else:
 
 instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 'kb76', 'kb77', 'kb78', 'kb79'],
                'sinistro' : ['fl02', 'fl03', 'fl04', 'fl05', 'fl06', 'fl07', 'fl08', 'fl09', 'fl10','fl11',\
-                             'fl12','fl13','fl14','fl15','fl16', 'fa16','fa11','fa07','fa06','fa05','fa03','fa12','fa15'],
+                             'fl12','fl13','fl14','fl15','fl16', 'fa16','fa11','fa07','fa06','fa05','fa03',\
+                             'fa04','fa12','fa15','fa20'],
              'spectral' : ['fs02', 'fs03', 'fs01', 'em01', 'em02']}
 
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
 
 telescope0={'lsc' : ['1m0-04', '1m0-05', '1m0-09'], 'elp' : ['1m0-08'], 'cpt': ['1m0-10','1m0-12','1m0-13'],
-            'coj' : ['1m0-11', '1m0-03', '2m0-02'], 'ogg' :  ['2m0-01'], 'all': ['1m0-03', '1m0-04' ,'1m0-05',
-                                                                                 '1m0-08', '1m0-09', '1m0-10',
-                                                                                 '1m0-11', '1m0-12', '1m0-13',
-                                                                                 '2m0-01', '2m0-02']}
-site0=['lsc','elp','coj','cpt','ogg']
+            'coj' : ['1m0-11', '1m0-03', '2m0-02'], 'ogg' :  ['2m0-01'], 'tfn': ['1m0-03'],
+            'all': ['1m0-03', '1m0-04' ,'1m0-05','1m0-08', '1m0-09', '1m0-10','1m0-11', '1m0-12', '1m0-13',
+                    '2m0-01', '2m0-02']}
+site0=['lsc','elp','coj','cpt','ogg','tfn']
 
 dome0={('lsc','domc') : '1m0-04', ('lsc','doma') : '1m0-05', ('lsc','domb') : '1m0-09', ('elp','doma') : '1m0-08',
          ('cpt','doma') : '1m0-10', ('cpt','domc') : '1m0-12', ('cpt','domb') : '1m0-13', ('coj','doma') : '1m0-11',
@@ -212,8 +214,9 @@ def readkey3(hdr,keyword):
                            'type'      : 'OBSTYPE',\
                            'propid'      : 'PROPID',\
                            'telescop'  : 'TELESCOP'}
-    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11','fl12','fl13','fl14','fl15','fl16',\
-                       'fa05','fa03','fa06','fa12','fa07','fa16','fa11','fa14','fa15']:   # sinistro
+    elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11',\
+                       'fl12','fl13','fl14','fl15','fl16',\
+                       'fa04','fa05','fa03','fa06','fa12','fa07','fa16','fa11','fa14','fa15','fa20']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
@@ -1037,7 +1040,7 @@ def sendtrigger(_name, _ra, _dec, _site, _exp, _nexp, _filters, _airmass, _utsta
         if verbose: print 'JD = '+str(_JDtoday)
         return _JDtoday
 
-    if _site in ['elp','cpt','ogg','lsc','coj']:
+    if _site in ['elp','cpt','ogg','lsc','coj','tfn']:
        location = {
           'telescope_class' : '1m0',
           'site'            : _site,
@@ -1178,7 +1181,7 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
        _dec = float(_dec) + delta 
 ####################################
 
-    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj']:
+    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj', 'tfn']:
        _location={ "telescope_class": telclass, 'site' : _site}
     else:     _location={ "telescope_class": telclass}
 
@@ -1474,19 +1477,6 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
 
 ####################################################################################################3
 
-def getstatus(username,passwd,tracking_id):
-    import httplib
-    import urllib
-    import json
-    params = urllib.urlencode({'username': username ,'password': passwd})
-    conn = httplib.HTTPSConnection("lco.global")
-    headers = {'Content-type': 'application/x-www-form-urlencoded'}
-    conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params, headers)
-    response = conn.getresponse().read()
-    python_dict = json.loads(response)
-    return python_dict
-
-#########################################################################################
 
 #############
 def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,proposal,_airmass=2.0, lunar=20,\
@@ -1642,11 +1632,55 @@ def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,pr
     except:
        return '', python_dict
 
+
+#########################################################################################    
+def getstatus(username,passwd,tracking_id):
+   '''
+   old definition to get the status of LCO observations
+   '''
+   import httplib
+   import urllib
+   import json
+   params = urllib.urlencode({'username': username ,'password': passwd})
+   conn = httplib.HTTPSConnection("lco.global")
+   headers = {'Content-type': 'application/x-www-form-urlencoded'}
+   conn.request("POST", "/observe/service/request/get/userrequeststatus/" + tracking_id, params, headers)
+   response = conn.getresponse().read()
+   python_dict = json.loads(response)
+   return python_dict
+
+    
 #####################################################################
 def getstatus_new(token,tracking_id):
-    ss = requests.get('https://observe.lco.global/api/userrequests/' + tracking_id + '/', headers={'Authorization': 'Token ' + token})
-    return ss.json()
+   '''
+   old definition to get the status of LCO observations with API V2
+   '''
+   ss = requests.get('https://observe.lco.global/api/userrequests/' + tracking_id + '/', headers={'Authorization': 'Token ' + token})
+   return ss.json()
 
+ #####################################################################
+
+def getstatus_apiv3(token,tracking_id):
+   '''
+   old definition to get the status of LCO observations with API V3
+   '''
+   ss = requests.get('https://observe.lco.global/api/requestgroups/' + tracking_id + '/', headers={'Authorization': 'Token ' + token})
+   return ss.json()
+
+ 
+#####################################################################
+def getstatus_all(token,status,date,user='stefano_valenti1',proposal='KEY2020B-006'):
+    req = 'https://observe.lco.global/api/requestgroups/' + '?limit=1000&'+\
+          'proposal=' + proposal + '&'+\
+          'created_after=' + date + '&'+\
+          'user=' + user
+    if status:
+        req = req + '&state=' + status
+    print req
+    ss = requests.get(req, headers={'Authorization': 'Token ' + token})
+    return ss.json()
+ 
+ 
 ###################################################################
 def sendtrigger2_new(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username, token,proposal,camera='sbig',_airmass=2.0,lunar = 20, 
                      _site='', mode='NORMAL'):
@@ -1697,7 +1731,7 @@ def sendtrigger2_new(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
        _dec = float(_dec) + delta 
 ####################################
 
-    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj']:
+    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj', 'tfn']:
         location = { "telescope_class": telclass, 'site' : _site}
     else:
         location = { "telescope_class": telclass}
@@ -1816,7 +1850,8 @@ def downloadfloydsraw(JD,token):
 
         for kk,track in enumerate(ll0['tracknumber']):
 #            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
-            _dict = agnkey.util.getstatus_new(token,str(track).zfill(10))
+#            _dict = agnkey.util.getstatus_new(token,str(track).zfill(10))
+            _dict = agnkey.util.getstatus_apiv3(token,str(track).zfill(10))
             print track
             #################   update status
             if 'state' in _dict.keys(): 
@@ -1957,3 +1992,414 @@ def sendemail(fromaddr,toaddrs,subj,text):
 
 ####################################3
             
+def sendfloydstrigger_api3(_name,_exp,_ra,_dec,_utstart,_utend,username, token,proposal,_airmass=2.0, lunar=20,\
+                          _site='', _slit=1.6, _calibration='after', nexp = 1, _type='wcs', mode='NORMAL'):
+    ''' This definition will trigger new observations using the API Web Server
+        - it takes most of the input by command line
+        - some input have a default value (eg telclass,airmass,binx,biny
+        - if site is specify will triger a specific telescope, otherwise will trigger on the full network
+        - filters, number of exposure per filter, exposure time are vector of the same lenght
+    '''
+    import string
+    from datetime import datetime
+
+    def JDnow(datenow='',verbose=False):
+        import datetime
+        import time
+        _JD0 = 2455927.5
+        if not datenow:
+            datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
+                                        time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
+                   (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        if verbose: print 'JD= '+str(_JDtoday)
+        return _JDtoday
+
+    ######################3
+    windows = [{
+        'start': _utstart,
+        'end': _utend
+    }]
+    #####################3
+
+    if _site in ['ogg','coj']:
+       location = {"telescope_class": "2m0", "site": _site}
+    else:
+       location = {"telescope_class": "2m0"}
+
+       ######################
+    if _type == 'wcs':
+        acquisition_config = {
+            "mode": "WCS",
+            "extra_params": {
+                "acquire_radius": 0.0 }}
+    else:
+        acquisition_config = {
+            "mode": "BRIGHTEST",
+            "extra_params": {
+                "acquire_radius": 5.0}}    
+       ######################
+
+    guiding_config = {
+        "mode":"ON",
+        "optional": False,
+        "exposure_time": 15.0,        
+        "extra_params": {}}
+       
+    # Additional constraints to be added to this request 
+    constraints = {
+        'max_airmass': _airmass,
+        'min_lunar_distrete  ance': lunar
+    }
+
+    #############################3
+    target = {
+        'name': _name,
+        'type': 'ICRS',
+        'ra': float(_ra),
+        'dec': float(_dec),
+        'epoch': 2000,
+        "proper_motion_ra": 0.0,
+        "proper_motion_dec": 0.0,
+        "parallax": 0.0,
+    }
+    ###################################3
+    slitvec={ '1.6': "slit_1.6as", '2.0': "slit_2.0as", '0.9': "slit_0.9as", '6.0': "slit_6.0as", '1.2': "slit_1.2as"}
+    _slit = str(_slit)
+    
+    instrument_config_lamp = {
+        "exposure_time": 20.0,
+        "exposure_count": 1,
+        "bin_x": 1,
+        "bin_y": 1,
+        "mode": "default",
+        "rotator_mode": "VFLOAT",
+        "optical_elements":{
+            "slit": slitvec[_slit]
+        },
+        "extra_params": {
+            "defocus": 0.0
+        }
+    }
+
+    instrument_config_arc = {
+        "exposure_time": 60.0,
+        "exposure_count": 1,
+        "bin_x": 1,
+        "bin_y": 1,
+        "mode": "default",
+        "rotator_mode": "VFLOAT",
+        "optical_elements":{
+            "slit": slitvec[_slit]
+        },
+        "extra_params": {
+            "defocus": 0.0
+        }
+    }
+
+    instrument_config_spectrum = {
+        "exposure_time": _exp,
+        "exposure_count": 1,
+        "bin_x": 1,
+        "bin_y": 1,
+        "mode": "default",
+        "rotator_mode": "VFLOAT",
+        "optical_elements":{
+            "slit": slitvec[_slit]
+        },
+        "extra_params": {
+            "defocus": 0.0
+        }
+    }
+
+    #############################
+       
+    configuration_lamp = {
+        "type": "LAMP_FLAT",
+        "instrument_type": "2M0-FLOYDS-SCICAM",
+        "instrument_configs": [instrument_config_lamp],
+        "acquisition_config": acquisition_config,
+        "guiding_config": guiding_config,
+        "constraints": constraints,
+        "target": target
+    }    
+
+    configuration_arc = {
+        "type": "ARC",
+        "instrument_type": "2M0-FLOYDS-SCICAM",
+        "instrument_configs": [instrument_config_arc],
+        "acquisition_config": acquisition_config,
+        "guiding_config": guiding_config,
+        "constraints": constraints,
+        "target": target
+    }    
+
+    configuration_spectrum = {
+        "type": "SPECTRUM",
+        "instrument_type": "2M0-FLOYDS-SCICAM",
+        "instrument_configs": [instrument_config_spectrum],
+        "acquisition_config": acquisition_config,
+        "guiding_config": guiding_config,
+        "constraints": constraints,
+        "target": target
+    }    
+
+    
+
+    if _calibration == 'all':
+       configurations = [configuration_arc, configuration_lamp, configuration_spectrum, configuration_lamp, configuration_arc]
+    elif _calibration =='after':
+       configurations = [configuration_spectrum, configuration_lamp, configuration_arc]
+    else:
+       configurations = [configuration_spectrum]                            
+
+
+       ############################################################################
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
+
+    user_request = {
+        'name': _name,  # The title
+        'proposal': proposal,
+        'ipp_value': 1.00,
+        'operator': 'SINGLE',
+        'observation_type': mode,
+        'requests': [{
+            'location': location,
+            'configurations': configurations,
+            'windows': windows
+        }]
+    }
+    print '#'*20
+    print user_request
+    print '#'*20
+    response = requests.post(
+        'https://observe.lco.global/api/requestgroups/',
+        headers={'Authorization': 'Token ' + token},
+        json = user_request
+    )
+
+    ########################################################
+    python_dict = response.json()
+    try:
+        if 'id' in python_dict:
+           tracking_number=str(python_dict['id'])
+        else:
+           tracking_number=str('0')
+        
+        _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+        _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+        input_datesub = JDnow(verbose=False)
+        input_str_smjd = JDnow(_start,verbose=False)
+        input_str_emjd = JDnow(_end,verbose=False)
+        _seeing = 9999
+        _sky = 9999
+        _instrument = '2m0'
+        priority = 1
+        
+        try:
+           lineout = str(input_datesub)+' '+str(input_str_smjd)+' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' ' + str(_exp) + '   ' + str(_airmass) + '   ' + str(proposal) + ' '+str(username) + \
+                     ' ' + str(_seeing) + ' ' + str(_sky) + ' ' + str(priority) + ' ' + str(tracking_number) + '  0'
+        except:
+           lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd)+'   '+str(_site)+' floyds '+\
+                     str(_slit) + ' '+str(_exp)+'   '+ str(_airmass)+'   ' + str(proposal) + ' ' + str(username) + ' ' + \
+                     str(_seeing) + ' '+str(_sky) + ' ' + str(priority) + ' 0  0'
+        return lineout, python_dict
+    except:
+       return '', python_dict
+
+
+#####################################################################
+
+def sendtrigger_api3(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,username, token,proposal,camera='sbig',_airmass=2.0,lunar = 20, 
+                     _site='', mode='NORMAL'):
+    import string,re
+    import numpy as np
+    from datetime import datetime
+    def JDnow(datenow='',verbose=False):
+        import datetime
+        import time
+        _JD0=2455927.5
+        if not datenow:
+            datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
+                                        time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
+        _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
+                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
+        if verbose: print 'JD= '+str(_JDtoday)
+        return _JDtoday
+
+    fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
+                   'u': 'up','g': 'gp', 'r': 'rp', 'i': 'ip', 'z': 'zs',
+                   'up': 'up', 'gp': 'gp', 'rp': 'rp', 'ip': 'ip', 'zs': 'zs'}}
+    fildic['2m0'] = fildic['1m0']
+
+    _inst={'sinistro': '1M0-SCICAM-SINISTRO','sbig': '1M0-SCICAM-SBIG',
+           'spectral': '2M0-SCICAM-SPECTRAL','oneof': 'oneof'}
+    binx={'sbig': 2,'sinistro': 1,'spectral': 2}
+
+    if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
+       mode='NORMAL'
+
+    if mode in ['normal']:
+           mode='NORMAL'
+    elif mode in ['ToO']:
+           mode='TARGET_OF_OPPORTUNITY'
+
+    if camera in ['sbig', 'sinistro']:
+        telclass = '1m0'
+    else:
+        telclass = '2m0'
+
+#################################### adding dither
+    if camera in ['sinistro']:
+       pixel = 10
+       pixarc = 0.387 * 2.
+       delta = pixel * pixarc / 3600. # 10 pixel in degree for sinisto camera
+       scal = np.pi/180.
+       _ra = float(_ra) + ( delta * np.cos(float(_dec) * scal) )
+       _dec = float(_dec) + delta 
+
+    ####################################
+
+    windows = [{
+        'start': _utstart,
+        'end': _utend
+    }]
+       
+    ####################################
+
+    if _site in ['elp', 'cpt', 'ogg', 'lsc', 'coj', 'tfn']:
+        location = { "telescope_class": telclass, 'site' : _site}
+    else:
+        location = { "telescope_class": telclass}
+
+
+    acquisition_config = {
+        "mode": "OFF",
+        "exposure_time": None,
+        "extra_params": {}}        
+
+    guiding_config = {
+        "mode":"ON",
+        "optional": True,
+        "exposure_time": None,
+        "optical_elements": {},
+        "extra_params": {}}
+
+    # Additional constraints to be added to this request
+    constraints = {
+        'max_airmass': _airmass,
+        'min_lunar_distance': lunar
+    }
+
+    submit = False
+    if camera in ['sbig', 'sinistro', 'spectral']:
+        #############################3
+        target = {
+            'name': _name,
+            'type': 'ICRS',
+            'ra': float(_ra),
+            'dec': float(_dec),
+            'epoch': 2000,
+            "proper_motion_ra": 0.0,
+            "proper_motion_dec": 0.0,
+            "parallax": 0.0,
+            "epoch":2000.0,
+        }
+
+        
+        submit = True
+        configurations=[]
+        for i in range(0,len(filtervec)):
+
+
+            instrument_config = {
+                "exposure_time": float(expvec[i]),
+                "exposure_count": int(nexpvec[i]),
+                "bin_x": 1,
+                "bin_y": 1,
+                "mode": "full_frame",
+                "rotator_mode": "",
+                "optical_elements":{
+                    "filter": fildic[telclass][filtervec[i]]
+                },
+                "extra_params": {}
+            }
+           
+            configurations.append(
+                {"constraints": constraints,
+                 "instrument_configs": [instrument_config],
+                 "acquisition_config": acquisition_config,
+                 "guiding_config": guiding_config,
+                 'target': target,
+                 "instrument_type": _inst[camera],
+                 "type": "EXPOSE",
+                 "extra_params": {},
+                 "priority": 1,
+                }
+            )
+
+        user_request = {
+            'name': _name,  # The title
+            'proposal': proposal,
+            'ipp_value': 1.00,
+            'operator': 'SINGLE',
+            'observation_type': mode,
+            'requests': [{
+                'location': location,
+                'configurations': configurations,
+                'windows': windows
+            }]
+        }
+    else:
+        print('warning: camera not defined')
+
+
+    if submit is False:
+        return '', {'error':'wrong camera'}
+    else:
+        response = requests.post(
+            'https://observe.lco.global/api/requestgroups/',
+            headers={'Authorization': 'Token ' + token},
+            json = user_request
+        )
+    
+        #################################################################
+        python_dict = response.json()
+        try:
+           if 'id' in python_dict:
+              tracking_number = str(python_dict['id'])
+           else:
+              tracking_number = str('0')
+           _start = datetime.strptime(string.split(str(_utstart),'.')[0],"20%y-%m-%d %H:%M:%S")
+           _end = datetime.strptime(string.split(str(_utend),'.')[0],"20%y-%m-%d %H:%M:%S")
+           input_datesub = JDnow(verbose=False)
+           input_str_smjd = JDnow(_start,verbose=False)
+           input_str_emjd = JDnow(_end,verbose=False)
+           _seeing = 9999
+           _sky = 9999
+           _instrument = telclass
+           priority = 1
+           try:
+              lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' '+str(input_str_emjd) + '   ' + str(_site)+\
+                        ' ' + ','.join(filtervec)+' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                        str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' '+str(_seeing) + ' ' + str(_sky) + \
+                        ' '+str(_instrument) + ' '+str(priority) + ' '+str(tracking_number) + '  0'
+           except:
+              lineout = str(input_datesub) + ' ' + str(input_str_smjd) + ' ' + str(input_str_emjd) + '   ' + str(_site) + \
+                        ' ' + ','.join(filtervec) + ' ' + ','.join(nexpvec) + ' ' + ','.join(expvec) + '   ' + \
+                        str(_airmass) + '   '+str(proposal) + ' ' + str(username) + ' ' + str(_seeing) + ' ' + str(_sky) + \
+                        ' ' + str(_instrument) + ' ' + str(priority) + ' 0  0'
+           return lineout, python_dict
+        except:
+           return '', python_dict   
+
+
+
+##################################################

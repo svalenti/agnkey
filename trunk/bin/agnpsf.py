@@ -163,7 +163,6 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
 
 
     _center='no'
-
     iraf.fitskypars.annulus = a4
     iraf.fitskypars.dannulus = a4
     iraf.noao.digiphot.daophot.daopars.sannulus = int(a4)
@@ -182,7 +181,7 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.centerpars.cbox = 1
     iraf.daopars.recenter = _center
     iraf.photpars.zmag = zmag
-
+    
     iraf.delete('_psf.ma*,' + img + '.psf.fit?,_psf.ps*,_psf.gr?,_psf.n*,_psf.sub.fit?', verify=False)
     iraf.phot(img+'[0]', '_psf.coo', '_psf.mag', interac=False, verify=False, verbose=False)
 
@@ -194,7 +193,6 @@ def psffit(img, fwhm, psfstars, hdr, interactive, _datamax=45000, psffun='gauss'
     iraf.daopars.wsannul = int(a4)
     iraf.daopars.recenter = _center
     iraf.daopars.varorder = varord
-
     if interactive:
         shutil.copyfile('_psf.mag', '_psf.pst')
         print '_' * 80
@@ -224,8 +222,7 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         import agnkey
         hdr = agnkey.util.readhdr(img + '.fits')
         instrument = agnkey.util.readkey3(hdr, 'instrume')
-        print 'INSTRUMENT:', instrument
-
+        print ('INSTRUMENT:', instrument)
         if 'PIXSCALE' in hdr:
             pixelscale = agnkey.util.readkey3(hdr, 'PIXSCALE')
         elif 'CCDSCALE' in hdr:
@@ -285,7 +282,6 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
         print 'FWHM[header]  ', fwhm, '   in pixel'
         if ofwhm: fwhm = float(ofwhm)
         print '    FWHM[input]  ', fwhm, ' in pixel'
-
         xdim, ydim = iraf.hselect(img+'.fits[0]', 'i_naxis1,i_naxis2', 'yes', Stdout=1)[0].split()
         print img, fwhm, threshold, scale
 
@@ -407,7 +403,6 @@ def ecpsf(img, ofwhm, threshold, psfstars, distance, interactive, ds9, psffun='g
 #                    ff.write('%10s %10s %10s \n' % (xs[i], ys[i], fluxrad[i]))
 #                ff.close()
         ###################################################################################
-
         print 80 * "#"
         photmag, pst, fitmag = psffit(img, fwhm, psfstars, hdr, interactive, _datamax, psffun, fixaperture)
 

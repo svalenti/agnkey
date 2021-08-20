@@ -51,7 +51,7 @@ def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
             cursor.execute ("select raw.namefile from datarawlco raw where "+\
                                " raw.dateobs = "+str(epoch0)+\
                                " and NOT EXISTS(select * from "+str(datatable)+" redu where raw.namefile = redu.namefile)")
-      elif telescope in ['elp','lsc','cpt','coj','1m0','kb','fl']:
+      elif telescope in ['elp','lsc','cpt','tfn', 'coj','1m0','kb','fl']:
          if epoch2:  
             print "select raw.namefile from datarawlco raw where raw.namefile like '%"+telescope+"%'"+\
                                " and raw.dateobs < "+str(epoch2)+" and raw.dateobs >= "+str(epoch0)+\
@@ -107,7 +107,7 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"<="+"'"+value2+"' and "+column+">="+"'"+value1+"'")
          else:
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"="+"'"+value1+"'")
-      elif telescope in ['lsc','elp','cpt','coj','1m0','kb','fts','ftn','fl','fs']:
+      elif telescope in ['lsc','elp','cpt','coj','tfn', '1m0','kb','fts','ftn','fl','fs']:
          if value2:
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"<="+"'"+value2+"' and "+column+">="+"'"+value1+"' and namefile like '%"+telescope+"%'")
          else:
@@ -224,14 +224,15 @@ def ingestdata(telescope,instrument,listepoch,_force):
    from agnsqldef import getfromdataraw
    from agnsqldef import updatevalue
    
-   if telescope in ['fts','ftn','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','all','coj','tar']:
+   if telescope in ['fts','ftn','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10',
+                    '1m0-11','1m0-12','1m0-13','tfn', 'lsc','elp','cpt','all','coj','tar']:
       hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
    else:
       hostname, username, passwd, database=agnkey.agnsqldef.getconnection('lcogt')
 
    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
 
-   if telescope=='all': tellist=['elp','lsc','cpt','coj']
+   if telescope=='all': tellist=['elp','lsc','cpt','coj','tfn']
    elif telescope in ['1m0-08']: tellist=['elp']
    elif telescope in ['1m0-05','1m0-04','1m0-09']: tellist=['lsc']
    elif telescope in ['1m0-13','1m0-10','1m0-12']: tellist=['cpt']
@@ -242,14 +243,19 @@ def ingestdata(telescope,instrument,listepoch,_force):
    elif telescope =='coj': tellist=['coj']
    elif telescope =='fts': tellist=['coj']
    elif telescope =='ftn': tellist=['ogg']
+   elif telescope =='tfn': tellist=['tfn']
+   
 
    if not instrument:
-      if telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','all','coj']:
-                               instrumentlist = ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
-                                                 'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                                                 'fl11','fl12','fl13','fl14','fl15','fl16']
-      elif ['fts','ftn']:      instrumentlist = ['fs01','fs02','fs03','em01','em03']
-   else:                       instrumentlist = [instrument]
+      if telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tfn',
+                       'lsc','elp','cpt','all','coj']:
+         instrumentlist = ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
+                           'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
+                           'fl11','fl12','fl13','fl14','fl15','fl16','fl20']
+      elif ['fts','ftn']:
+         instrumentlist = ['fs01','fs02','fs03','em01','em03']
+   else:
+      instrumentlist = [instrument]
 
    for epoch in listepoch:
     if telescope in ['fts']:
@@ -258,7 +264,8 @@ def ingestdata(telescope,instrument,listepoch,_force):
     elif telescope in ['ftn']:
        imglist=''
        print '\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/'
-    elif telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','all','coj']:
+    elif telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12',
+                       '1m0-13','tfn','lsc','elp','cpt','all','coj']:
        print 'force ingestion'
        import agnkey
        from agnkey.util import readkey3,readhdr
@@ -303,10 +310,11 @@ def ingestdata(telescope,instrument,listepoch,_force):
                            'OBID':readkey3(hdr,'GROUPID'),'USERID':readkey3(hdr,'USERID'),'temperature':readkey3(hdr,'CCDATEMP'),'dateobs2':readkey3(hdr,'DATE-OBS')}
                dictionary['namefile']=string.split(img,'/')[-1]
                dictionary['directory']=re.sub(dictionary['namefile'],'',img) 
-         elif  telescope in ['all','lsc','elp','cpt','coj','1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tar']:
+         elif  telescope in ['all','lsc','elp','cpt','coj','tfn','1m0-03','1m0-04','1m0-05','1m0-08',
+                             '1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','tar']:
                if instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
                                  'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                                 'fl11','fl12','fl13','fl14','fl15','fl16']:
+                                 'fl11','fl12','fl13','fl14','fl15','fl16','fl20']:
                   hdr=readhdr(img)
 #                  if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-008'] or readkey3(hdr,'object') in ['2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk']:
                   if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-009'] or readkey3(hdr,'object') in ['PSN09554214','2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk','PTF13dzb']:
@@ -333,7 +341,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
             if dictionary:
                if instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79',\
                                  'fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                                 'fl11','fl12','fl13','fl14','fl15','fl16']:
+                                 'fl11','fl12','fl13','fl14','fl15','fl16','fl20']:
                   if not agnkey.agnsqldef.getfromdataraw(conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile'):
                      agnkey.agnsqldef.insert_values(conn,datarawtable,dictionary)
                      print 'insert '+img
@@ -358,14 +366,17 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
    dataredutable=datatable
    _type=''
    if not _instrument:
-      if _telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13','lsc','elp','cpt','coj','all']:   _type='1m'
-      elif _telescope in ['ftn','fts']: _type='2m'
+      if _telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12','1m0-13',
+                        'lsc','elp','cpt','coj','tfn','all']:
+         _type='1m'
+      elif _telescope in ['ftn','fts']:
+         _type='2m'
       else: sys.exit('instrument not defined, telescopen not in the list')
    else:
       if _instrument in ['kb05','kb69','kb70','kb71','kb73','kb74','kb75','kb76','kb77','kb78','kb79']:  
          _type='1m'
       elif _instrument in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10',\
-                           'fl11','fl12','fl13','fl14','fl15','fl16']:     
+                           'fl11','fl12','fl13','fl14','fl15','fl16','fl20']:     
          _type='1m'
       elif _instrument in ['fs01','fs02','fs03','em03','em01']:                                   
          _type='2m'

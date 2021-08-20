@@ -120,6 +120,8 @@ if __name__ == "__main__":
             tel = agnkey.util.telescope0['coj']
         elif _telescope == 'cpt':
             tel = agnkey.util.telescope0['cpt']
+        elif _telescope == 'tfn':
+            tel = agnkey.util.telescope0['tfn']
     else:
         tel = agnkey.util.telescope0['all']
 
@@ -248,7 +250,7 @@ if __name__ == "__main__":
             listacampi = standard + sloancal
         for _standard in listacampi:
             if _telescope == 'all':
-                for _tel in ['elp', 'lsc', 'cpt', 'coj']:
+                for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
                     zerostandard(_standard, epoch, field, _tel)
             else:
                 zerostandard(_standard, epoch, field, _telescope)
@@ -259,7 +261,7 @@ if __name__ == "__main__":
             for _name in apasscal:
                 if _name not in landoltcal:
                     if _telescope == 'all':
-                        for _tel in ['elp', 'lsc', 'cpt', 'coj']:
+                        for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
                             zerostandard(_name, epoch, 'apass', _tel)
                         else:
                             zerostandard(_name, epoch, 'apass', _telescope)
@@ -267,7 +269,7 @@ if __name__ == "__main__":
             for _name in apasscal:
                 if _name not in sloancal:
                     if _telescope == 'all':
-                        for _tel in ['elp', 'lsc', 'cpt', 'coj']:
+                        for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
                             zerostandard(_name, epoch, 'apass', _tel)
                         else:
                             zerostandard(_name, epoch, 'apass', _telescope)
@@ -280,14 +282,14 @@ if __name__ == "__main__":
                 #                if obj not in landoltcal:
                 print obj + ': object not calibrated in landolt'
                 for _std in standard:
-                    for _tel in ['elp', 'lsc', 'cpt']:
+                    for _tel in ['elp', 'lsc', 'cpt', 'tfn', 'coj']:
                         os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
                                   ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
             if field == 'sloan':
                 #               if obj not in sloancal:
                 print obj + ': object not calibrated in sloan'
                 for _std in standard:
-                    for _tel in ['elp', 'lsc', 'cpt']:
+                    for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
                         os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
                                   ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
     # run psffit on all objects
