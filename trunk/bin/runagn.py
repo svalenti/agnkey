@@ -25,8 +25,8 @@ def runin(epoch,_type):
     start = string.split(epoch,'-')[0][0:4]+'-'+string.split(epoch,'-')[0][4:6]+'-'+string.split(epoch,'-')[0][6:8]
     end = string.split(epoch,'-')[1][0:4]+'-'+string.split(epoch,'-')[1][4:6]+'-'+string.split(epoch,'-')[1][6:8]
     try:
-        print '/dark/hal/anaconda2/envs/dlt40/bin/agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end
-        os.system('/dark/hal/anaconda2/envs/dlt40/bin/agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
+        print( agnkey.util.execdirectory+ 'agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
+        os.system(agnkey.util.execdirectory+'agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
     except:
         print 'problem with ingestion'
 
@@ -58,6 +58,8 @@ if __name__ == "__main__":
     parser = OptionParser(usage=usage, description=description, version="%prog agnkey")
     parser.add_option("-f", "--filter", dest="filter", default='', type="str",
                       help='-f filter [sloan,landolt,u,g,r,i,z,U,B,V,R,I] \t [%default]')
+    parser.add_option("-s", "--stage", dest="stage", default=None, type="str",
+                      help='-s  stage [ingestion,psf,hjd,wcs] \t [%default]')
     parser.add_option("-T", "--telescope", dest="telescope", default='all', type="str",
                       help='-T telescope ' + ', '.join(agnkey.util.telescope0['all']) + ', '.join(agnkey.util.site0) + \
                            ', fts, ftn, 1m0, kb, fl \t [%default]')
@@ -78,6 +80,7 @@ if __name__ == "__main__":
     _filetype = option.filetype
     _filter = option.filter
     _xwindow = option.xwindow
+    _stage = option.stage
 
     if _xwindow:
         from stsci.tools import capable
@@ -88,6 +91,11 @@ if __name__ == "__main__":
     else:
         XX = ''
 
+    if _stage:
+        if _stage not in ['ingestion','wcs','psf','hjd','newcal','zeropoint','mag','abscat','psfmag']:
+            sys.argv.append('--help')
+        option, args = parser.parse_args()
+        
     if _telescope not in agnkey.util.telescope0['all'] + agnkey.util.site0 + ['all', 'ftn', 'fts', '1m0', 'kb', 'fl']:
         sys.argv.append('--help')
     if _filter:
@@ -130,18 +138,19 @@ if __name__ == "__main__":
     else:
         fil = ['landolt', 'sloan']
 
-
-        #  upload req info in logtable
-    _JDn = agnkey.agnsqldef.JDnow() - 10
-    username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
-    token = agnkey.util.readpass['token']
-
-    agnkey.util.downloadfloydsraw(_JDn, token)
-
-    if _ingest:
-        print '\n### ingest raw data \n'
-        runin(epoch,'image')  # ingest raw images
-        runin(epoch,'spectra')  # ingest raw spectra
+######################################3
+    if _stage is None or _stage=='ingestion':
+            #  upload req info in logtable
+        _JDn = agnkey.agnsqldef.JDnow() - 10
+        username, passwd = agnkey.util.readpass['odinuser'], agnkey.util.readpass['odinpasswd']
+        token = agnkey.util.readpass['token']
+        
+        agnkey.util.downloadfloydsraw(_JDn, token)
+        
+        if _ingest:
+            print '\n### ingest raw data \n'
+            runin(epoch,'image')  # ingest raw images
+            runin(epoch,'spectra')  # ingest raw spectra
 
 
     if _filter:
@@ -154,34 +163,42 @@ if __name__ == "__main__":
     else:
         tt = '  -T ' + _telescope + ' '
 
-    ##########################################################################
-    #    added for new idl pipeline
-    print '\n####  add hjd, when missing '
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s idlstart ')
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
-    #############################################################################
+    if _stage is None or _stage=='hjd':
+        ##########################################################################
+        #    added for new idl pipeline    
+        print '\n####  add hjd, when missing '
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s idlstart ')
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
+        #############################################################################
 
-    print '\n####  compute  astrometry, when missing '
-    #  compute astrometry when tim astrometry failed
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
+    if _stage is None or _stage=='wcs':        
+        print '\n####  compute  astrometry, when missing '
+        #  compute astrometry when tim astrometry failed
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
 
-    #  try again or set to bad image
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
+        #  try again or set to bad image
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --xshift 1 --yshift 1 ' + ff + tt + XX)
 
-    #####################################################
-    print '\n####  compute  psf, when missing '
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
-
-    ######################################################
-    #    added for new calibration
-    os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s apmag ')  #  compute psf
+    if _stage is None or _stage=='psf':                
+        #####################################################
+        print '\n####  compute  psf, when missing '
+        print(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
 
 
+##########################################3
     ll = agnkey.agnloopdef.get_list(epoch, 'all', '', '', '', '', '', '', 'dataredulco', _filetype)
     if ll:
         lista = list(set(ll['objname']))
     else:
         lista = []
+        
+    ######################################################
+    #    added for new calibration
+##############################################                            
+    if _stage is None or _stage=='newcal':
+        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s apmag  -b apmag ')  #  
+
     sloancal = []
     landoltcal = []
     apasscal = []
@@ -236,12 +253,13 @@ if __name__ == "__main__":
         if _catlandolt:  landoltcal.append(obj)
         if _catsloan:    sloancal.append(obj)
         if _catapass:    apasscal.append(obj)
-
+    
     print '\n### standard fields: ' + str(standard)
     print '\n### landolt fields:\n' + str(landoltcal)
     print '\n### sloan field:\n' + str(sloancal)
     print '\n### apass field:\n' + str(apasscal)
     print '\n### not in the lists:\n ' + str(notinthelist)
+    
     #                 compute zero point for different fields
     for field in fil:
         if field == 'landolt': 
@@ -255,99 +273,110 @@ if __name__ == "__main__":
             else:
                 zerostandard(_standard, epoch, field, _telescope)
 
-    #    compute zeropoint for apass field not in landolt or sloan
-    for field in fil:
-        if field == 'landolt':
-            for _name in apasscal:
-                if _name not in landoltcal:
-                    if _telescope == 'all':
-                        for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
-                            zerostandard(_name, epoch, 'apass', _tel)
-                        else:
-                            zerostandard(_name, epoch, 'apass', _telescope)
-        if field == 'sloan':
-            for _name in apasscal:
-                if _name not in sloancal:
-                    if _telescope == 'all':
-                        for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
-                            zerostandard(_name, epoch, 'apass', _tel)
-                        else:
-                            zerostandard(_name, epoch, 'apass', _telescope)
-
-    #               compute catalogues for SN fields
-    for field in fil:
-        for obj in lista:
+##############################################                            
+    if _stage is None or _stage=='zeropoint':                
+        #    compute zeropoint for apass field not in landolt or sloan
+        for field in fil:
             if field == 'landolt':
-                #                for obj in lista:
-                #                if obj not in landoltcal:
-                print obj + ': object not calibrated in landolt'
-                for _std in standard:
-                    for _tel in ['elp', 'lsc', 'cpt', 'tfn', 'coj']:
-                        os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
-                                  ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
+                for _name in apasscal:
+                    if _name not in landoltcal:
+                        if _telescope == 'all':
+                            for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
+                                zerostandard(_name, epoch, 'apass', _tel)
+                            else:
+                                zerostandard(_name, epoch, 'apass', _telescope)
             if field == 'sloan':
-                #               if obj not in sloancal:
-                print obj + ': object not calibrated in sloan'
-                for _std in standard:
-                    for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
-                        os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
-                                  ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
-    # run psffit on all objects
-    for field in fil:
-        for obj in lista:
-            if obj not in standard:
-                print '###', obj
-                if obj in coomandsn.keys():
-                    os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
-                              ' -s psfmag -c  ' + coomandsn[obj])
-                else:
-                    os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
-                              ' -s psfmag -c  -x 3 -y 3 --bkg 4 --size 7 ')
+                for _name in apasscal:
+                    if _name not in sloancal:
+                        if _telescope == 'all':
+                            for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
+                                zerostandard(_name, epoch, 'apass', _tel)
+                            else:
+                                zerostandard(_name, epoch, 'apass', _telescope)
 
-    print '\n### landolt fields:\n' + str(landoltcal)
-    print '\n### sloan field:\n' + str(sloancal)
-    print '\n### apass field:\n' + str(apasscal)
-
-    for field in fil:
-        for obj in lista:
-            if obj not in standard:
+##############################################                            
+    if _stage is None or _stage=='abscat':
+        #               compute catalogues for SN fields
+        for field in fil:
+            for obj in lista:
                 if field == 'landolt':
-                    if obj in landoltcal:
-                        print '###', obj
-                        try:
-                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
-                                      ' -s mag --type fit')
-                        except:
-                            pass
-                    elif obj in apasscal:
-                        print '###', obj
-                        try:
-                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
-                                      ' -s mag --type fit')
-                        except:
-                            pass
-                elif field == 'sloan':
-                    if obj in sloancal:
-                        print '###', obj
-                        try:
-                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
-                                      ' -s mag --type fit')
-                        except:
-                            pass
-                    elif obj in apasscal:
-                        print '###', obj
-                        try:
-                            os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
-                                      ' -s mag --type fit')
-                        except:
-                            pass
+                    #                for obj in lista:
+                    #                if obj not in landoltcal:
+                    print obj + ': object not calibrated in landolt'
+                    for _std in standard:
+                        for _tel in ['elp', 'lsc', 'cpt', 'tfn', 'coj']:
+                            os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
+                                      ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
+                if field == 'sloan':
+                    #               if obj not in sloancal:
+                    print obj + ': object not calibrated in sloan'
+                    for _std in standard:
+                        for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
+                            os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
+                                      ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
 
+                            
+##############################################                            
+    if _stage is None or _stage=='psfmag':                            
+        # run psffit on all objects
+        for field in fil:
+            for obj in lista:
+                if obj not in standard:
+                    print '###', obj
+                    if obj in coomandsn.keys():
+                        os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                                  ' -s psfmag -c  ' + coomandsn[obj])
+                    else:
+                        os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                                  ' -s psfmag -c  -x 3 -y 3 --bkg 4 --size 7 ')
+        
+        print '\n### landolt fields:\n' + str(landoltcal)
+        print '\n### sloan field:\n' + str(sloancal)
+        print '\n### apass field:\n' + str(apasscal)
 
-    # make stamps for all new images
-    try:
-        os.system(agnkey.util.execdirectory+'agnloop.py -e ' + str(epoch) + ' -s makestamp' + ' ' + XX)
-    except:
-        print 'warning makestap did not work'
+##############################################                            
+    if _stage is None or _stage=='mag':                                    
+        for field in fil:
+            for obj in lista:
+                if obj not in standard:
+                    if field == 'landolt':
+                        if obj in landoltcal:
+                            print '###', obj
+                            try:
+                                os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                                          ' -s mag --type fit')
+                            except:
+                                pass
+                        elif obj in apasscal:
+                            print '###', obj
+                            try:
+                                os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
+                                          ' -s mag --type fit')
+                            except:
+                                pass
+                    elif field == 'sloan':
+                        if obj in sloancal:
+                            print '###', obj
+                            try:
+                                os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
+                                          ' -s mag --type fit')
+                            except:
+                                pass
+                        elif obj in apasscal:
+                            print '###', obj
+                            try:
+                                os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
+                                          ' -s mag --type fit')
+                            except:
+                                pass
+
+##################################################
+    if _stage is None or _stage=='makestamp':
+        # make stamps for all new images
+        try:
+            os.system(agnkey.util.execdirectory+'agnloop.py -e ' + str(epoch) + ' -s makestamp' + ' ' + XX)
+        except:
+            print 'warning makestap did not work'
 
     stop = time.time()
     print 'time to process all  data ', str(stop - start)

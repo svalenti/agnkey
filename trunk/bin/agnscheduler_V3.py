@@ -249,7 +249,7 @@ def sendtrigger_api3(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
         return _JDtoday
 
     fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
-                   'u': 'up','g': 'gp', 'r': 'rp', 'i': 'ip', 'z': 'zs',
+                    'u': 'up','g': 'gp', 'r': 'rp', 'i': 'ip', 'z': 'zs','Y':'Y',
                    'up': 'up', 'gp': 'gp', 'rp': 'rp', 'ip': 'ip', 'zs': 'zs'}}
     fildic['2m0'] = fildic['1m0']
 

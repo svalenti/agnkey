@@ -50,15 +50,15 @@ instrument0 = {'sbig' : ['kb69','kb05', 'kb70', 'kb71', 'kb73', 'kb74', 'kb75', 
 
 instrument0['all'] = list(instrument0['sbig']) + list(instrument0['sinistro']) + list(instrument0['spectral'])
 
-telescope0={'lsc' : ['1m0-04', '1m0-05', '1m0-09'], 'elp' : ['1m0-08'], 'cpt': ['1m0-10','1m0-12','1m0-13'],
+telescope0={'lsc' : ['1m0-04', '1m0-05', '1m0-09'], 'elp' : ['1m0-08','1m0-06'], 'cpt': ['1m0-10','1m0-12','1m0-13'],
             'coj' : ['1m0-11', '1m0-03', '2m0-02'], 'ogg' :  ['2m0-01'], 'tfn': ['1m0-03'],
             'all': ['1m0-03', '1m0-04' ,'1m0-05','1m0-08', '1m0-09', '1m0-10','1m0-11', '1m0-12', '1m0-13',
                     '2m0-01', '2m0-02']}
 site0=['lsc','elp','coj','cpt','ogg','tfn']
 
-dome0={('lsc','domc') : '1m0-04', ('lsc','doma') : '1m0-05', ('lsc','domb') : '1m0-09', ('elp','doma') : '1m0-08',
-         ('cpt','doma') : '1m0-10', ('cpt','domc') : '1m0-12', ('cpt','domb') : '1m0-13', ('coj','doma') : '1m0-11',
-         ('coj','domb') : '1m0-03', ('coj','clma') : '2m0-02', ('ogg','clma') : '2m0-01'}
+dome0={('lsc','domc') : '1m0-04', ('lsc','doma') : '1m0-05', ('lsc','domb') : '1m0-09', \
+       ('elp','doma') : '1m0-08', ('elp','domb') : '1m0-06', ('cpt','doma') : '1m0-10', ('cpt','domc') : '1m0-12', \
+       ('cpt','domb') : '1m0-13', ('coj','doma') : '1m0-11', ('coj','domb') : '1m0-03', ('coj','clma') : '2m0-02', ('ogg','clma') : '2m0-01'}
 
 ###################################################
 #
@@ -216,7 +216,8 @@ def readkey3(hdr,keyword):
                            'telescop'  : 'TELESCOP'}
     elif _instrume in ['fl02','fl03','fl04','fl05','fl06','fl07','fl08','fl09','fl10','fl11',\
                        'fl12','fl13','fl14','fl15','fl16',\
-                       'fa04','fa05','fa03','fa06','fa12','fa07','fa16','fa11','fa14','fa15','fa20']:   # sinistro
+                       'fa04','fa05','fa03','fa06','fa12','fa07','fa16',\
+                       'fa11','fa14','fa01','fa08','fa19','fa15','fa20']:   # sinistro
         useful_keys = {'object'    : 'OBJECT',\
                            'date-obs'  : 'DATE-OBS',\
                            'ut'        : 'DATE-OBS',\
@@ -451,7 +452,7 @@ def display_image(img,frame,_z1,_z2,scale,_xcen=0.5,_ycen=0.5,_xsize=1,_ysize=1,
               else: z11=float(z11)
               if not z22: z22=_z22
               else: z22=float(z22)
-              print z11,z22
+              #print z11,z22
               sss=iraf.display(img,frame,fill='yes', xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize, erase=_erase,\
                                    zrange='no', zscale='no', z1=z11, z2=z22, Stdout=1)
               answ0 = raw_input('>>> Cuts OK ? [y/n] ? [y] ')

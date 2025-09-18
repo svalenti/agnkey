@@ -8,10 +8,12 @@ import os
 import sys
 import string
 import re
-try:     from astropy.io import fits as pyfits 
-except:  import pyfits
+try:
+    from astropy.io import fits as pyfits 
+except:
+    import pyfits
 
-from pyfits import getheader
+#from pyfits import getheader
 from optparse import OptionParser
 
 if __name__ == "__main__":
@@ -361,8 +363,8 @@ if __name__ == "__main__":
                 while answ0 == 'n':
                     agnkey.util.delete("sky.fits,bg.fits,bgs.fits,sn.fits,residual.fits")
                     if _show:      agnkey.util.display_image('original.fits', 1, z11, z22, False, _xsize=.5, _ysize=.5)
-                    nax = int(getheader('original.fits')['NAXIS1'])
-                    nay = int(getheader('original.fits')['NAXIS2'])
+                    nax = int(pyfits.getheader('original.fits')['NAXIS1'])
+                    nay = int(pyfits.getheader('original.fits')['NAXIS2'])
                     if len(vector) == 1:
                         xb, yb, value = string.split(vector[0])
                         checkleng0 = 'yes'

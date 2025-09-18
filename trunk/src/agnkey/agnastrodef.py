@@ -1359,7 +1359,8 @@ def run_astrometry(im, clobber=True,redo=False):
         dec = agnkey.util.readkey3(hdr,'DEC')
         #    ra = pyfits.getval(im, 'RA')
         #    dec = pyfits.getval(im, 'DEC')
-        cmd = 'solve-field --crpix-center --no-verify --no-fits2fits --no-tweak -l 30 '
+        cmd = 'solve-field --crpix-center --no-verify --no-tweak -l 30 '
+        #--no-fits2fits 
         cmd += '--backend-config '+ str(agnkey.__path__[0]) + '/standard/astrometry/backend.cfg '
         cmd += ' --radius 1.0 --ra %s --dec %s --guess-scale ' % (ra, dec)
         cmd += '--scale-units arcsecperpix --scale-low 0.1 --scale-high .7 '

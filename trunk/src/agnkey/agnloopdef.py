@@ -553,7 +553,6 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
             _telescope = agnkey.util.readkey3(hdr, 'telescop')
             _telid = agnkey.util.readkey3(hdr, 'telid')
             _site = agnkey.util.readkey3(hdr, 'SITEID')
-            print _telescope, _telid,_site
             if _telescope in agnkey.util.telescope0['elp']:
                 tel_tag = 'LCOGT-McDonald'
                 _observatory = 'mcdonald'
@@ -563,7 +562,7 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
             #####  this is not correct, not sure about tnf values    
             elif _telescope in agnkey.util.telescope0['tfn']:
                 tel_tag = 'LCOGT-tenerife'
-                _observatory = 'tfn'
+                _observatory = 'lapalma'
             elif _telescope in agnkey.util.telescope0['ogg']:
                 _observatory = 'cfht'
                 tel_tag = 'FTN'
@@ -583,10 +582,10 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
                 _observatory = 'cfht'
                 tel_tag = 'FTN'
             else:
-                print _telescope
+                print(_telescope, _telid,_site)
                 sys.exit('ERROR: site and telescope not correct')
             if 'HJD' not in hdr.keys() or _force:
-                print _dir + img
+                #print _dir + img
                 iraf.specred.setjd(_dir + img+'[0]', date='DATE-OBS', time='UTSTART', \
                                    exposure='EXPTIME', ra='ra', dec='dec', epoch='', observa=_observatory)
             else:
@@ -604,7 +603,7 @@ def updatefromheader(imglist,imgheader='hjd',tablecolumn='hjd',database='datared
         _dir,img = os.path.split(img0)
         if _dir:
             _dir = _dir+'/'
-        print _dir + img                     
+        #print _dir + img                     
         if os.path.isfile(_dir + img):
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             hdr = agnkey.util.readhdr(_dir + img)

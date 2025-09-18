@@ -153,14 +153,28 @@ if __name__ == "__main__":
                       dest='verbose', default=False, help='verbose \t\t\t [%default]')
     parser.add_option("-c", "--catalog", dest="catalog", default='', type='str',
                       help='use input catalog  \t\t %default')
+    parser.add_option("-X", "--xwindow", action="store_true", dest='xwindow', default=False,
+                      help='xwindow \t\t\t [%default]')
 
+
+    
     option, args = parser.parse_args()
     if len(args) < 1: sys.argv.append('--help')
     _ra = option.ra
     _dec = option.dec
     _verbose  = option.verbose
     _catalogue=option.catalog
+    _xwindow = option.xwindow
 
+    if _xwindow:
+        from stsci.tools import capable
+        capable.OF_GRAPHICS = False
+        XX = ' -X '
+        import matplotlib
+        matplotlib.use('Agg')
+    else:
+        XX = ''
+    
     option, args = parser.parse_args()
     imglist = agnkey.util.readlist(args[0])
     for img in imglist:
@@ -217,11 +231,11 @@ if __name__ == "__main__":
                             pass
                     _cat = _sloan
                 else:
-                    _sloan = vizq(_ra0, _dec0, 'sdss7', 20)
+                    _sloan = vizq(_ra0, _dec0, 'sdss9', 20,_verbose)
                     if _sloan['id'].size == 0:
                         print 'sloan catalog NOT found'
                         if _filter in ['g', 'r', 'i']:
-                            _apass = vizq(_ra0, _dec0, 'apass', 20)
+                            _apass = vizq(_ra0, _dec0, 'apass', 20,_verbose)
                             if _apass['id'].size == 0:
                                 print 'apass catalog NOT found'
                             else:
@@ -230,7 +244,7 @@ if __name__ == "__main__":
                     else:
                         print 'sloan catalog found with vizq'
                         _cat = _sloan
-                        _catalogue = 'sdss7'
+                        _catalogue = 'sdss9'
 
             elif _filter in ['U', 'B', 'V', 'R', 'I']:
                 _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _object + '*')
@@ -260,12 +274,13 @@ if __name__ == "__main__":
                         else:
                             _landolt = ''
                         if not _landolt:
-                            _landolt = vizq(_ra0, _dec0, 'apass', 20)
+                            _landolt = vizq(_ra0, _dec0, 'apass', 20,_verbose)
                             if _landolt:
                                 _catalogue = 'apass'
                 if _landolt:
                     _cat = _landolt
-
+            else:
+                print('FILTER NOT FOUND',_filter)
 
         if _cat:
             distvec, pos0, pos1 = crossmatch(_rasex, _decsex, _cat['ra'], _cat['dec'], 5)
@@ -481,12 +496,12 @@ if __name__ == "__main__":
                 except:
                     error3 = 0
 
-                print flux1, flux2, flux3
-                print error1,error2, error3
-                print mag1,mag2,mag3
-                print dmag1,dmag2,dmag3
-                print ZZ1,ZZ2,ZZ3
-                print std1N,std2N,std3N
+#                print flux1, flux2, flux3
+#                print error1,error2, error3
+#                print mag1,mag2,mag3
+#                print dmag1,dmag2,dmag3
+#                print ZZ1,ZZ2,ZZ3
+#                print std1N,std2N,std3N
                 flux10 = 0
                 flux20 = 0
                 flux30 = 0
