@@ -93,3 +93,8 @@ ln -s xxx/xxx/AGNKEY/  WEBLOCATION/AGNKEY/
 
 # cronjob to download the data
 40 12 * * * . /dark/hal/.cronfile2 ; /dark/anaconda/anaconda27/envs/halenv/bin/runagn.py -X -i >>  /dark/hal/cronfile/cronagn.log  2>&1
+
+#######################################
+database structure here
+
+https://www.dropbox.com/scl/fi/nvfai7587cgod4ss52zmf/agnkey.sql?rlkey=ykc27461wzdbvc1itam5137ka&st=gp3i0f8v&dl=0
