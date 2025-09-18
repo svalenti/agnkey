@@ -88,3 +88,8 @@ LINK DATA DIRECTORY ON THE WEB
 ln -s xxx/xxx/AGNKEY/  WEBLOCATION/AGNKEY/
 
 ############################################################################################
+# Crongjob to schedule new observations   (modified as needed)
+55 * * * * . /dark/hal/.cronfile2 ;  /dark/anaconda/anaconda27/envs/halenv/bin/agnscheduler_V3.py >>  /dark/hal/cronfile/cronscheduler.log   2>&1
+
+# cronjob to download the data
+40 12 * * * . /dark/hal/.cronfile2 ; /dark/anaconda/anaconda27/envs/halenv/bin/runagn.py -X -i >>  /dark/hal/cronfile/cronagn.log  2>&1
