@@ -14,7 +14,7 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
                database='dataredulco',ra='',dec=''):
     import agnkey
     import datetime
-    print magtype,ra,dec
+    print(magtype,ra,dec)
     if magtype == 'mag':
         mtype = 'mag'
         mtypeerr = 'dmag'
@@ -212,7 +212,7 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
 
     if _show:
         plotfast(setup)
-        print setup['mtype']
+        print(setup['mtype'])
         try:
             plotfast(setup)
         except:
@@ -260,7 +260,7 @@ def run_getmag(ll, _field, _output='', _interactive=False, _show=False, _bin=1e-
             ff.write(linetot[gg])
     else:
         for gg in np.sort(aaa):
-            print linetot[gg]
+            print(linetot[gg])
     if _output:
         ff.close()
 
@@ -325,7 +325,7 @@ def run_cat(imglist, extlist, _interactive=False, mode=1, _type='fit', _fix=Fals
         command = _mode + ' _tmp.list -e _tmpext.list ' + ii + tt + ff + ss
     else:
         command = _mode + ' _tmp.list ' + ii + tt + ff + ss
-    print command
+    print(command)
     os.system(command)
 
 
@@ -338,7 +338,7 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
         _dir = _dir+'/'
         status = checkstage(img, 'wcs')
         if status == -4 and redo:
-            print 'wcs not good, try again'
+            print('wcs not good, try again')
             agnkey.agnsqldef.updatevalue(database, 'quality', 0, string.split(img, '/')[-1])
             status = checkstage(img, 'wcs')
 
@@ -358,13 +358,13 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
         if status >= -1:
             if not cc:
                 ###########################################
-                print _dir + img
+                print(_dir + img)
                 _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'supernovaelist.txt')
                 if not _SN0:    
                     _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'standardlist.txt')
                 if not _SN0:    
                     _ra0, _dec0, _SN0, _tt = agnkey.util.checksndb(_dir + img, 'lsc_sn_pos')
-                print _ra0, _dec0, _SN0
+                print(_ra0, _dec0, _SN0)
                 if _SN0:
                     _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _SN0 + '*')
                     if len(_catalogue) == 0:
@@ -376,23 +376,23 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
             if mode =='sv':
                 command = 'agnastro.py ' + _dir + img + ' ' + rr + ' ' + ii + ' -m  vizir --xshift ' + str(
                     _xshift) + ' --yshift ' + str(_yshift) + cc  #+' '+ff+' '+cc+' -t '+_type+' '+ss
-                print command
+                print(command)
                 os.system(command)
             elif mode=='astrometry':
                 agnkey.agnastrodef.run_astrometry(_dir + img, True,redo)
             else:
-                print str(mode)+' not defined'
+                print(str(mode)+' not defined')
 
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print( 'status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print ('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print ('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print ('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print 'status ' + str(status) + ': unknown status')
 
 
 def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=False, redo=False, show=False, _cutmag=99,
@@ -440,7 +440,7 @@ def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=Fa
                 _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'supernovaelist.txt')
                 if not _SN0:    _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'standardlist.txt')
                 if not _SN0:    _ra0, _dec0, _SN0, _tt = agnkey.util.checksndb(_dir + img, 'lsc_sn_pos')
-                print _ra0, _dec0, _SN0
+                print(_ra0, _dec0, _SN0)
                 if _SN0:
                     if not _calib:
                         _catalogue = glob.glob(agnkey.__path__[0] + '/standard/cat/' + _field + '/' + _SN0 + '*')
@@ -461,18 +461,18 @@ def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=Fa
             command = 'agnabsphot.py ' + _dir + re.sub('fits', 'sn2.fits',img) + ' ' +\
                       ii + rr + ff + cc + ' -t ' + _type + ' ' + ss + dd + hh + ll +\
                       ' --cutmag ' + str(_cutmag)
-            print command
+            print(command)
             os.system(command)
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print('status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
 
 
 def run_apmag(imglist, database='dataredulco', _ra='', _dec='', _catalog='', verbose=False):
@@ -494,13 +494,13 @@ def run_apmag(imglist, database='dataredulco', _ra='', _dec='', _catalog='', ver
                 vv = ' -v '
             else:
                 vv = ''
-            print _dir + img1
+            print(_dir + img1)
             if os.path.isfile(_dir + img1):
                 command = 'agnnewcalib.py ' + _dir + img1 + cord  + cc  + vv
-                print command
+                print(command)
                 os.system(command)
             else:
-                print img1, ' not found'
+                print(img1, ' not found')
 
 
 # ##################################################################
@@ -514,21 +514,21 @@ def run_cosmic(imglist, database='dataredulco', _sigclip=4.5, _sigfrac=0.2, _obj
             _dir,img = os.path.split(ggg)
             if _dir:
                 _dir = _dir+'/'
-            print _dir + img
+            print(_dir + img)
             if os.path.isfile(_dir + img):
                 if not os.path.isfile(re.sub('.fits', '.clean.fits', _dir + img)) or _force:
-                    print _dir + img, _sigclip, _sigfrac, _objlim
+                    print(_dir + img, _sigclip, _sigfrac, _objlim)
                     output, mask, satu = agnkey.util.Docosmic(_dir + img, _sigclip, _sigfrac, _objlim)
                     agnkey.util.updateheader(output, 0, {'DOCOSMIC': [True, 'Cosmic rejection using LACosmic']})
-                    print 'mv ' + output + ' ' + _dir
+                    print('mv ' + output + ' ' + _dir)
                     os.system('mv ' + output + ' ' + _dir)
                     os.system('mv ' + mask + ' ' + _dir)
                     os.system('mv ' + satu + ' ' + _dir)
-                    print output, mask, satu
+                    print(output, mask, satu)
                 else:
-                    print 'cosmic rejection alread done'
+                    print('cosmic rejection alread done')
             else:
-                print img, ' not found'
+                print( img,' not found')
 
 
 ###################################################################
@@ -547,7 +547,7 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
         _dir,img = os.path.split(ggg)
         if _dir:
             _dir = _dir+'/'
-        print _dir + img                     
+        print(_dir + img)                     
         if os.path.isfile(_dir + img):
             hdr = agnkey.util.readhdr(_dir + img)
             _telescope = agnkey.util.readkey3(hdr, 'telescop')
@@ -589,27 +589,26 @@ def run_idlstart(imglist, database='dataredulco', _force=True):
                 iraf.specred.setjd(_dir + img+'[0]', date='DATE-OBS', time='UTSTART', \
                                    exposure='EXPTIME', ra='ra', dec='dec', epoch='', observa=_observatory)
             else:
-                print 'HJD already there'
+                print('HJD already there')
             if 'TEL_TAG' not in hdr.keys() or _force:
                 agnkey.util.updateheader(_dir + img, 0,
                                          {'tel_tag': [tel_tag, 'telescope identification for idl reduction']})
             else:
-                print 'tel_tag already there'
+                print('tel_tag already there')
         else:
-            print img, ' not found'
+            print(img, ' not found')
 
 def updatefromheader(imglist,imgheader='hjd',tablecolumn='hjd',database='dataredulco'):
     for img0 in imglist:
         _dir,img = os.path.split(img0)
         if _dir:
             _dir = _dir+'/'
-        #print _dir + img                     
         if os.path.isfile(_dir + img):
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             hdr = agnkey.util.readhdr(_dir + img)
             if len(ggg):
                 if imgheader in hdr and tablecolumn in ggg[0]:
-                    print img,hdr[imgheader],tablecolumn
+                    print(img,hdr[imgheader],tablecolumn)
                     agnkey.agnsqldef.updatevalue(database, tablecolumn, hdr[imgheader], img)
         
 
@@ -652,45 +651,45 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
             dd = ' '
 
         status = checkstage(img, 'psf')
-        print status
+        print(status)
         if status == 1: rr = '-r'
         if status >= 1:
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             _dir = ggg[0]['wdirectory']
             if ggg[0]['filetype'] == 3:
                 ##################################################################################
-                print '\n### get parameters for difference image'
+                print('\n### get parameters for difference image')
                 _dir = ggg[0]['wdirectory']
                 hdrdiff=agnkey.util.readhdr(_dir+img)
                 if 'PSF' not in hdrdiff:
                     sys.exit('\n### warning PSF file not defined')
                 else:
                     imgpsf=hdrdiff['PSF']
-                    print '\n### psf file for difference image: '+imgpsf
+                    print('\n### psf file for difference image: '+imgpsf)
                     statuspsf = checkstage(imgpsf, 'psf')
-                    print statuspsf
+                    print(statuspsf)
                     if statuspsf == 2:
-                        print 'psf file for difference image found'
+                        print('psf file for difference image found')
                         gggpsf = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(imgpsf), '*')
                         _dirpsf = gggpsf[0]['wdirectory']
                         os.system('cp '+_dirpsf+re.sub('.fits', '.psf.fits', imgpsf)+' '+_dir+
                                   re.sub('.fits', '.psf.fits', img))
                         agnkey.agnsqldef.updatevalue('dataredulco', 'psf', re.sub('.fits', '.psf.fits', img),
                                              string.split(img, '/')[-1])
-                        print '\n ### copy '+re.sub('.fits', '.psf.fits', imgpsf)+' in '+re.sub('.fits', '.psf.fits', img)
+                        print('\n ### copy '+re.sub('.fits', '.psf.fits', imgpsf)+' in '+re.sub('.fits', '.psf.fits', img))
                     else:
-                        print '\n### ERROR: PSF file not found \n please run psf file on image: '+imgpsf
+                        print('\n### ERROR: PSF file not found \n please run psf file on image: '+imgpsf)
                 #####################################################################################
                 if 'PHOTNORM' not in hdrdiff:
                     sys.exit('\n ### warning PHOTNORM file not defined')
                 else:
                     photnorm=hdrdiff['PHOTNORM']
                     if photnorm=='t':
-                        print '\n ### zero point done with template'
+                        print('\n ### zero point done with template')
                         imgtable = hdrdiff['TEMPLATE']
 
                     elif photnorm=='i':
-                        print '\n ### zero point done with target'
+                        print('\n ### zero point done with target')
                         imgtable = hdrdiff['TARGET']
 
                     sntable = re.sub('.fits','.sn2.fits',imgtable)
@@ -698,8 +697,8 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
                     dirtable = gggtable[0]['wdirectory']
 
                     if os.path.isfile(dirtable+sntable):
-                        print '\n ### fits table found '
-                        print 'cp ' + dirtable + sntable + ' ' + _dir + re.sub('.fits', '.sn2.fits', img)
+                        print('\n ### fits table found ')
+                        print('cp ' + dirtable + sntable + ' ' + _dir + re.sub('.fits', '.sn2.fits', img))
                         os.system('cp ' + dirtable + sntable + ' ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     else:
                         sys.exit('ERROR: fits table not there, run psf for ' + sntable)
@@ -708,18 +707,18 @@ def run_psf(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=F
                 img0 = img
                 command = 'agnpsf.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
                     treshold) + xwindow + gg + cc + dd
-                print command
+                print(command)
                 os.system(command)
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print( 'status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print( 'status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
     ##################################################################
 
 ###################################################################
@@ -759,7 +758,7 @@ def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=
             dd = ' '
 
         status = checkstage(img, 'psf')
-        print status
+        print(status)
         if status == 1: rr = '-r'
         if status >= 1:
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
@@ -770,18 +769,18 @@ def run_psf2(imglist, treshold=5, interactive=False, _fwhm='', show=False, redo=
                 img0 = img
             command = 'agnpsf2.py ' + _dir + img0 + ' ' + ii + ' ' + ss + ' ' + rr + ' ' + ff + ' ' + '-t ' + str(
                 treshold) + xwindow + gg + cc + dd
-            print command
+            print(command)
             os.system(command)
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print( 'status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print( 'status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print( 'status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print( 'status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print( 'status ' + str(status) + ': unknown status')
     ##################################################################
 
 def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _recenter=False, _ref='', interactive=False,
@@ -791,7 +790,7 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
     direc = agnkey.__path__[0]
     for img in imglist:
         status = checkstage(img, 'psfmag')
-        print status
+        print(status)
         if status >= 1:
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             _dir = ggg[0]['wdirectory']
@@ -817,7 +816,7 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
             else:
                 dd = ' '
             if _ref:
-                print img0, _ref, show
+                print(img0, _ref, show)
                 _ras, _decs = agnkey.agnloopdef.getcoordfromref(img0, _ref, show)
             if _ras: _ras = '-R ' + str(_ras)
             if _decs: _decs = '-D ' + str(_decs)
@@ -835,17 +834,17 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
                     command = command + pp
                 except:
                     command = ''
-                    print 'PSF header not found in ' + str(img)
-            print command
+                    print('PSF header not found in ' + str(img))
+            print(command)
             os.system(command)
         elif status == 0:
-            print 'status ' + str(status) + ': psf stage not done'
+            print('status ' + str(status) + ': psf stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
             print 'status ' + str(status) + ': unknown status'
     ##################################################################
@@ -936,7 +935,7 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
                                            re.sub('sn2.fits', 'fits', img2), '*')
     _dir2 = ggg2[0]['wdirectory']
 
-    print _dir1, _dir2, img1, img2
+    print(_dir1, _dir2, img1, img2)
 
     dicti1 = agnkey.agnabsphotdef.makecatalogue([_dir1 + img1])
     dicti2 = agnkey.agnabsphotdef.makecatalogue([_dir2 + img2])
@@ -949,13 +948,13 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
             ra02 = dicti2[i][j]['ra0']
             dec02 = dicti2[i][j]['dec0']
 
-    print _dir1 + img1
+    print( _dir1 + img1)
     t = pyfits.open(_dir1 + img1)
     tbdata = t[1].data
     hdr1 = t[0].header
     psfx1 = agnkey.util.readkey3(hdr1, 'PSFX1')
     psfy1 = agnkey.util.readkey3(hdr1, 'PSFY1')
-    print psfx1, psfy1
+    print(psfx1, psfy1)
     if psfx1 != None and psfy1 != None:
         lll = str(psfx1) + ' ' + str(psfy1)
         aaa = iraf.wcsctran('STDIN', 'STDOUT', _dir1 + img1, Stdin=[lll], inwcs='logical', units='degrees degrees',
@@ -992,11 +991,11 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
         decsn2c = float(decsn1) - median(ddec)
 
     if _show:
-        print 'shift in arcsec (ra dec)'
-        print len(pos1), len(ra01)
-        print median(rra), median(ddec)
-        print 'SN position on image 2 computed'
-        print rasn2c, decsn2c
+        print( 'shift in arcsec (ra dec)')
+        print( len(pos1), len(ra01))
+        print( median(rra), median(ddec))
+        print( 'SN position on image 2 computed')
+        print( rasn2c, decsn2c)
         iraf.display(_dir2 + re.sub('sn2.fits', 'fits', img2), 2, fill=True, Stdout=1, zsc='yes',
                      zra='yes')  #,z1=0,z2=3000)
         lll = str(rasn2c) + ' ' + str(decsn2c)
@@ -1163,7 +1162,7 @@ def run_local(imglist, _field, _interactive=False, database='dataredulco'):
     else:
         _field = ''
     command = 'agnmaglocal.py _tmpcat.list ' + ii + ' ' + _field
-    print command
+    print(command)
     os.system(command)
 
 
@@ -1208,7 +1207,7 @@ def position(imglist, ra1, dec1, show=False):
                     if len(pos1) >= 1:
                         ra.append(ra00[pos1[argmin(distvec)]])
                         dec.append(dec00[pos1[argmin(distvec)]])
-                        print i, j, ra00[pos1[argmin(distvec)]], dec00[pos1[argmin(distvec)]]
+                        print(i, j, ra00[pos1[argmin(distvec)]], dec00[pos1[argmin(distvec)]])
                     #                        iraf.display(re.sub('.sn2.','.',j),1,fill=True,Stdout=1)
                     #                        lll=str(ra00[pos1[argmin(distvec)]])+' '+str(dec00[pos1[argmin(distvec)]])
                     #                        aaa=iraf.wcsctran('STDIN','STDOUT',j,Stdin=[lll],inwcs='world',units='degrees degrees',outwcs='logical',columns='1 2',formats='%10.5f %10.5f',Stdout=1)[3]
@@ -1225,7 +1224,7 @@ def position(imglist, ra1, dec1, show=False):
         setp(xticklabels, fontsize='20')
         setp(yticklabels, fontsize='20')
         legend(numpoints=1, markerscale=1.5)
-        print median(dec)
+        print(median(dec))
         plot(((ra - median(ra)) * 3600) * cos(median(dec) * pi / 180.), (dec - median(dec)) * 3600, 'or',
              label='position')
     try:
@@ -1246,30 +1245,30 @@ def checkcat(imglist, database='dataredulco'):
         if status >= 1:
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             _dir = ggg[0]['wdirectory']
-            print _dir, img
+            print(_dir, img)
             if os.path.isfile(_dir + re.sub('.fits', '.cat', img)):
                 aa = raw_input('>>>good catalogue [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
-                    print 'updatestatus bad catalogue'
+                    print('updatestatus bad catalogue')
                     agnkey.agnsqldef.updatevalue(database, 'abscat', 'X', string.split(img, '/')[-1])
                     agnkey.util.delete(_dir + re.sub('.fits', '.cat', img))
                     if aa in ['bad', 'b', 'B']:
-                        print 'updatestatus bad quality'
+                        print('updatestatus bad quality')
                         agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
                         agnkey.util.delete(_dir + re.sub('.fits', '.cat', img))
             else:
                 agnkey.agnsqldef.updatevalue(database, 'abscat', 'X', string.split(img, '/')[-1])
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print( 'status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print( 'status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print( 'status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print( 'status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print( 'status ' + str(status) + ': unknown status')
 
 
 def checkpsf(imglist, database='dataredulco'):
@@ -1282,41 +1281,41 @@ def checkpsf(imglist, database='dataredulco'):
     iraf.daophot(_doprint=0)
     for img in imglist:
         status = checkstage(img, 'checkpsf')
-        print img, status
+        print(img, status)
         if status >= 1:
             ggg = agnkey.agnsqldef.getfromdataraw(agnkey.agnsqldef.conn, database, 'namefile', str(img), '*')
             _dir = ggg[0]['wdirectory']
             iraf.delete('_psf.psf.fits', verify=False)
             if os.path.isfile(_dir + re.sub('.fits', '.psf.fits', img)):
-                print img
+                print(img)
                 agnkey.util.marksn2(_dir + img, _dir + re.sub('fits', 'sn2.fits', img), 1, '', True)
                 iraf.seepsf(_dir + re.sub('.fits', '.psf.fits', img), '_psf.psf')
                 iraf.surface('_psf.psf')
                 aa = raw_input('>>>good psf [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
-                    print 'updatestatus bad'
+                    print('updatestatus bad')
                     agnkey.agnsqldef.updatevalue(database, 'psf', 'X', string.split(img, '/')[-1])
                     agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999, string.split(img, '/')[-1])
                     if os.path.isfile(_dir + re.sub('.fits', '.psf.fits', img)):
-                        print 'rm ' + _dir + re.sub('.fits', '.psf.fits', img)
+                        print('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                         os.system('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                     if os.path.isfile(_dir + re.sub('.fits', '.sn2.fits', img)):
-                        print 'rm ' + _dir + re.sub('.fits', '.sn2.fits', img)
+                        print('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                         os.system('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     if aa in ['bad', 'b', 'B']:
-                        print 'updatestatus bad quality'
+                        print('updatestatus bad quality')
                         agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print('status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print( 'status ' + str(status) + ': unknown status')
 
     #############################################################################
 
@@ -1330,8 +1329,8 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
 
     iraf.digiphot(_doprint=0)
     iraf.daophot(_doprint=0)
-    print force
-    print _z1, _z2
+    print(force)
+    print(_z1, _z2)
     for img in imglist:
         status = checkstage(img, 'wcs')
         if status >= 0 or force == False:
@@ -1348,7 +1347,7 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
             _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'supernovaelist.txt')
             if not _SN0:    _ra0, _dec0, _SN0 = agnkey.util.checksnlist(_dir + img, 'standardlist.txt')
             if not _SN0:    _ra0, _dec0, _SN0, _tt = agnkey.util.checksndb(_dir + img, 'lsc_sn_pos')
-            print _ra0, _dec0, _SN0, img, _filter, _exptime
+            print(_ra0, _dec0, _SN0, img, _filter, _exptime)
             if _SN0:
                 ccc = iraf.wcsctran('STDIN', 'STDOUT', _dir + img, Stdin=[str(_ra0) + ' ' + str(_dec0)], inwcs='world',
                                     units='degrees degrees', outwcs='logical',
@@ -1382,33 +1381,33 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
             aa = raw_input('>>>good wcs [[y]/n] or [b] bad quality ? ')
             if not aa: aa = 'y'
             if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
-                print 'updatestatus bad'
+                print('updatestatus bad')
                 agnkey.agnsqldef.updatevalue(database, 'wcs', 9999, string.split(img, '/')[-1])
                 agnkey.agnsqldef.updatevalue(database, 'psf', 'X', string.split(img, '/')[-1])
                 agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999, string.split(img, '/')[-1])
                 if os.path.isfile(_dir + re.sub('.fits', '.psf.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.psf.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                 if os.path.isfile(_dir + re.sub('.fits', '.sn2.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.sn2.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                 if aa in ['bad', 'b', 'B']:
                     print 'updatestatus bad quality'
                     agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
             elif aa in ['c', 'C', 'cancel']:
-                print 'remove from database'
+                print('remove from database')
                 os.system('rm ' + _dir + img)
                 agnkey.agnsqldef.deleteredufromarchive(string.split(img, '/')[-1], 'dataredulco', 'namefile')
                 agnkey.agnsqldef.deleteredufromarchive(string.split(img, '/')[-1], 'inoutredu', 'nameout')
             #          elif status==0: print 'status '+str(status)+': WCS stage not done' 
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
 
     ##################################################################
 
@@ -1426,7 +1425,7 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
         _dir,img = os.path.split(ggg)
         if _dir:
             _dir = _dir+'/'
-        print _dir + img
+        print(_dir + img)
         status = agnkey.agnloopdef.checkstage(img, 'wcs')
         if status >= 0:  # or force==False:
             _output = re.sub('.fits', '.png', _dir + img)
@@ -1470,7 +1469,7 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
                 if _interactive:
                     plt.show()
                 else:
-                    print _output
+                    print(_output)
                     agnkey.util.delete(_output)
                     plt.savefig(_output)
             else:
@@ -1478,19 +1477,19 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
 
         elif status == -1:
             time.sleep(.1)
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
             time.sleep(.1)
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
             time.sleep(.1)
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         elif status == -5:
             time.sleep(.1)
-            print 'status ' + str(status) + ': png already done'
+            print('status ' + str(status) + ': png already done')
         else:
             time.sleep(.1)
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
 
 
 def checkclean(imglist, force=True, database='dataredulco'):
@@ -1516,12 +1515,12 @@ def checkclean(imglist, force=True, database='dataredulco'):
     image = ax.imshow(X,interpolation='nearest', origin='upper', cmap='gray_r', vmin=_z1, vmax=_z2)
 
     for kk,img in enumerate(imglist2):
-            print date[kk],img
+            print(date[kk],img)
             img0 = string.split(img, '/')[-1]
             X, hdr = pyfits.getdata(img, header=True)
             aa=time.time()
             _z1,_z2 = agnkey.zscale.zscale(X)    
-            print time.time()-aa
+            print(time.time()-aa)
             image.set_data(X)
             image.set_clim(vmin=_z1,vmax=_z2)
             fig.canvas.draw()
@@ -1543,15 +1542,15 @@ def checkclean(imglist, force=True, database='dataredulco'):
                 agnkey.agnsqldef.updatevalue(database, 'psf', 'X', string.split(img, '/')[-1])
                 agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999, string.split(img, '/')[-1])
                 if os.path.isfile(_dir + re.sub('.fits', '.psf.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.psf.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                 if os.path.isfile(_dir + re.sub('.fits', '.sn2.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.sn2.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
-                print 'updatestatus bad quality'
+                print('updatestatus bad quality')
                 agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
             else:
-                print 'updatestatus quality good'
+                print('updatestatus quality good)'
                 agnkey.agnsqldef.updatevalue(database, 'quality', 127, string.split(img, '/')[-1])
 #        else:
 #            print 'clean image not found'
@@ -1581,13 +1580,13 @@ def checkfast(imglist, force=True, database='dataredulco'):
       ax = fig.add_axes([0.1,0.1,0.85,0.85])
       image = ax.imshow(X,interpolation='nearest', origin='upper', cmap='gray_r', vmin=_z1, vmax=_z2)
       for kk,img in enumerate(imglist2):
-            print date[kk],img
+            print(date[kk],img)
             _dir,img0 = os.path.split(img)
             #img0 = string.split(img, '/')[-1]
             X, hdr = pyfits.getdata(img, header=True)
             aa=time.time()
             _z1,_z2 = agnkey.zscale.zscale(X)    
-            print time.time()-aa
+            print(time.time()-aa)
             image.set_data(X)
             image.set_clim(vmin=_z1,vmax=_z2)
             fig.canvas.draw()
@@ -1603,15 +1602,15 @@ def checkfast(imglist, force=True, database='dataredulco'):
                 agnkey.agnsqldef.updatevalue(database, 'appmagap2', 9999, string.split(img, '/')[-1])
                 agnkey.agnsqldef.updatevalue(database, 'appmagap3', 9999, string.split(img, '/')[-1])
                 if os.path.isfile(_dir + re.sub('.fits', '.psf.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.psf.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.psf.fits', img))
                 if os.path.isfile(_dir + re.sub('.fits', '.sn2.fits', img)):
-                    print 'rm ' + _dir + re.sub('.fits', '.sn2.fits', img)
+                    print('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
-                print 'updatestatus bad quality'
+                print('updatestatus bad quality')
                 agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
             else:
-                print 'updatestatus quality good'
+                print('updatestatus quality good')
                 agnkey.agnsqldef.updatevalue(database, 'quality', 127, string.split(img, '/')[-1])
             #          elif status==0: print 'status '+str(status)+': WCS stage not done' 
 #        elif status == -1:
@@ -1642,35 +1641,35 @@ def checkmag(imglist, database='dataredulco'):
             if os.path.isfile(_dir + re.sub('.fits', '.og.fits', img)) and os.path.isfile(
                             _dir + re.sub('.fits', '.rs.fits', img)):
                 aaa = iraf.display(_dir + re.sub('.fits', '.og.fits', img), 1, fill=True, Stdout=1)
-                print aaa
+                print(aaa)
                 iraf.display(_dir + re.sub('.fits', '.rs.fits', img), 2, fill=True, Stdout=1)
                 aa = raw_input('>>>good mag [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
-                    print 'updatestatus bad'
+                    print('updatestatus bad')
                     agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999, string.split(img, '/')[-1])
                     agnkey.agnsqldef.updatevalue(database, 'appmagap1', 9999, string.split(img, '/')[-1])
                     agnkey.agnsqldef.updatevalue(database, 'appmagap2', 9999, string.split(img, '/')[-1])
                     agnkey.agnsqldef.updatevalue(database, 'appmagap3', 9999, string.split(img, '/')[-1])
                     if os.path.isfile(_dir + re.sub('.fits', '.og.fits', img)):
-                        print 'rm ' + _dir + re.sub('.fits', '.og.fits', img)
+                        print('rm ' + _dir + re.sub('.fits', '.og.fits', img))
                         os.system('rm ' + _dir + re.sub('.fits', '.og.fits', img))
                     if os.path.isfile(_dir + re.sub('.fits', '.rs.fits', img)):
-                        print 'rm ' + _dir + re.sub('.fits', '.rs.fits', img)
+                        print('rm ' + _dir + re.sub('.fits', '.rs.fits', img))
                         os.system('rm ' + _dir + re.sub('.fits', '.rs.fits', img))
                 if aa in ['bad', 'b', 'B']:
-                    print 'updatestatus bad quality'
+                    print('updatestatus bad quality')
                     agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
         elif status == 0:
-            print 'status ' + str(status) + ': WCS stage not done'
+            print('status ' + str(status) + ': WCS stage not done')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
 
 
 def checkpos(imglist, _ra, _dec, database='dataredulco'):
@@ -1684,12 +1683,12 @@ def checkpos(imglist, _ra, _dec, database='dataredulco'):
             _dir = ggg[0]['wdirectory']
             if os.path.isfile(_dir + re.sub('fits', 'sn2.fits', img)):  imglist2.append(
                 _dir + re.sub('fits', 'sn2.fits', img))
-    print imglist2, _ra, _dec
+    print(imglist2, _ra, _dec)
     ra, dec = agnkey.agnloopdef.position(imglist2, _ra, _dec, show=True)
     print '######## mean ra and dec position  ############'
-    print 'ra= ' + str(ra)
-    print 'dec= ' + str(dec)
-    print '#############'
+    print('ra= ' + str(ra))
+    print('dec= ' + str(dec))
+    print('#############')
 
 
 def checkquality(imglist, database='dataredulco'):
@@ -1714,9 +1713,9 @@ def checkquality(imglist, database='dataredulco'):
                     aa = raw_input('>>>good image [y/[n]] ? ')
                     if not aa: aa = 'n'
                     if aa in ['n', 'N', 'No', 'NO']:
-                        print 'status bad'
+                        print('status bad')
                     else:
-                        print 'updatestatus good'
+                        print('updatestatus good')
                         agnkey.agnsqldef.updatevalue(database, 'quality', 127, string.split(img, '/')[-1])
                         #updatevalue('dataredulco','psfmag',9999,string.split(img,'/')[-1])
                         #if os.path.isfile(_dir+re.sub('.fits','.psf.fits',img)):
@@ -1744,8 +1743,8 @@ def onkeypress2(event):
       ii = argmin(dist)
       if ii in idd: 
           idd.remove(ii)
-      print _namefile[ii]
-      print _mag[ii]
+      print(_namefile[ii])
+      print(_mag[ii])
       _dir= os.path.dirname(_namefile[ii])+'/'
       filename = os.path.basename(_namefile[ii])
       if _dir:
@@ -1767,7 +1766,7 @@ def onkeypress2(event):
 
     if event.key in ['d']:
         if _setup['mtype'] in ['apflux1','apflux2','apflux3']:
-            print 'flux to null'
+            print('flux to null')
             agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', filename)
             agnkey.agnsqldef.updatevalue(_database, 'apflux2', 'NULL', filename)
             agnkey.agnsqldef.updatevalue(_database, 'apflux3', 'NULL', filename)
@@ -1775,7 +1774,7 @@ def onkeypress2(event):
             agnkey.agnsqldef.updatevalue(_database, 'dapflux2', 'NULL', filename)
             agnkey.agnsqldef.updatevalue(_database, 'dapflux3', 'NULL', filename)
         else:
-            print 'mag to null'
+            print('mag to null')
             agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', filename)
             agnkey.agnsqldef.updatevalue(_database, 'psfmag', 'NULL', filename)
             agnkey.agnsqldef.updatevalue(_database, 'apmag', 'NULL', filename)
@@ -1789,7 +1788,7 @@ def onkeypress2(event):
                                          {'APMAG1': [9999, 'ap magnitude']})
     elif event.key in ['u']:
         agnkey.agnsqldef.updatevalue(_database, 'magtype', -1, filename)
-        print '\n### set as a limit'
+        print('\n### set as a limit')
     elif event.key in ['b']:
         agnkey.agnsqldef.updatevalue(_database, 'quality', 1, filename)
         agnkey.agnsqldef.updatevalue(_database, 'mag', 'NULL', filename)
@@ -1801,8 +1800,8 @@ def onkeypress2(event):
         agnkey.agnsqldef.updatevalue(_database, 'apflux1', 'NULL', filename)
         agnkey.agnsqldef.updatevalue(_database, 'apflux2', 'NULL', filename)
         agnkey.agnsqldef.updatevalue(_database, 'apflux3', 'NULL', filename)
-        print '\n### set bad quality'
-    print '\n### press:\n d to cancel value,\n c to check one point\n u to set the upper limit\n b to set bad quality.\n Return to exit ...'
+        print('\n### set bad quality')
+    print('\n### press:\n d to cancel value,\n c to check one point\n u to set the upper limit\n b to set bad quality.\n Return to exit ...')
 
     nonincl = []
     for i in range(len(_hjd)):
@@ -1895,7 +1894,7 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
         for _fil in _setup[_tel]:
             shift = _shift[_fil]
             col = _color[_fil]
-            print _tel, _fil
+            print(_tel, _fil)
             jj = array(_setup[_tel][_fil][
                 'hjd'])  #compress(array(_setup[_tel][_fil]['magtype'])>=1,array(_setup[_tel][_fil]['mjd']))
             mm = array(_setup[_tel][_fil][
@@ -2079,7 +2078,7 @@ def check_missing(lista, database='dataredulco'):
             xx, yy = xx[0]['directory'], yy[0]['wdirectory']
             if not os.path.isfile(yy + i):
                 os.system('cp ' + xx + i + ' ' + yy + i)
-                print xx, str(i), yy + i
+                print(xx, str(i), yy + i)
 
 
 def checkfilevsdatabase(lista, database='dataredulco'):
@@ -2102,44 +2101,44 @@ def checkfilevsdatabase(lista, database='dataredulco'):
                     _mag = agnkey.util.readkey3(hdr1, 'MAG')
                     if not _mag:  #  mag
                         if lista['mag'][i] != 9999.0:
-                            print lista['namefile'][i], _mag, lista['mag'][i], 'mag'
+                            print(lista['namefile'][i], _mag, lista['mag'][i], 'mag')
                             agnkey.agnsqldef.updatevalue(database, 'mag', 9999.0, lista['namefile'][i])
                     else:
                         if _mag == 9999.0:
                             if lista['mag'][i] != 9999.0:
-                                print lista['namefile'][i], _mag, lista['mag'][i], 'mag'
+                                print(lista['namefile'][i], _mag, lista['mag'][i], 'mag')
                                 agnkey.agnsqldef.updatevalue(database, 'mag', 9999.0, lista['namefile'][i])
                         elif _mag != 9999.0:
                             if round(lista['mag'][i], 4) != round(float(_mag), 4):
-                                print lista['namefile'][i], _mag, lista['mag'][i], 'mag'
+                                print(lista['namefile'][i], _mag, lista['mag'][i], 'mag')
                                 agnkey.agnsqldef.updatevalue(database, 'mag', _mag, lista['namefile'][i])
 
                     if not _psfmag:  #  psfmag
                         if lista['psfmag'][i] != 9999.0:
-                            print lista['namefile'][i], _mag, lista['psfmag'][i], 'psfmag'
+                            print(lista['namefile'][i], _mag, lista['psfmag'][i], 'psfmag')
                             agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999.0, lista['namefile'][i])
                     else:
                         if _psfmag == 9999.0:
                             if lista['psfmag'][i] != 9999.0:
-                                print lista['namefile'][i], _psfmag, lista['psfmag'][i], 'psfmag'
+                                print(lista['namefile'][i], _psfmag, lista['psfmag'][i], 'psfmag')
                                 agnkey.agnsqldef.updatevalue(database, 'psfmag', 9999.0, lista['namefile'][i])
                         elif _psfmag != 9999.0:
                             if round(lista['psfmag'][i], 4) != round(float(_psfmag), 4):
-                                print lista['namefile'][i], _psfmag, lista['psfmag'][i], 'psfmag'
+                                print(lista['namefile'][i], _psfmag, lista['psfmag'][i], 'psfmag')
                                 agnkey.agnsqldef.updatevalue(database, 'psfmag', _psfmag, lista['namefile'][i])
 
                     if not _apmag:  #  apmag
                         if lista['mag'][i] != 9999.0:
-                            print lista['namefile'][i], _mag, lista['mag'][i], 'apmag'
+                            print(lista['namefile'][i], _mag, lista['mag'][i], 'apmag')
                             agnkey.agnsqldef.updatevalue(database, 'apmag', 9999.0, lista['namefile'][i])
                     else:
                         if _apmag == 9999.0:
                             if lista['apmag'][i] != 9999.0:
-                                print lista['namefile'][i], _apmag, lista['apmag'][i], 'apmag'
+                                print(lista['namefile'][i], _apmag, lista['apmag'][i], 'apmag')
                                 agnkey.agnsqldef.updatevalue(database, 'apmag', 9999.0, lista['namefile'][i])
                         elif _apmag != 9999.0:
                             if round(lista['apmag'][i], 4) != round(float(_apmag), 4):
-                                print lista['namefile'][i], _apmag, lista['apmag'][i], 'apmag'
+                                print(lista['namefile'][i], _apmag, lista['apmag'][i], 'apmag')
                                 agnkey.agnsqldef.updatevalue(database, 'apmag', _apmag, lista['namefile'][i])
 
 
@@ -2155,8 +2154,8 @@ def run_merge(imglist, _redu=False):
     stat = 'psf'
     for img in imglist:
         status.append(checkstage(string.split(img, '/')[-1], stat))
-    print imglist
-    print status
+    print(imglist)
+    print(status)
     imglist = imglist[where(array(status) > 0)]
     status = array(status)[where(array(status) > 0)]
 
@@ -2172,7 +2171,7 @@ def run_merge(imglist, _redu=False):
     #     else:    ff=''
     #     tt=' -t '+_type+' '
     command = 'agnmerge_new.py _tmp.list ' + ii  #+tt+ff
-    print command
+    print(command)
     os.system(command)
 
 
@@ -2245,7 +2244,7 @@ def run_template(listtemp, show=False, _force=False, _interactive=False,
         command += ' --uncleaned'
     if _subtract_mag_from_header:
         command += ' --subtract-mag-from-header'
-    print command
+    print(command)
     os.system(command)
 
 
@@ -2314,33 +2313,34 @@ def checkdiff(imglist, database='dataredulco'):
             origimg = diffimg.replace('.diff', '')
             tempimg = origimg.replace('.fits', '.ref.fits')
             if os.path.isfile(diffimg) and os.path.isfile(origimg) and os.path.isfile(tempimg):
-                print img, photlcodict[0]['filter']
+                print(img, photlcodict[0]['filter'])
                 iraf.display(origimg, 1, fill=True, Stdout=1)
                 iraf.display(tempimg, 2, fill=True, Stdout=1)
                 iraf.display(diffimg, 3, fill=True, Stdout=1)
                 ans = raw_input('>>> good difference [[y]/n] or [b]ad quality (original image)? ')
                 if ans in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
-                    print 'updatestatus bad'
-                    print 'rm', diffimg.replace('.fits', '*')
+                    print('updatestatus bad')
+                    print('rm', diffimg.replace('.fits', '*'))
                     os.system('rm ' + diffimg.replace('.fits', '*'))
-                    print 'rm', tempimg
+                    print('rm', tempimg)
                     os.system('rm ' + tempimg)
-                    print 'delete', img, 'from database'
+                    print('delete', img, 'from database')
                     agnkey.agnsqldef.deleteredufromarchive(img, 'dataredulco', 'namefile')
                 if ans in ['bad', 'b', 'B']:
-                    print 'updatestatus bad quality'
+                    print('updatestatus bad quality')
                     agnsql.agnsqldef.updatevalue(database, 'quality', 1, os.path.basename(origimg))
             else:
                 for f in [origimg, tempimg, diffimg]:
-                    if not os.path.isfile(f): print f, 'not found'
+                    if not os.path.isfile(f):
+                      print(f, 'not found')
         elif status == -1:
-            print 'status ' + str(status) + ': sn2.fits file not found'
+            print('status ' + str(status) + ': sn2.fits file not found')
         elif status == -2:
-            print 'status ' + str(status) + ': .fits file not found'
+            print('status ' + str(status) + ': .fits file not found')
         elif status == -4:
-            print 'status ' + str(status) + ': bad quality image'
+            print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
 
 
 #############################################################
@@ -2349,7 +2349,7 @@ def run_remove(listfile, _filetype, _redo):
     import string
     import re
     if len(listfile)>=10:
-        print listfile
+        print(listfile)
         answ = raw_input('are you sure you want to remove all this files ? [[y]/n] ')
         if not answ: 
             answ = 'y'
@@ -2358,9 +2358,9 @@ def run_remove(listfile, _filetype, _redo):
 
     if answ in ['y','yes','Y']:
         for img in listfile:
-            print img,os.path.basename(img)
+            print(img,os.path.basename(img))
             os.system('rm '+ re.sub('.fits','',img)+'*')
-            print '## dataredulco'
+            print('## dataredulco')
             agnkey.agnsqldef.deleteredufromarchive(os.path.basename(img), 'dataredulco', 'namefile')
             #print '## reference image'
             #agnkey.dlt40sql.deleteredufromarchive(dlt40.dlt40sql.conn, os.path.basename(img), 'referenceimages', 'filename')

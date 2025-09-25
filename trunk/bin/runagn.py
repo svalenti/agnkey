@@ -28,7 +28,7 @@ def runin(epoch,_type):
         print( agnkey.util.execdirectory+ 'agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
         os.system(agnkey.util.execdirectory+'agndownloaddata.py -r '+_type+' -s '+start + ' -e '+ end)
     except:
-        print 'problem with ingestion'
+        print('problem with ingestion')
 
 
 # ##########################################################
@@ -41,17 +41,17 @@ def zerostandard(standard, epoch, field, telescope='lsc'):
     try:
         if len(catalogue) >= 1:
             aa = re.sub(agnkey.__path__[0] + '/' + 'standard/cat/', '', catalogue[0])
-            print '\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
-                  ' -s zcat --catalog ' + aa + ' --cutmag -6 -T ' + telescope
+            print('\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
+                  ' -s zcat --catalog ' + aa + ' --cutmag -6 -T ' + telescope)
             os.system(agnkey.util.execdirectory+'agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
                       ' -s zcat --catalog ' + aa + ' --cutmag -6 -T ' + telescope)
         else:
-            print '\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
-                  ' -s zcat --cutmag -6 -T ' + telescope
+            print('\nagnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field + \
+                  ' -s zcat --cutmag -6 -T ' + telescope)
             os.system(agnkey.util.execdirectory+'agnloop.py --type ph -b zcat -F -e ' + epoch + ' -n ' + standard + ' -f ' + field +
                       ' -s zcat --cutmag -6 -T ' + telescope)
     except:
-        print 'problem with zeropoint'
+        print('problem with zeropoint')
 
 ###########################################################
 if __name__ == "__main__":
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         agnkey.util.downloadfloydsraw(_JDn, token)
         
         if _ingest:
-            print '\n### ingest raw data \n'
+            print('\n### ingest raw data \n')
             runin(epoch,'image')  # ingest raw images
             runin(epoch,'spectra')  # ingest raw spectra
 
@@ -166,13 +166,13 @@ if __name__ == "__main__":
     if _stage is None or _stage=='hjd':
         ##########################################################################
         #    added for new idl pipeline    
-        print '\n####  add hjd, when missing '
+        print('\n####  add hjd, when missing ')
         os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s idlstart ')
         os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -s update --column hjd --header HJD ') 
         #############################################################################
 
     if _stage is None or _stage=='wcs':        
-        print '\n####  compute  astrometry, when missing '
+        print('\n####  compute  astrometry, when missing ')
         #  compute astrometry when tim astrometry failed
         os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b wcs -s wcs --mode astrometry ' + ff + tt + XX)
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     if _stage is None or _stage=='psf':                
         #####################################################
-        print '\n####  compute  psf, when missing '
+        print('\n####  compute  psf, when missing ')
         print(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)
         os.system(agnkey.util.execdirectory+'agnloop.py -e ' + epoch + ' -b psf -s psf ' + ff + tt + XX)  #  compute psf
 
@@ -220,33 +220,33 @@ if __name__ == "__main__":
                 else:
                     _SN0 = _SS
         if _Std:
-            print '\n### object in the standard list ' + _Std
+            print('\n### object in the standard list ' + _Std)
             standard.append(obj)
             _temp = _Std
         else:
             _temp = _SN0
         if _temp:
-            print '\n### object in the supernova list ' + _temp
+            print('\n### object in the supernova list ' + _temp)
             _catlandolt = glob.glob(agnkey.__path__[0] + '/standard/cat/landolt/' + _temp + '*')
             _catsloan = glob.glob(agnkey.__path__[0] + '/standard/cat/sloan/' + _temp + '*')
             _catapass = glob.glob(agnkey.__path__[0] + '/standard/cat/apass/' + _temp + '*')
             if len(_catlandolt) >= 1:
                 _catlandolt = _catlandolt[0]
-                print '\n### landolt catalogue available ' + _catlandolt
+                print('\n### landolt catalogue available ' + _catlandolt)
             else:
                 _catlandolt = ''
             if len(_catsloan) >= 1:
                 _catsloan = _catsloan[0]
-                print '\n### sloan catalogue available ' + _catsloan
+                print('\n### sloan catalogue available ' + _catsloan)
             else:
                 _catsloan = ''
             if len(_catapass) >= 1:
                 _catapass = _catapass[0]
-                print '\n### apass catalogue available ' + _catapass
+                print('\n### apass catalogue available ' + _catapass)
             else:
                 _catapass = ''
         if not _Std and not _SN0:
-            print '\n###warning:  object NOT in the supernova and standard lists ' + obj
+            print('\n###warning:  object NOT in the supernova and standard lists ' + obj)
             notinthelist.append(obj)
             _catlandolt = ''
             _catsloan = ''
@@ -254,11 +254,11 @@ if __name__ == "__main__":
         if _catsloan:    sloancal.append(obj)
         if _catapass:    apasscal.append(obj)
     
-    print '\n### standard fields: ' + str(standard)
-    print '\n### landolt fields:\n' + str(landoltcal)
-    print '\n### sloan field:\n' + str(sloancal)
-    print '\n### apass field:\n' + str(apasscal)
-    print '\n### not in the lists:\n ' + str(notinthelist)
+    print('\n### standard fields: ' + str(standard))
+    print('\n### landolt fields:\n' + str(landoltcal))
+    print('\n### sloan field:\n' + str(sloancal))
+    print('\n### apass field:\n' + str(apasscal))
+    print('\n### not in the lists:\n ' + str(notinthelist))
     
     #                 compute zero point for different fields
     for field in fil:
@@ -302,14 +302,14 @@ if __name__ == "__main__":
                 if field == 'landolt':
                     #                for obj in lista:
                     #                if obj not in landoltcal:
-                    print obj + ': object not calibrated in landolt'
+                    print(obj + ': object not calibrated in landolt')
                     for _std in standard:
                         for _tel in ['elp', 'lsc', 'cpt', 'tfn', 'coj']:
                             os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
                                       ' -b abscat -s abscat --standard ' + _std + ' -T ' + _tel + XX)
                 if field == 'sloan':
                     #               if obj not in sloancal:
-                    print obj + ': object not calibrated in sloan'
+                    print(obj + ': object not calibrated in sloan')
                     for _std in standard:
                         for _tel in ['elp', 'lsc', 'cpt', 'coj', 'tfn']:
                             os.system(agnkey.util.execdirectory+'agnloop.py --type ph  -F -e ' + epoch + ' -n ' + obj + ' -f ' + field + \
@@ -322,7 +322,7 @@ if __name__ == "__main__":
         for field in fil:
             for obj in lista:
                 if obj not in standard:
-                    print '###', obj
+                    print('###', obj)
                     if obj in coomandsn.keys():
                         os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                   ' -s psfmag -c  ' + coomandsn[obj])
@@ -330,9 +330,9 @@ if __name__ == "__main__":
                         os.system(agnkey.util.execdirectory+'agnloop.py -b psfmag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                   ' -s psfmag -c  -x 3 -y 3 --bkg 4 --size 7 ')
         
-        print '\n### landolt fields:\n' + str(landoltcal)
-        print '\n### sloan field:\n' + str(sloancal)
-        print '\n### apass field:\n' + str(apasscal)
+        print('\n### landolt fields:\n' + str(landoltcal))
+        print('\n### sloan field:\n' + str(sloancal))
+        print('\n### apass field:\n' + str(apasscal))
 
 ##############################################                            
     if _stage is None or _stage=='mag':                                    
@@ -341,14 +341,14 @@ if __name__ == "__main__":
                 if obj not in standard:
                     if field == 'landolt':
                         if obj in landoltcal:
-                            print '###', obj
+                            print('###', obj)
                             try:
                                 os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                           ' -s mag --type fit')
                             except:
                                 pass
                         elif obj in apasscal:
-                            print '###', obj
+                            print('###', obj)
                             try:
                                 os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
                                           ' -s mag --type fit')
@@ -356,14 +356,14 @@ if __name__ == "__main__":
                                 pass
                     elif field == 'sloan':
                         if obj in sloancal:
-                            print '###', obj
+                            print('###', obj)
                             try:
                                 os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f ' + field + ' ' + XX + \
                                           ' -s mag --type fit')
                             except:
                                 pass
                         elif obj in apasscal:
-                            print '###', obj
+                            print('###', obj)
                             try:
                                 os.system(agnkey.util.execdirectory+'agnloop.py -b mag -n ' + obj + ' -e ' + epoch + ' -f apass' + ' ' + XX + \
                                           ' -s mag --type fit')
@@ -376,8 +376,8 @@ if __name__ == "__main__":
         try:
             os.system(agnkey.util.execdirectory+'agnloop.py -e ' + str(epoch) + ' -s makestamp' + ' ' + XX)
         except:
-            print 'warning makestap did not work'
+            print('warning makestap did not work')
 
     stop = time.time()
-    print 'time to process all  data ', str(stop - start)
+    print('time to process all  data ', str(stop - start))
             
