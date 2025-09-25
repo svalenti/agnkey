@@ -392,7 +392,7 @@ def run_wcs(imglist, interactive=False, redo=False, _xshift=0, _yshift=0, catalo
         elif status == -4:
             print ('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status')
+            print('status ' + str(status) + ': unknown status')
 
 
 def run_zero(imglist, _fix, _type, _field, _catalogue, _color='', interactive=False, redo=False, show=False, _cutmag=99,
@@ -846,7 +846,7 @@ def run_fit(imglist, _ras='', _decs='', _xord=3, _yord=3, _bkg=4, _size=7, _rece
         elif status == -4:
             print('status ' + str(status) + ': bad quality image')
         else:
-            print 'status ' + str(status) + ': unknown status'
+            print('status ' + str(status) + ': unknown status')
     ##################################################################
 
 

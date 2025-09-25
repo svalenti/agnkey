@@ -755,8 +755,10 @@ def uploadspectrum(img,_output,_force,_permission,_filetype='fits'):
           if 'ERROR' in note:
               return note
           else:
-              if os.path.isdir(directory1): print 'directory there'
-              else:                        os.system('mkdir '+directory1)
+              if os.path.isdir(directory1):
+                  print('directory there')
+              else:
+                  os.system('mkdir '+directory1)
               if os.path.isfile(directory1+'/'+_output):
                   note=note+'file already there'+'\n'
                   if _force=='force':
@@ -800,9 +802,10 @@ def obsin(targid,_days=7):
         _JD0=2455927.5
         if not datenow:
             datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-            (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 1, 1, 0, 0, 0)).seconds/(3600.*24)+\
+            (datenow-datetime.datetime(2012, 1, 1, 0, 0, 0)).days
+        if verbose:
+            print('JD= '+str(_JDtoday))
         return _JDtoday
 
 
@@ -936,9 +939,10 @@ def obsin2(targid,_days=7):
         _JD0=2455927.5
         if not datenow:
             datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-            (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600.*24)+\
+            (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).days
+        if verbose:
+            print('JD= '+str(_JDtoday))
         return _JDtoday
 
 
@@ -1102,7 +1106,7 @@ def sqlquery(db,command):
        cursor.close()
    except MySQLdb.Error, e: 
        lista = "Error %d: %s" % (e.args[0], e.args[1])
-       print lista
+       print(lista)
    return lista
 
 #################################################################
@@ -1116,16 +1120,16 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
  lcdata, mint, maxt, minmag, maxmag = load_lc_data(db,targid,plottype,magtype)
 
  if lcdata == '':
-     print '''<span style="font-family: 'Open Sans', sans-serif; font-weight:400; font-size:14; color:black;">No photometry to display</span>'''
+     print('''<span style="font-family: 'Open Sans', sans-serif; font-weight:400; font-size:14; color:black;">No photometry to display</span>''')
      return ''
  # Make the flot plot:
  r = random.randrange(0, 10001)
- print '''<div id="lcplot%s%s%s" style="width:%spx;height:%spx"></div>''' %(targid, magtype, str(r), str(width), str(height))
-# print '<a>d</a>'
- print '''<script id="source_phot" language="javascript" type="text/javascript">'''
- print '''function negformat(val, axis) {
+ print('''<div id="lcplot%s%s%s" style="width:%spx;height:%spx"></div>''' %(targid, magtype, str(r), str(width), str(height)))
+
+ print('''<script id="source_phot" language="javascript" type="text/javascript">''')
+ print('''function negformat(val, axis) {
             return val.toFixed(axis.tickDecimals);
-          };'''
+          };''')
 
 # dm=True
 # if dm:
@@ -1135,7 +1139,7 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
 
 
 
- print '''$(function () {
+ print('''$(function () {
           var lcplot = $("#lcplot%s%s%s");
           var xlabel = '<div style="position:absolute;left:%spx;bottom:5px;color:#666;font-family: \\'Open Sans\\', sans-serif; font-weight:400; font-size:12">Days Ago</div>';
           var options = {
@@ -1170,9 +1174,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
                  selection: { mode: "xy" },
                  grid: { hoverable: true, borderWidth: 1 }
                 }; 
-          ''' % (targid, magtype, r, width/2-20,str(mint), str(maxt), str(minmag), str(maxmag))
+          ''' % (targid, magtype, r, width/2-20,str(mint), str(maxt), str(minmag), str(maxmag)))
 
- print '''function plotSelected() {
+ print('''function plotSelected() {
           var data = %s;
           var plot = $.plot(lcplot, data,
                      $.extend(true, {}, options, {})
@@ -1181,9 +1185,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
 	  return plot;
           }   
           var plot = plotSelected();
-      ''' %lcdata
+      ''' %lcdata)
 
- print ''' // tooltips
+ print(''' // tooltips
           function showChartTooltip(x, y, contents) {
               $('<div id="charttooltip%s%s%s">' + contents + '</div>').css( {
                   position: 'absolute',
@@ -1213,9 +1217,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
                   $("#charttooltip%s%s%s").remove();
                   previousPoint = null;
               }
-          });''' %(targid, magtype, r, targid, magtype, r, targid, magtype, r, targid, magtype, r)
+          });''' %(targid, magtype, r, targid, magtype, r, targid, magtype, r, targid, magtype, r))
 
- print '''
+ print('''
        // zooming
        lcplot.bind("plotselected", function (event, ranges) {
            var data = %s;
@@ -1238,9 +1242,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
               plot.draw();  
            });
        });
- ''' % (lcdata,mint, maxt, minmag, maxmag)
+ ''' % (lcdata,mint, maxt, minmag, maxmag))
 
- print '''
+ print('''
        // zooming reset button       
        $("<div style='right:10px; top:7px; font-family:\\"Open Sans\\",sans-serif; font-weight:400; font-size:12; color:black; position:absolute; cursor:pointer'>[reset]</div>")
            .appendTo(lcplot)
@@ -1252,9 +1256,9 @@ def plot_phot(db,targid, width=450, height=250, plottype='flot', magtype='psfmag
               plot.setupGrid();
               plot.draw();  
            });
-       ''' %(mint, maxt, minmag, maxmag)
- print '''}); '''
- print '''</script> ''' 
+       ''' %(mint, maxt, minmag, maxmag))
+ print('''}); ''')
+ print('''</script> ''')
  return ''
 
 #################################################################################

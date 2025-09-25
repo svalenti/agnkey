@@ -2,7 +2,7 @@
 
 def extintion(site):
     kk={}
-    print '\n### site = '+site
+    print('\n### site = '+site)
     kk['lasilla'] =  {'U':0.46,'u':0.46, 'B':0.27, 'g':0.20 ,'V':0.12, 'r':0.09, 'R':0.09, 'i':0.02, 'I':0.02, 'z':0.03,'J':0.07, 'H':0.023,'K':0.045}  
     kk['paranal'] =  {'U':0.43,'u':0.43, 'B':0.22, 'g':0.18 ,'V':0.11, 'r':0.07, 'R':0.07, 'i':0.05, 'I':0.05, 'z':0.06,'J':0.11, 'H':0.06,'K': 0.07}
     kk['roque'] =    {'U':0.46,'u':0.46, 'B':0.22, 'g':0.16 ,'V':0.12, 'r':0.08, 'R':0.08, 'i':0.04, 'I':0.04, 'z':0.06,'J':0.12, 'H':0.06,'K': 0.09}
@@ -177,7 +177,7 @@ def colfix(instrument,ss='sloan'):
         colorefisso['fl11']=colorefisso['fl12']=colorefisso['fl13']=colorefisso['kb71']
         colorefisso['fa03']=colorefisso['fa14']=colorefisso['fa12']=colorefisso['kb71']
         colorefisso['fa08']=colorefisso['fa04']=colorefisso['fa20']=colorefisso['fa19']=colorefisso['kb71']
-    print instrument
+    print(instrument)
     return colorefisso[instrument]
 
 ################################################################################

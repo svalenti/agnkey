@@ -154,7 +154,8 @@ def wcsstart(img,CRPIX1='',CRPIX2=''):
         if not CRPIX2:        CRPIX2= readkey3(hdr,'ROTCENTY')-100
         CDELT1=2
         CDELT2=2
-    else:  print '\n### ERROR: instument not found !!!'
+    else:
+        print('\n### ERROR: instument not found !!!')
 
     CTYPE1  = 'RA---TAN'  
     CTYPE2  = 'DEC--TAN' 
@@ -216,7 +217,7 @@ def querycatalogue(catalogue,img,method='iraf'):
                 #colonne4={'usnoa2':'mag','usnob1':'mag','2mass':'mag','gsc1':'mag'}
                 colonne3=' 1   2 '
                 column={'ra':1,'dec':2,'r':3}
-                print 'catalogue from user'
+                print('catalogue from user')
             else:
                 sys.exit('Error: catalogue '+str(catalogue)+'not in the list [usnob1,usnoa2,2mass]')
         else:
@@ -321,9 +322,9 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
         if not sexvec:
             sexvec=agnkey.agnastrodef.sextractor(img)
 ###################
-        print xshift,yshift
+        print(xshift,yshift)
         if xshift!=0 and yshift!=0:
-            print 'guess astrometry before starting '
+            print('guess astrometry before starting ')
             agnkey.agnastrodef.wcsstart(img,xshift,yshift)
 #        ss=datetime.datetime.now()
 #        time.sleep(1)
@@ -375,7 +376,7 @@ def agnastroloop(imglist,catalogue,_interactive,number1,number2,number3,_fitgeo,
                 V=(math.pi/(4*math.log(2)))*(32000-float(mbkg3))*(float(fwhmgess3)**2)
             magsat=-2.5*math.log10(V)
         else:        magsat=9999
-    print rmsx3,rmsy3,num3,fwhmgess3,ellgess3,fwhmgessime,rasys3,decsys3,magsat
+    print(rmsx3,rmsy3,num3,fwhmgess3,ellgess3,fwhmgessime,rasys3,decsys3,magsat)
     return  rmsx3,rmsy3,num3,fwhmgess3,ellgess3,fwhmgessime,rasys3,decsys3,magsat
 
 #################################################################################################
@@ -527,7 +528,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
                 try:           rmsx,rmsy=array(string.split(string.split(_ccmap1[_ccmap1.index('Wcs mapping status')+1],':')[-1])[0:2],float)
                 except:        rmsx,rmsy=array(string.split(string.split(_ccmap1[_ccmap1.index('Wcs mapping status')+1],':')[-1])[0:2])
                 if rmsx<2 and rmsy<2:
-                    print '\n### update astrometry with non linear order' 
+                    print('\n### update astrometry with non linear order') 
 #                    raw_input('go on ')
                     _ccmap1=iraf.ccmap('STDIN','STDOUT',images=img,Stdin=vettoretran,fitgeome=fitgeo,xcolum=3, xxorder=2,\
                                        yyorder=2, ycolum=4,lngcolum=1,latcolumn=2,lngunit='degrees',update='Yes',interact='No',maxiter=3,Stdout=1)
@@ -590,7 +591,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
     hdr=readhdr(img)
     _airmass=readkey3(hdr,'AIRMASS')
     if not _airmass: 
-        print '\n### warning: airmass at starting exposure'
+        print('\n### warning: airmass at starting exposure')
         _airmass=readkey3(hdr,'airmass')
     _exptime=readkey3(hdr,'exptime')
     _filter=readkey3(hdr,'filter')
@@ -641,8 +642,8 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
         _ra=readkey3(hdr,'RA')
         _dec=readkey3(hdr,'DEC')
         magsel0,magsel1=12,18
-        print _ra,_dec
-        print 'sloan to file take degree degree'
+        print(_ra,_dec)
+        print('sloan to file take degree degree')
         _ids=agnkey.agnastrodef.sloan2file(_ra,_dec,20,float(magsel0),float(magsel1),'_tmpsloan.cat')
         ascifile='_tmpsloan.cat'
         stdcooS=agnkey.agnastrodef.readtxt(ascifile)
@@ -655,7 +656,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
         idstdS=standardpixS['id']
         xstdS=compress((array(xstdS,float)<readkey3(hdr,'naxis1'))&(array(xstdS,float)>0)&(array(ystdS,float)>0)&(array(ystdS,float)<readkey3(hdr,'naxis2')),xstdS)
        ##############
-        print _filter
+        print(_filter)
         if _filter in ['B', 'V', 'R', 'I']:
             if _field=='sloan':   standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
             else:
@@ -673,8 +674,9 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
                         standardpix=standardpixS
                         stdcoo=stdcooS
                         stdcoo=agnkey.agnastrodef.transformsloanlandolt(stdcoo)
-                        print '\n### transform sloan in landolt'
-                    else:    standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
+                        print('\n### transform sloan in landolt')
+                    else:
+                              standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
         elif _filter in  ['SDSS-U','SDSS-G','SDSS-R','SDSS-I','Pan-Starrs-Z']: 
             if _field=='landolt':   standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
             else:
@@ -692,8 +694,9 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
                         standardpix=standardpixL
                         stdcoo=stdcooL
                         stdcoo=agnkey.agnastrodef.transformlandoltsloan(stdcoo)
-                        print '\n### transform landolt to sloan'
-                    else:   standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
+                        print('\n### transform landolt to sloan')
+                    else:
+                        standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
 
     xstd=standardpix['ra']
     ystd=standardpix['dec']
@@ -704,7 +707,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
     if len(xstd0)>1:  ########   go only if standard stars are in the field  ##########
         magstd0={}
         airmass0={}
-        print '\n###  standard field: '+str(_field)
+        print('\n###  standard field: '+str(_field))
         ###############  sextractor on standard field
         namesex=agnkey.util.defsex('default.sex')
         os.system('sex '+img+' -c '+namesex+' > _logsex')
@@ -742,7 +745,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
         ###################
         colorvec=colors[filters[_filter]]
         if _field=='landolt':
-            print '\n###  landolt system'
+            print('\n###  landolt system')
             for _filtlandolt in 'UBVRI':
                 if _filtlandolt==filters[_filter]: airmass0[_filtlandolt]=_airmass
                 else: airmass0[_filtlandolt]=1
@@ -759,7 +762,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
             fileph['VR']=array(array(magstd0['V'],float)-array(magstd0['R'],float),str)
             fileph['RI']=array(array(magstd0['R'],float)-array(magstd0['I'],float),str)
         elif _field=='sloan':
-            print _filter
+            print(_filter)
             for _filtsloan in 'ugriz':
                 if _filtsloan==filters[_filter]: airmass0[_filtsloan]=_airmass
                 else: airmass0[_filtsloan]=1
@@ -777,7 +780,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
             fileph['iz']=array(array(magstd0['i'],float)-array(magstd0['z'],float),str)
         distvec,pos0,pos1=agnkey.agnastrodef.crossmatch(array(rastd0),array(decstd0),array(rasex),array(decsex),10) 
         fwhm0=(median(array(fw,float)[pos1]))*.68*2.35
-        print '\n fwhm = '+str(fwhm0)
+        print('\n fwhm = '+str(fwhm0))
         iraf.noao.digiphot.mode='h'
         iraf.noao.digiphot.daophot.photpars.zmag = 0
         iraf.noao.digiphot.daophot.daopars.psfrad = fwhm0*4
@@ -811,8 +814,8 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
             fil.write('%6.6s\t%6.6s\t%6.6s\n' % (str(1),str(1),str(1)))  # exptime
             fil.write('%6.6s\t%6.6s\t%6.6s\n' % (str(airmass0['J']),str(airmass0['H']),str(airmass0['K'])))
 
-        print '\n KK   filter airmass \n '
-        print str(kk[filters[_filter]]),str(filters[_filter]),str(_airmass)
+        print('\n KK   filter airmass \n ')
+        print(str(kk[filters[_filter]]),str(filters[_filter]),str(_airmass))
         for i in range(0,len(pos1)): 
             gg=open('tmp.one','w')
             gg.write(str(xsex[pos1[i]])+' '+str(ysex[pos1[i]])+'\n')
@@ -857,7 +860,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
             if len(colore)==0:
                     b,a,RR=9999,9999,9999
                     result=''
-                    print 'no calibration, '+_filter+' '+_field
+                    print('no calibration, '+_filter+' '+_field)
             elif len(colore)>1:
                 agnkey.util.updateheader(img,0,{'PHOTZP':[median(zero),'MAG=-2.5*log(data)+PHOTZP ']})
                 if _field=='landolt':      a, b, RR=agnkey.agnastrodef.linreg(colore, zero)
@@ -888,7 +891,7 @@ def zeropoint(img,_field,verbose=False,catalogue=''):
                 legend(numpoints=1,markerscale=1.5)
                 show()
     else: 
-        print 'no calibration, '+_filter+' '+_field
+        print('no calibration, '+_filter+' '+_field)
         result=''
     delete('tmp.*,detection*')
     return result
@@ -1185,7 +1188,7 @@ def sextractor(img):
             fw=compress((array(fw)<=15)&(array(fw)>=-2),array(fw))
         except: 
             xpix,ypix,fw,cl,cm,ell=[],[],[],[],[],[]
-            print '\n### ERROR Filtering the sextractor detections, please check that sextractor is working ......'
+            print('\n### ERROR Filtering the sextractor detections, please check that sextractor is working ......')
         
         return xpix,ypix,fw,cl,cm,ell,bkg,fl
 
@@ -1304,14 +1307,14 @@ def finewcs(img):
             if 'rms' in _ccmap1[_ccmap1.index('Wcs mapping status')+1]:
                 try:           rmsx,rmsy=np.array(string.split(string.split(_ccmap1[_ccmap1.index('Wcs mapping status')+1],':')[-1])[0:2],float)
                 except:        rmsx,rmsy=np.array(string.split(string.split(_ccmap1[_ccmap1.index('Wcs mapping status')+1],':')[-1])[0:2])
-            print rmsx,rmsy,ff
+            print(rmsx,rmsy,ff)
             if rmsx<2 and rmsy<2:
                 if rmsx+rmsy<=rmsx0+rmsy0:
                     rmsx0,rmsy0=rmsx,rmsy
                     bestvalue=ff
-        print rmsx,rmsy,bestvalue
+        print(rmsx,rmsy,bestvalue)
         if rmsx0<2 and rmsy0<2:
-            print 'update wcs with distortion correction'  
+            print('update wcs with distortion correction') 
             _ccmap1=iraf.ccmap('STDIN','STDOUT',images=img,Stdin=vector4,fitgeome=bestvalue,xcolum=3, xxorder=_order,\
                                xyorder=_order, yxorder=_order, yyorder=_order, ycolum=4,lngcolum=1,latcolumn=2,\
                                lngunit='degrees',update='Yes',interact='No',maxiter=3,Stdout=1,verbose='yes')
@@ -1336,7 +1339,7 @@ def run_astrometry(im, clobber=True,redo=False):
     import tempfile
     temp_name = next(tempfile._get_candidate_names())
     temp_name = temp_name + '.fits'
-    print 'astrometry for image ' + str(im)
+    print('astrometry for image ' + str(im))
     # Run astrometry.net
     hdr = agnkey.util.readhdr(im)
     if 'WCSERR' in hdr:
@@ -1353,7 +1356,7 @@ def run_astrometry(im, clobber=True,redo=False):
     if redo: 
         done = 0
     if done:
-        print 'already done'
+        print('already done')
     else:
         ra = agnkey.util.readkey3(hdr,'RA')
         dec = agnkey.util.readkey3(hdr,'DEC')
@@ -1369,13 +1372,13 @@ def run_astrometry(im, clobber=True,redo=False):
         cmd += '--solved none --match none --rdls none --wcs none --corr none '
         cmd += ' --downsample 4 --fits-image '
         cmd += '%s' % im
-        print cmd
+        print(cmd)
         os.system(cmd)
         basename = im[:-5]
         if os.path.exists(basename + '.axy'):
             os.remove(basename + '.axy')
         else:
-            print 'axy files do not exist'
+            print('axy files do not exist')
         if os.path.exists(basename + '-indx.xyls'):
             os.remove(basename + '-indx.xyls')
         if os.path.exists(temp_name):
@@ -1422,12 +1425,12 @@ def run_astrometry(im, clobber=True,redo=False):
             elif 'WCS_ERR' in hdr:
                 dictionary['WCS_ERR'] = [0, '']
 
-            print dictionary
+            print(dictionary)
             agnkey.util.updateheader(im, 0, dictionary)
             agnkey.agnsqldef.updatevalue('dataredulco', 'WCS', 0, string.split(im, '/')[-1])
             os.remove(temp_name)
         else:
-            print temp_name+' files do not exist'
+            print(temp_name+' files do not exist')
 ###################################################################
 ###################################################################
 

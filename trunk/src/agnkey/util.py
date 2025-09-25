@@ -389,7 +389,7 @@ def updateheader(image,dimension,headerdict):
     except:
         import agnkey
         from agnkey.util import correctcard
-        print 'warning: problem to update header, try to correct header format ....'
+        print('warning: problem to update header, try to correct header format ....')
         correctcard(image)
         try:
             imm=pyfits.open(image,mode='update')
@@ -402,7 +402,7 @@ def updateheader(image,dimension,headerdict):
             imm.flush()
             imm.close()
         except:
-           print 'niente'
+           print('niente')
 #           import sys
 #            sys.exit('error: not possible update header')
 #################################################################################################
@@ -425,17 +425,17 @@ def display_image(img,frame,_z1,_z2,scale,_xcen=0.5,_ycen=0.5,_xsize=1,_ysize=1,
               sss=iraf.display(img, frame, xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize, erase=_erase,\
                                    fill='yes', zscale='no', zrange='no', z1=_z1, z2=_z2,Stdout=1)
           except:
-              print ''
-              print '### ERROR: PROBLEM OPENING DS9'
-              print ''
+              print('')
+              print('### ERROR: PROBLEM OPENING DS9')
+              print('')
               goon='False'
        else:
         try:
             sss=iraf.display(img, frame, xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize, erase=_erase, fill='yes', Stdout=1)
         except:
-            print ''
-            print '### ERROR: PROBLEM OPENING DS9'
-            print ''
+            print('')
+            print('### ERROR: PROBLEM OPENING DS9')
+            print('')
             goon=False
 
        if scale and goon:
@@ -461,7 +461,7 @@ def display_image(img,frame,_z1,_z2,scale,_xcen=0.5,_ycen=0.5,_xsize=1,_ysize=1,
        if goon:
           _z1,_z2=string.split(string.split(sss[0])[0],'=')[1],string.split(string.split(sss[0])[1],'=')[1]
     else:
-        print 'Warning: image '+str(img)+' not found in the directory '
+        print('Warning: image '+str(img)+' not found in the directory ')
     return _z1,_z2,goon
 
 ###########################################################################
@@ -770,8 +770,8 @@ def marksn2(img,fitstab,frame=1,fitstab2='',verbose=False):
     if verbose:
  #     print 2.5*log10(_exptime)
         for i in range(0,len(column['ra0'])):
-             print xy[i], column['ra0'][i], column['dec0'][i], column['magp3'][i], column['magp4'][i], column['smagf'][i],\
-                 column['magp2'][i]
+             print(xy[i], column['ra0'][i], column['dec0'][i], column['magp3'][i], column['magp4'][i], column['smagf'][i],\
+                 column['magp2'][i])
 
     if fitstab2:
         vector2=[]
@@ -815,17 +815,17 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
       if 'gain' in hd:
          gain    = hd['GAIN']
       else:
-         print 'warning GAIN not found'
+         print('warning GAIN not found')
          gain = 1
       if 'saturate' in hd:
          sat     = hd['SATURATE']
       else:
-         print 'warning SATURATE not found'
+         print('warning SATURATE not found')
          sat = 60000
       if 'RDNOISE' in hd:
          rdnoise = hd['RDNOISE']
       else:
-         print 'warning RDNOISE not found'
+         print('warning RDNOISE not found')
          rdnoise = 1
    # need to trick LACosmic into using the right sigma for a sky-subtracted image
    med = np.median(ar)                           # median pixel of image (in ADU)
@@ -839,8 +839,8 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
 #   else:
 #      _pssl=0.0
 
-   print 'gain    sat     noise   sigclip objlim  sigfrac pssl'
-   print '{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl)
+   print('gain    sat     noise   sigclip objlim  sigfrac pssl')
+   print('{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl))
 
    niter = 1
    c = agnkey.cosmics.cosmicsimage(ar, pssl=_pssl, gain=gain, readnoise=rdnoise, sigclip=5, sigfrac=0.3 , objlim=5, satlevel=sat)
@@ -867,7 +867,7 @@ def Docosmic(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    out_fits = pyfits.PrimaryHDU(header=hd,data=(out3!=0).astype('uint8'))
    out_fits.writeto(outsat, clobber=True, output_verify='fix')
 
-   print 'time to do cosmic ray rejection:', time.time()-start
+   print('time to do cosmic ray rejection:', time.time()-start)
    return out,outmask,outsat
 
 ##############################################
@@ -903,17 +903,17 @@ def Docosmicold(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
       if 'gain' in hd:
          gain    = hd['GAIN']
       else:
-         print 'warning GAIN not found'
+         print('warning GAIN not found')
          gain = 1
       if 'saturate' in hd:
          sat     = hd['SATURATE']
       else:
-         print 'warning SATURATE not found'
+         print('warning SATURATE not found')
          sat = 60000
       if 'RDNOISE' in hd:
          rdnoise = hd['RDNOISE']
       else:
-         print 'warning RDNOISE not found'
+         print('warning RDNOISE not found')
          rdnoise = 1
    # need to trick LACosmic into using the right sigma for a sky-subtracted image
    med = np.median(ar)                           # median pixel of image (in ADU)
@@ -921,8 +921,8 @@ def Docosmicold(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    _pssl = gain*noise**2 - rdnoise**2/gain - med # previously subtracted sky level
    ar[ar < -_pssl] = sat                         # change (what will be) negative values to saturated
 
-   print 'gain    sat     noise   sigclip objlim  sigfrac pssl'
-   print '{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl)
+   print('gain    sat     noise   sigclip objlim  sigfrac pssl')
+   print('{:<7.1f} {:<7.0f} {:<7.1f} {:<7.1f} {:<7.0f} {:<7.1f} {:<7.2f}'.format(gain, sat, rdnoise, _sigclip, _objlim, _sigfrac, _pssl))
 
 #    ar[ar<0] = sat   #    set as saturated vaule all negative values
 #    if 'L1SIGMA' in hd and 'L1MEAN' in hd:
@@ -962,7 +962,7 @@ def Docosmicold(img,_sigclip=5.5,_sigfrac=0.2,_objlim=4.5):
    out_fits = pyfits.PrimaryHDU(header=hd,data=(out3!=0).astype('uint8'))
    out_fits.writeto(outsat, clobber=True, output_verify='fix')
 
-   print 'time to do cosmic ray rejection:', time.time()-start
+   print('time to do cosmic ray rejection:', time.time()-start)
    return out,outmask,outsat
 
 ##############################################
@@ -1036,9 +1036,10 @@ def sendtrigger(_name, _ra, _dec, _site, _exp, _nexp, _filters, _airmass, _utsta
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday = _JD0 + (datenow - datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24) + \
-                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD = '+str(_JDtoday)
+        _JDtoday = _JD0 + (datenow - datetime.datetime(2012, 1, 1, 0, 0, 0)).seconds/(3600.*24) + \
+                   (datenow - datetime.datetime(2012,  1,  1, 0, 0, 0)).days
+        if verbose:
+           print('JD = '+str(_JDtoday))
         return _JDtoday
 
     if _site in ['elp','cpt','ogg','lsc','coj','tfn']:
@@ -1288,8 +1289,8 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
     response = conn.getresponse().read()
     python_dict = json.loads(response)
 
-    print 'jason=  ', json_user_request
-    print 'response= ' , response
+    print('jason=  ', json_user_request)
+    print('response= ' , response)
 
 
     try:
@@ -1347,7 +1348,8 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
         _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
                    (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
@@ -1502,7 +1504,8 @@ def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,pr
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
         _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
                    (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     if mode not in ['NORMAL','TARGET_OF_OPPORTUNITY','normal','ToO']:
@@ -1526,10 +1529,10 @@ def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,pr
        ac_mode =  "BRIGHTEST"
        _radius = 5.0 
 
-    print '############'
-    print _slit
-    print slitvec
-    print slitvec[_slit], 
+    print('############')
+    print(_slit)
+    print(slitvec)
+    print(slitvec[_slit]) 
     molecule_lamp = {"exposure_time": 20.0, "spectra_slit": slitvec[_slit],
                      "instrument_name": "2M0-FLOYDS-SCICAM",
                      "type": "LAMP_FLAT", "exposure_count": 1, "ag_exp_time": 10.0,
@@ -1677,7 +1680,7 @@ def getstatus_all(token,status,date,user='stefano_valenti1',proposal='KEY2020B-0
           'user=' + user
     if status:
         req = req + '&state=' + status
-    print req
+    print(req)
     ss = requests.get(req, headers={'Authorization': 'Token ' + token})
     return ss.json()
  
@@ -1697,7 +1700,8 @@ def sendtrigger2_new(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
         _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
                    (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
@@ -1840,7 +1844,7 @@ def downloadfloydsraw(JD,token):
     command = ['select t.*,l.filters  from triggerslog as t join triggers as l where t.triggerid=l.id and t.tracknumber and t.windowstart >'+str(JD)]
     lista=agnkey.agnsqldef.query(command)
     if len(lista) == 0:
-        print 'no tracknumber for spectra '
+        print('no tracknumber for spectra ')
     else:
         ll0={}
         for jj in lista[0].keys():
@@ -1853,14 +1857,14 @@ def downloadfloydsraw(JD,token):
 #            _dict = agnkey.util.getstatus(username,passwd,str(track).zfill(10))
 #            _dict = agnkey.util.getstatus_new(token,str(track).zfill(10))
             _dict = agnkey.util.getstatus_apiv3(token,str(track).zfill(10))
-            print track
+            print(track)
             #################   update status
             if 'state' in _dict.keys(): 
                 _status=_dict['state']
-                print _status
+                print(_status)
                 if ll0['status'][kk]!=_status:
-                    print ll0['status'][kk],_status
-                    print 'update status'
+                    print(ll0['status'][kk],_status)
+                    print('update status')
                     agnkey.agnsqldef.updatevalue('triggerslog', 'status', _status, track,
                                                  connection='agnkey',namefile0='tracknumber')
             else:
@@ -1868,11 +1872,11 @@ def downloadfloydsraw(JD,token):
 
             #################   update reqnumber
             if 'requests' in _dict.keys():
-               print str(ll0['reqnumber'][kk]).zfill(10)
+               print(str(ll0['reqnumber'][kk]).zfill(10))
                _reqnumber = str(_dict['requests'][-1]['id']).zfill(10)
                if str(ll0['reqnumber'][kk]).zfill(10)!= _reqnumber:
-                  print str(ll0['reqnumber'][kk]).zfill(10), _reqnumber
-                  print 'update reqnumber'
+                  print(str(ll0['reqnumber'][kk]).zfill(10), _reqnumber)
+                  print('update reqnumber')
                   agnkey.agnsqldef.updatevalue('triggerslog', 'reqnumber', _reqnumber, track,
                                                connection='agnkey',namefile0='tracknumber')
             else:
@@ -1979,7 +1983,7 @@ def jd2date(inputjd):
 
 def sendemail(fromaddr,toaddrs,subj,text):
    import smtplib
-   print readpass['emailsmtp']
+   print(readpass['emailsmtp'])
    try:
       message = 'To: %s \nSubject: %s\n\n%s' % (toaddrs,subj, text)
       server = smtplib.SMTP(readpass['emailsmtp'])
@@ -2013,7 +2017,8 @@ def sendfloydstrigger_api3(_name,_exp,_ra,_dec,_utstart,_utend,username, token,p
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
         _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
                    (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     ######################3
@@ -2176,9 +2181,9 @@ def sendfloydstrigger_api3(_name,_exp,_ra,_dec,_utstart,_utend,username, token,p
             'windows': windows
         }]
     }
-    print '#'*20
+    print('#'*20)
     print user_request
-    print '#'*20
+    print('#'*20)
     response = requests.post(
         'https://observe.lco.global/api/requestgroups/',
         headers={'Authorization': 'Token ' + token},
@@ -2232,7 +2237,8 @@ def sendtrigger_api3(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
         _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
                    (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
