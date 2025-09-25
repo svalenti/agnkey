@@ -1392,7 +1392,7 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
                     print('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                     os.system('rm ' + _dir + re.sub('.fits', '.sn2.fits', img))
                 if aa in ['bad', 'b', 'B']:
-                    print 'updatestatus bad quality'
+                    print('updatestatus bad quality')
                     agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
             elif aa in ['c', 'C', 'cancel']:
                 print('remove from database')
@@ -1473,7 +1473,7 @@ def makestamp(imglist, database='dataredulco', _z1='', _z2='', _interactive=True
                     agnkey.util.delete(_output)
                     plt.savefig(_output)
             else:
-                print 'SN not found'
+                print('SN not found')
 
         elif status == -1:
             time.sleep(.1)
@@ -1550,7 +1550,7 @@ def checkclean(imglist, force=True, database='dataredulco'):
                 print('updatestatus bad quality')
                 agnkey.agnsqldef.updatevalue(database, 'quality', 1, string.split(img, '/')[-1])
             else:
-                print('updatestatus quality good)'
+                print('updatestatus quality good')
                 agnkey.agnsqldef.updatevalue(database, 'quality', 127, string.split(img, '/')[-1])
 #        else:
 #            print 'clean image not found'
@@ -1685,7 +1685,7 @@ def checkpos(imglist, _ra, _dec, database='dataredulco'):
                 _dir + re.sub('fits', 'sn2.fits', img))
     print(imglist2, _ra, _dec)
     ra, dec = agnkey.agnloopdef.position(imglist2, _ra, _dec, show=True)
-    print '######## mean ra and dec position  ############'
+    print('######## mean ra and dec position  ############')
     print('ra= ' + str(ra))
     print('dec= ' + str(dec))
     print('#############')

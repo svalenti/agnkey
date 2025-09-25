@@ -142,19 +142,19 @@ datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmti
 _date=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec).date() 
 
 ###########################   need to start the page here 
-print "Content-Type: text/html\n"
-print '<html>'
-print '<body>'
+print("Content-Type: text/html\n")
+print('<html>')
+print('<body>')
 ############################
 #print SN_RA,SN_DEC,SN
 if _type=='add':
     if not _note:
-        print "Content-Type: text/html\n"
-        print '<html>'
-        print '<body>'
-        print '<h3>warning: note is empty </h3>'
-        print '</html>'
-        print '</body>'
+        print( "Content-Type: text/html\n")
+        print( '<html>')
+        print( '<body>')
+        print( '<h3>warning: note is empty </h3>')
+        print( '</html>')
+        print( '</body>')
         sys.exit()
     else:
         _table='noteobjects'
@@ -166,12 +166,12 @@ if _type=='add':
         
 elif _type=='delete':
     if not _id:
-        print "Content-Type: text/html\n"
-        print '<html>'
-        print '<body>'
-        print '<h3>warning: note is empty </h3>'
-        print '</html>'
-        print '</body>'
+        print( "Content-Type: text/html\n")
+        print( '<html>')
+        print( '<body>')
+        print( '<h3>warning: note is empty </h3>')
+        print( '</html>')
+        print( '</body>')
         sys.exit()
     else:
         _table='noteobjects'
@@ -219,20 +219,20 @@ elif _type=='newobject':
             agn_function.insert_values(conn,'userslog',dictionary2)
             
         else:
-            print "Content-Type: text/html\n"
-            print '<html>'
-            print '<body>'
-            print '<h3>warning: NAME, RA and DEC should all be defined</h3>'
-            print '</html>'
-            print '</body>'
+            print( "Content-Type: text/html\n")
+            print( '<html>')
+            print( '<body>')
+            print( '<h3>warning: NAME, RA and DEC should all be defined</h3>')
+            print( '</html>')
+            print( '</body>')
             sys.exit()
     else:
-        print "Content-Type: text/html\n"
-        print '<html>'
-        print '<body>'
-        print '<h3>warning: user '+str(_user)+' does not have permission to add new objects </h3>'
-        print '</html>'
-        print '</body>'
+        print( "Content-Type: text/html\n")
+        print( '<html>')
+        print( '<body>')
+        print( '<h3>warning: user '+str(_user)+' does not have permission to add new objects </h3>')
+        print ('</html>')
+        print ('</body>')
         sys.exit()
 elif _type=='permission':
      aa=agn_function.query(['select groups,groupid from groupstab order by groupid'])
@@ -259,7 +259,7 @@ elif _type=='catalogue':
 
 elif _type=='markasbad':
     agn_function.updatevalue('datarawfloyds',_key,_note,_id,connection='agnkey',namefile0='id')
-    print _date,_note,_key,_user,_targid
+    print(_date,_note,_key,_user,_targid)
     dictionary1={'targid':int(_targid),'note':str(_key)+' '+str(_note),'dateobs':_date, 'users':_user,'command':'update','tables':'lsc_sn_pos'}
     agn_function.insert_values(conn,'userslog',dictionary1)
 

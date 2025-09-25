@@ -45,8 +45,8 @@ if not SN:
     SN=['ttMrk1048_20140907_None_2014-09-07.fits']
     directory=['/dark/hal/public_html/AGNKEY/test/']
 
-print "Content-Type: text/html\n"
-print '<html><body>'
+print("Content-Type: text/html\n")
+print('<html><body>')
 #print str(directory[0])+str(SN[0])
 
 fi=str(directory[0])+str(SN[0])
@@ -93,7 +93,7 @@ if graf:
    savefig(fileoutput, format='png')
 
 if graf:
-   print '<img src="'+fileoutput+'" alt="" height="500" width="800">'
+   print('<img src="'+fileoutput+'" alt="" height="500" width="800">')
 else:
-    print '<h2> ERROR: problem to read the fits </h2>'
-print '</body></html>'
+    print('<h2> ERROR: problem to read the fits </h2>')
+print('</body></html>')

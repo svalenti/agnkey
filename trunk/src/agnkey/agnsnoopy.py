@@ -50,7 +50,7 @@ def fitsn(img,imgpsf,coordlist,_recenter,fwhm0,original,sn,residual,_show,_inter
 
     #  fitskypars.salgorithm = "constant"
     #  fitskypars.skyvalue = 0
-    print '\n### recentering: '+str(answ)
+    print('\n### recentering: '+str(answ))
     if _show:
         iraf.noao.digiphot.daophot.phot(original,coordlist,"apori",veri='no')   
         iraf.noao.digiphot.daophot.phot(sn,coordlist,img+".sn.mag",veri='no')   
@@ -59,7 +59,7 @@ def fitsn(img,imgpsf,coordlist,_recenter,fwhm0,original,sn,residual,_show,_inter
         iraf.noao.digiphot.daophot.phot(sn,coordlist,img+".sn.mag",veri='no',verb='no')   
 
     agnkey.util.delete(img+".sn.als")
-    print sn,imgpsf,img
+    print(sn,imgpsf,img)
     iraf.allstar(sn,img+".sn.mag",imgpsf,img+".sn.als","",residual,veri='no',verb='no')
     agnkey.util.delete("snfit.fits")
     iraf.imarith(sn+'.fits',"-",residual+'.fits',"snfit.fits")
@@ -105,13 +105,13 @@ def fitsn(img,imgpsf,coordlist,_recenter,fwhm0,original,sn,residual,_show,_inter
 #    raw_input('waint here ')
 
     if _show:
-        print "********************************************************************"
-        print "ID <apmag on original>  <apmag on bgsubt> fitmag truemag err_fit"         
-        print "     ",a1,"       ",a2,"      ",a3,"        ",a1,"     ",a2,"     ",a3 
+        print( "********************************************************************")
+        print( "ID <apmag on original>  <apmag on bgsubt> fitmag truemag err_fit"         )
+        print( "     ",a1,"       ",a2,"      ",a3,"        ",a1,"     ",a2,"     ",a3 )
 
 
     apmag1,apmag2,apmag3,truemag=[],[],[],[]
-    print _exptime
+    print(_exptime)
     for i in range(len(tmptbl)):
         try:            apmag1.append(float(string.split(tmptbl[i])[0]))#-2.5*log10(_exptime))
         except:         apmag1.append(9999)
@@ -122,12 +122,12 @@ def fitsn(img,imgpsf,coordlist,_recenter,fwhm0,original,sn,residual,_show,_inter
         try:            truemag.append(fitmag[i]+float(apco0))
         except:         truemag.append('INDEF')
         if _show:
-            print i,apori1[i],apori2[i],apori3[i],apmag1[i],apmag2[i],apmag3[i],fitmag[i],truemag[i],magerr[i]
+            print( i,apori1[i],apori2[i],apori3[i],apmag1[i],apmag2[i],apmag3[i],fitmag[i],truemag[i],magerr[i])
     if _show:
-        print "********************************************************************"
+        print( "********************************************************************")
 
     if _show:
-        print midpt,z11,z22
+        print( midpt,z11,z22)
         _tmp1,_tmp2,goon=agnkey.util.display_image(original+'.fits',1, z11, z22, False, _xcen=.25, _ycen=.25, _xsize=.3, _ysize=.3)
         z01 = float(z11)-float(midpt)
         z02 = float(z22)-float(midpt) 
@@ -175,7 +175,7 @@ def manusn(img,imgpsf,dmag0,apori1,apori2,apori3,apmag1,apmag2,apmag3,fitmag,tru
    fdmag = 10**(-0.4*float(dmag0))
    agnkey.util.delete(",_snfit.fit?,skyfit.fit?,_snfit.ar?")
    if truemag[0]=='INDEF':
-       print 'ACTUNG'
+       print( 'ACTUNG')
        magerr[0]=0.0
        agnkey.util.delete('test.fits')
        os.system('echo '+str(iraf.field(img+'.sn.coo', field='1,2', Stdout=1)[0])+' '+dmag0+' > dddd')
@@ -185,7 +185,7 @@ def manusn(img,imgpsf,dmag0,apori1,apori2,apori3,apmag1,apmag2,apmag3,fitmag,tru
        iraf.imarith("snfit.fits","*",fdmag,"_snfit.fits")   
    iraf.imarith("original.fits","-","_snfit.fits","skyfit.fits")
    _tmp1,_tmp2,goon=agnkey.util.display_image('original.fits',1, z11, z22, False, _xcen=.25, _ycen=.25, _xsize=.3, _ysize=.3)
-   print z11,z22,midpt
+   print( z11,z22,midpt)
    z01 = float(z11)-float(midpt)
    z02 = float(z22)-float(midpt) 
    s1 = 1
@@ -227,14 +227,14 @@ def manusn(img,imgpsf,dmag0,apori1,apori2,apori3,apmag1,apmag2,apmag3,fitmag,tru
        except:
            newmag[i]=float(dmag0)
            magerr[i]=0.0
-   print truemag
-   print newmag
+   print( truemag)
+   print( newmag)
 
-   print "***************************************************************************" 
-   print "#id  x_ori   y_ori     x     y    ap_ori ap_bgsub  fit_mag  err_art  err_fit" 
+   print( "***************************************************************************" )
+   print( "#id  x_ori   y_ori     x     y    ap_ori ap_bgsub  fit_mag  err_art  err_fit" )
    for i in range(len(fitmag)):
-       print "SN",i,str(centx[i]+x1),str(centy[i]+y1),str(centx[i]),str(centy[i]),"  ",str(apori3[i]),"  ",str(apmag3[i]),"  ",str(newmag[i]),"  ",str(arterr),"  ",str(magerr[i])
-   print "**************************************************************************"
+       print( "SN",i,str(centx[i]+x1),str(centy[i]+y1),str(centx[i]),str(centy[i]),"  ",str(apori3[i]),"  ",str(apmag3[i]),"  ",str(newmag[i]),"  ",str(arterr),"  ",str(magerr[i]))
+   print("**************************************************************************")
 
    return apori1,apori2,apori3,apmag1,apmag2,apmag3,fitmag,truemag,magerr,centx,centy,newmag
 
@@ -255,13 +255,13 @@ def errore(img,imgpsf,coordlist,size,truemag,fwhm0,leng0,_show,_interactive,_num
         try:  
             artfac0=float(artfac0)
             if float(artfac0)>=size-1:
-                print '!!! WARNING: '+str(artfac0)+' too large (max '+str(size)+'- 1)'
-                print 'try again....'
+                print( '!!! WARNING: '+str(artfac0)+' too large (max '+str(size)+'- 1)')
+                print( 'try again....')
             else:
                 dartf = artfac0
         except:
-            print '#### WARNING: '+str(artfac0)+' should be a number !!!!'
-            print 'try again....'
+            print( '#### WARNING: '+str(artfac0)+' should be a number !!!!')
+            print( 'try again....')
     agnkey.util.delete("tmpar?")
 
     agnkey.util.delete('artskyfit.fits')
@@ -358,9 +358,10 @@ def errore(img,imgpsf,coordlist,size,truemag,fwhm0,leng0,_show,_interactive,_num
 	except: pass
         i=i+1
 
-    for i in tmpart:  print i 
+    for i in tmpart:
+        print (i) 
     
-    print " ########## "
+    print(" ########## ")
     try:
         media=mean(array(tmpart))
         arterr=std(array(tmpart))
@@ -369,8 +370,8 @@ def errore(img,imgpsf,coordlist,size,truemag,fwhm0,leng0,_show,_interactive,_num
         media=0
         arterr=0
         arterr2=0
-    print '### average = %6.6s \t arterr= %6.6s ' % (str(media),str(arterr))
-    print '###  %6.6s \t (error at 1 sigma rejection) ' % (str(arterr2))
+    print( '### average = %6.6s \t arterr= %6.6s ' % (str(media),str(arterr)))
+    print( '###  %6.6s \t (error at 1 sigma rejection) ' % (str(arterr2)))
     agnkey.util.delete("reserr.fit?,artbg.fit?,artstar.fit?,artres.fit?,artfit.fit?,artskyfit.fit?")
     agnkey.util.delete("reserr.ar?")
     agnkey.util.delete("artlist.co?")

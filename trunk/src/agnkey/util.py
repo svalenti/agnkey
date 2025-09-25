@@ -1146,9 +1146,10 @@ def sendtrigger2(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,usernam
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
-                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
-        if verbose: print 'JD= '+str(_JDtoday)
+        _JDtoday=_JD0 + (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600. * 24)+\
+                   (datenow - datetime.datetime(2012,  1,  1, 0, 0, 0)).days
+        if verbose:
+           print('JD= '+str(_JDtoday))
         return _JDtoday
 
     fildic={'1m0': {'U': 'U','B': 'B','V': 'V', 'R': 'R','I': 'I',
@@ -1346,8 +1347,8 @@ def sendfloydstrigger(_name,_exp,_ra,_dec,_utstart,_utend,username,passwd,propos
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-                   (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600.*24)+\
+                   (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).days
         if verbose:
            print('JD= '+str(_JDtoday))
         return _JDtoday
@@ -1502,8 +1503,8 @@ def sendfloydstrigger_new(_name,_exp,_ra,_dec,_utstart,_utend,username, token,pr
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-                   (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600.*24)+\
+                   (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).days
         if verbose:
            print('JD= '+str(_JDtoday))
         return _JDtoday
@@ -1698,8 +1699,8 @@ def sendtrigger2_new(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
-                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
+        _JDtoday=_JD0 + (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600. * 24)+\
+                   (datenow - datetime.datetime(2012,  1,  1, 0, 0, 0)).days
         if verbose:
            print('JD= '+str(_JDtoday))
         return _JDtoday
@@ -1977,7 +1978,7 @@ def makecatalogue2(imglist):
 def jd2date(inputjd):
    import datetime
    jd0 = 2451544.5 # On Jan 1, 2000 00:00:00
-   return datetime.datetime(2000,01,01,00,00,00)+datetime.timedelta(days=inputjd-jd0)
+   return datetime.datetime(2000, 1, 1, 0, 0, 0)+datetime.timedelta(days=inputjd-jd0)
 
 ############################################################################
 
@@ -2015,8 +2016,8 @@ def sendfloydstrigger_api3(_name,_exp,_ra,_dec,_utstart,_utend,username, token,p
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-                   (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+        _JDtoday=_JD0+(datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600.*24)+\
+                   (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).days
         if verbose:
            print('JD= '+str(_JDtoday))
         return _JDtoday
@@ -2182,7 +2183,7 @@ def sendfloydstrigger_api3(_name,_exp,_ra,_dec,_utstart,_utend,username, token,p
         }]
     }
     print('#'*20)
-    print user_request
+    print(user_request)
     print('#'*20)
     response = requests.post(
         'https://observe.lco.global/api/requestgroups/',
@@ -2235,8 +2236,8 @@ def sendtrigger_api3(_name,_ra,_dec,expvec,nexpvec,filtervec,_utstart,_utend,use
         if not datenow:
             datenow = datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday,
                                         time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-        _JDtoday=_JD0 + (datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600. * 24)+\
-                   (datenow - datetime.datetime(2012, 01, 01,00,00,00)).days
+        _JDtoday=_JD0 + (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600. * 24)+\
+                   (datenow - datetime.datetime(2012,  1,  1, 0, 0, 0)).days
         if verbose:
            print('JD= '+str(_JDtoday))
         return _JDtoday

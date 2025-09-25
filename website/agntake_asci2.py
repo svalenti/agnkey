@@ -106,11 +106,11 @@ ff.close()
 
 os.system('chmod 777 ../../tmp/'+spettro2+'.asci')
 
-print "Content-Type: text/html\n"
-print '<html><body>'
+print("Content-Type: text/html\n")
+print('<html><body>')
 if graf==1:
-      print '<h4> The asci file has been created correctly <h4>'
-      print '<h4> <a href="../../tmp/'+spettro2+'.asci"><b>&bull;</b> asci file</a></h4>'
+      print('<h4> The asci file has been created correctly <h4>')
+      print('<h4> <a href="../../tmp/'+spettro2+'.asci"><b>&bull;</b> asci file</a></h4>')
 else:
-         print '<h4> Problem with the lambda calibration header <h4>'
-print '</body></html>'
+         print('<h4> Problem with the lambda calibration header <h4>')
+print('</body></html>')

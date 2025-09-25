@@ -23,7 +23,7 @@ def dbConnect(lhost, luser, lpasswd, ldb):
                                 db = ldb)
       conn.autocommit(True)
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return conn
 
@@ -32,14 +32,14 @@ try:
    conn = dbConnect(hostname, username, passwd, database)
 except:
    conn=''
-   print '\### warning: problem with the database'
+   print('\### warning: problem with the database')
 
 ########################################################################
 
 def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
    import sys
    import MySQLdb,os,string
-   print epoch0, epoch2,telescope
+   print( epoch0, epoch2,telescope)
    try:
       cursor = conn.cursor (MySQLdb.cursors.DictCursor)
       if telescope =='all':
@@ -53,9 +53,9 @@ def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
                                " and NOT EXISTS(select * from "+str(datatable)+" redu where raw.namefile = redu.namefile)")
       elif telescope in ['elp','lsc','cpt','tfn', 'coj','1m0','kb','fl']:
          if epoch2:  
-            print "select raw.namefile from datarawlco raw where raw.namefile like '%"+telescope+"%'"+\
-                               " and raw.dateobs < "+str(epoch2)+" and raw.dateobs >= "+str(epoch0)+\
-                               " and NOT EXISTS(select * from "+str(datatable)+" redu where raw.namefile = redu.namefile)"
+            print("select raw.namefile from datarawlco raw where raw.namefile like '%"+telescope+"%'"+\
+                      " and raw.dateobs < "+str(epoch2)+" and raw.dateobs >= "+str(epoch0)+\
+                      " and NOT EXISTS(select * from "+str(datatable)+" redu where raw.namefile = redu.namefile)")
             cursor.execute ("select raw.namefile from datarawlco raw where raw.namefile like '%"+telescope+"%'"+\
                                " and raw.dateobs < "+str(epoch2)+" and raw.dateobs >= "+str(epoch0)+\
                                " and NOT EXISTS(select * from "+str(datatable)+" redu where raw.namefile = redu.namefile)")
@@ -77,7 +77,7 @@ def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -92,7 +92,7 @@ def getfromdataraw(conn, table, column, value,column2='*'):
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -122,7 +122,7 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
          pass
       cursor.close ()
    except MySQLdb.Error, e: 
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -148,7 +148,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
 #      sys.exit (1)
 
 ###########################################################################
@@ -179,7 +179,7 @@ def insert_values(conn,table,values):
             pass
         cursor.close ()
     except MySQLdb.Error, e:
-        print "Error %d: %s" % (e.args[0], e.args[1])
+        print("Error %d: %s" % (e.args[0], e.args[1]))
 #        sys.exit (1)
 
 ########################################################################
@@ -260,17 +260,17 @@ def ingestdata(telescope,instrument,listepoch,_force):
    for epoch in listepoch:
     if telescope in ['fts']:
        imglist=''
-       print '\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/'
+       print('\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/')
     elif telescope in ['ftn']:
        imglist=''
-       print '\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/'
+       print('\n###  warning ingestion raw data FTN and FTS data should be done from web site and not from /archive/data1/')
     elif telescope in ['1m0-03','1m0-04','1m0-05','1m0-08','1m0-09','1m0-10','1m0-11','1m0-12',
                        '1m0-13','tfn','lsc','elp','cpt','all','coj']:
-       print 'force ingestion'
+       print('force ingestion')
        import agnkey
        from agnkey.util import readkey3,readhdr
        imglist=[]
-       print tellist,instrumentlist
+       print(tellist,instrumentlist)
        for tel in tellist:
           for instrument in instrumentlist:
              directory=agnkey.util.rawdata+tel+'/'+instrument+'/'+str(epoch)+'/oracproc/'
@@ -318,7 +318,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
                   hdr=readhdr(img)
 #                  if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-008'] or readkey3(hdr,'object') in ['2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk']:
                   if readkey3(hdr,'PROPID') in ['LCOELP-001','LCONET-001','DDTLCO-009'] or readkey3(hdr,'object') in ['PSN09554214','2012cg','LSQ12cpf','2012da','PTF12fuu','PTF12grk','PTF12gzk','PTF13dzb']:
-                     print readkey3(hdr,'PROPID'),readkey3(hdr,'USERID'),readkey3(hdr,'object')
+                     print(readkey3(hdr,'PROPID'),readkey3(hdr,'USERID'),readkey3(hdr,'object'))
                      _tech=None
                      dictionary={ 'lamp':readkey3(hdr,'lamp'), 'grism':readkey3(hdr,'grism'),'telescope':readkey3(hdr,'telescop'),'fwhm':readkey3(hdr,'L1FWHM'),\
                            'instrument':readkey3(hdr,'instrume'),'dec0':readkey3(hdr,'DEC'),'ra0':readkey3(hdr,'RA'),'ut':readkey3(hdr,'ut'),\
@@ -344,7 +344,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
                                  'fl11','fl12','fl13','fl14','fl15','fl16','fl20']:
                   if not agnkey.agnsqldef.getfromdataraw(conn,datarawtable,'namefile', string.split(img,'/')[-1],column2='namefile'):
                      agnkey.agnsqldef.insert_values(conn,datarawtable,dictionary)
-                     print 'insert '+img
+                     print('insert '+img)
                   elif _force:
                      for voce in dictionary:
                         if voce!='id' and voce!='namefile':
@@ -358,7 +358,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
 def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'):
    import string,re,os,sys
    import agnkey
-   print 'here'
+   print('here')
    #os.umask(000)   # permission to supernova user and group 
 
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
@@ -390,7 +390,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
       if exist:
          if force=='yes':
             agnkey.agnsqldef.deleteredufromarchive(string.split(img,'/')[-1],dataredutable)
-            print 'delete line from '+str(database)
+            print('delete line from '+str(database))
             exist=agnkey.agnsqldef.getfromdataraw(conn,dataredutable,'namefile', string.split(img,'/')[-1],column2='namefile')
 
       if not exist or force =='update':
@@ -399,7 +399,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
          else:
             if 'diff' in string.split(img,'/')[-1][0:4]=='diff':       filetype=3  #   difference image
             else:                                                      filetype=2  #   merge image
-         print filetype
+         print(filetype)
          if img[0]=='/':
             _dir=re.sub(string.split(img,'/')[-1],'',img)
             img=string.split(img,'/')[-1]
@@ -426,7 +426,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             dictionary['filetype']=filetype
             dictionary['targid']=_targid
 
-            print 'insert reduced'
+            print('insert reduced')
             ggg=agnkey.agnsqldef.getfromdataraw(conn, dataredutable, 'namefile',str(img), '*')
             if not ggg:
                agnkey.agnsqldef.insert_values(conn,dataredutable,dictionary)
@@ -438,7 +438,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
          ######################################
             if not os.path.isdir(dictionary['wdirectory']): os.mkdir(dictionary['wdirectory'])
             if not os.path.isfile(dictionary['wdirectory']+img) or force=='yes': 
-               print 'cp '+_dir+img+' '+dictionary['wdirectory']+img
+               print('cp '+_dir+img+' '+dictionary['wdirectory']+img)
                os.system('cp '+_dir+img+' '+dictionary['wdirectory']+img)
                os.chmod(dictionary['wdirectory']+img,0664)
 
@@ -460,7 +460,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             dictionary['wdirectory']=agnkey.util.workingdirectoy+'2mtel/'+readkey3(hdr,'date-night')+'/'
             dictionary['filetype']=filetype
             dictionary['targid']=_targid
-            print 'insert reduced'
+            print('insert reduced')
             ggg=agnkey.agnsqldef.getfromdataraw(conn, dataredutable, 'namefile',str(img), '*')
             if not ggg:
                agnkey.agnsqldef.insert_values(conn,dataredutable,dictionary)
@@ -469,10 +469,11 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
 #               for voce in ['filetype','ra0','dec0']:
                   agnkey.agnsqldef.updatevalue(dataredutable,voce,dictionary[voce],string.split(img,'/')[-1])
 
-         elif _type=='floyds': print 'floyds'
+         elif _type=='floyds':
+            print('floyds')
          else: sys.exit('instrument not recognised')
       else:
-         print 'already ingested'
+         print('already ingested')
 
 ###############################################################################################################################
 
@@ -507,7 +508,7 @@ def deleteredufromarchive(namefile,archive='dataredulco',column='namefile'):
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -532,7 +533,7 @@ def getfromcoordinate(conn, table, ra0, dec0,distance):
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -643,7 +644,7 @@ def getlike(conn, table, column, value,column2='*'):
          pass
       cursor.close ()
    except MySQLdb.Error, e:
-      print "Error %d: %s" % (e.args[0], e.args[1])
+      print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
@@ -663,7 +664,7 @@ def query(command):
                 pass
         cursor.close ()
    except MySQLdb.Error, e: 
-        print "Error %d: %s" % (e.args[0], e.args[1])
+        print("Error %d: %s" % (e.args[0], e.args[1]))
    return lista
 
 ###########################################################3
@@ -683,6 +684,7 @@ def JDnow(datenow='',verbose=False):
       datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
    _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
              (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
-   if verbose: print 'JD= '+str(_JDtoday)
+   if verbose:
+      print('JD= '+str(_JDtoday))
    return _JDtoday
 ###################################

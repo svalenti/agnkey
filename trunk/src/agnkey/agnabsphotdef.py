@@ -193,13 +193,14 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         colorefisso=agnkey.sites.colfix(_instrume,_calib)
 
     if _cat and not redo:
-        print 'already calibrated'
+        print('already calibrated')
     else:
      try:
            agnkey.agnsqldef.updatevalue(database,'zcat','X',string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
            if os.path.isfile(string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1]):
                  agnkey.agnsqldef.updatevalue(database,'zcat','X',string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
-     except: print 'module mysqldef not found'
+     except:
+           print('module mysqldef not found')
 
      column=agnkey.util.makecatalogue2([img])[_filter][img]
 
@@ -230,7 +231,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         xy = iraf.wcsctran('STDIN',output="STDOUT",Stdin=vector,Stdout=1,image=img,inwcs='world',units='degrees degrees',outwcs='logical',\
                                formats='%10.1f %10.1f',verbose='yes')[3:]
         iraf.tvmark(1,'STDIN',Stdin=list(xy),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=207,txsize=2)
-        print 'yelow circles sextractor'
+        print('yelow circles sextractor')
         
      if _catalogue:
         ######## use external catalogue
@@ -249,7 +250,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         if _interactive:
               vector=[k+' '+v for k,v in  zip(standardpixC['ra'],standardpixC['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
-              print 'yellow circles sextractor'
+              print('yellow circles sextractor')
 
         xstdC=standardpixC['ra']
         ystdC=standardpixC['dec']
@@ -270,7 +271,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
               vector=[k+' '+v for k,v in  zip(standardpixL['ra'],standardpixL['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
               #iraf.tvmark(1,'tmp.stdL.pix',mark="circle",number='yes',label='no',radii=8,nxoffse=5,nyoffse=5,color=204,txsize=2)
-              print 'yellow circles sextractor'
+              print('yellow circles sextractor')
 
         xstdL=standardpixL['ra']
         ystdL=standardpixL['dec']
@@ -307,7 +308,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
               vector=[k+' '+v for k,v in  zip(standardpixLL['ra'],standardpixLL['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
               #iraf.tvmark(1,'tmp.stdLL.pix',mark="cross",number='yes',label='no',radii=8,nxoffse=5,nyoffse=5,color=204,txsize=2)
-              print 'red crosses Stetson'
+              print('red crosses Stetson')
 
         xstdLL=compress((array(xstdLL,float)<readkey3(hdr,'XDIM'))&(array(xstdLL,float)>0)&(array(ystdLL,float)>0)&(array(ystdLL,float)<readkey3(hdr,'YDIM')),xstdLL)
         ######## check if it is sloan field
@@ -323,7 +324,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
               vector=[k+' '+v for k,v in  zip(standardpixS['ra'],standardpixS['dec'])]
               iraf.tvmark(1,'STDIN',Stdin=list(vector),mark="circle",number='yes',label='no',radii=10,nxoffse=5,nyoffse=5,color=204,txsize=2)
               #iraf.tvmark(1,'tmp.stdS.pix',mark="cross",number='yes',label='no',radii=8,nxoffse=5,nyoffse=5,color=205,txsize=2)
-              print 'green cross sloan'
+              print('green cross sloan')
 
         xstdS=standardpixS['ra']
         ystdS=standardpixS['dec']
@@ -354,7 +355,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
             colors={'U':['UB'],'B':['UB','BV'],'V':['BV','VR'],'R':['VR','RI'],'I':['RI']}
         if _field=='sloan':
                 standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
-                print 'filters and field selected do not match'
+                print('filters and field selected do not match')
         else:
             _field='landolt'
             if len(xstdL)>=1:
@@ -369,9 +370,9 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                 stdcoo=stdcooS
                 stdcoo=agnkey.agnastrodef.transformsloanlandolt(stdcoo)
                 if not _catalogue:  _catalogue='sdss8' 
-                print '\n### transform sloan in landolt'
+                print('\n### transform sloan in landolt')
             else:
-                print 'landolt, but catalogue not found'
+                print('landolt, but catalogue not found')
                 standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
        elif _filter in  ['up','gp','rp','ip','zs','SDSS-G','SDSS-R','SDSS-I','Pan-Starrs-Z']: 
         filters={'up':'u','ip':'i','gp':'g','rp':'r','zs':'z','SDSS-G':'g','SDSS-R':'r','SDSS-I':'i','Pan-Starrs-Z':'z'}
@@ -382,7 +383,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
             colors={'i':['ri','iz'],'r':['gr','ri'],'g':['ug','gr'],'z':['iz'],'u':['ug']}
         if _field=='landolt':   
                 standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}
-                print 'filters and field selected do not match'
+                print('filters and field selected do not match')
         else:
             _field='sloan'
             if len(xstdS)>=1:
@@ -394,9 +395,9 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                 stdcoo=stdcooL
                 stdcoo=agnkey.agnastrodef.transformlandoltsloan(stdcoo)
                 if not _catalogue:  _catalogue='landolt.dat' 
-                print '\n### transform landolt to sloan'
+                print('\n### transform landolt to sloan')
             else:
-                print 'sloan, but not in the sdss footprint'
+                print('sloan, but not in the sdss footprint')
                 standardpix,stdcoo={'ra':[9999],'dec':[9999],'id':[1]},{'ra':[9999],'dec':[9999]}        
 
      xstd=standardpix['ra']
@@ -410,7 +411,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
         airmass0={}
         result={}
         fileph={}
-        print '\n###  standard field: '+str(_field)
+        print('\n###  standard field: '+str(_field))
         ystd0=compress((array(xstd,float)<readkey3(hdr,'XDIM'))&(array(xstd,float)>0)&(array(ystd,float)>0)\
                                &(array(ystd,float)<readkey3(hdr,'YDIM')),ystd)
         rastd0=compress((array(xstd,float)<readkey3(hdr,'XDIM'))&(array(xstd,float)>0)&(array(ystd,float)>0)\
@@ -438,7 +439,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
 #        magsex=magsex[pos1]+2.5*math.log10(float(_exptime))-kk[filters[_filter]]*float(_airmass)  #  mag    exptime      - K x airmass
 #################################################################################
         if _field=='landolt':
-            print '\n###  landolt system'
+            print('\n###  landolt system')
             for _filtlandolt in 'UBVRI':
                 if _filtlandolt==filters[_filter]:  airmass0[_filtlandolt]=  0 #_airmass
                 else: airmass0[_filtlandolt]= 0
@@ -560,16 +561,16 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
             else: fisso=''
 
             if len(colore2)==0:
-                print 'no calibration, '+_filter+' '+_field
+                print('no calibration, '+_filter+' '+_field)
                 b,a,sa,sb=9999,9999,0,0
             else:
                 if _interactive:    a,sa,b,sb=fitcol(colore2,zero2,_filter,col,fisso)
                 else:               a,sa,b,sb=fitcol2(colore2,zero2,_filter,col,fisso,show,rejection)
 
-            print a,sa,b,sb
+            print(a,sa,b,sb)
             result[filters[_filter]+col]=[a,sa,b,sb]
         if result:
-            print '\n### zeropoint ..... done at airmass 0'
+            print('\n### zeropoint ..... done at airmass 0')
             if _catalogue:
                 agnkey.util.updateheader(img,0,{'CATALOG':[str(string.split(_catalogue,'/')[-1]),'catalogue source']})
             stringa=''
@@ -577,7 +578,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                 for kk in range(0,len(result[ll])):
                                     if not isfinite(result[ll][kk]): result[ll][kk]=0.0 
                 valore='%3.3s %6.6s %6.6s  %6.6s  %6.6s' %  (str(ll),str(result[ll][0]),str(result[ll][2]),str(result[ll][1]),str(result[ll][3]))
-                print '### ',valore
+                print('### ',valore)
                 agnkey.util.updateheader(img,0,{'zp'+ll:[str(valore),'a b sa sb in y=a+bx']})
                 if ll[0]==ll[2]: 
                       num=2
@@ -586,7 +587,7 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                 else: 
                       sys.exit('somthing wrong with color '+ll)
                 try:
-                    print 'zcol'+str(num),ll[1:],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1]
+                    print('zcol'+str(num),ll[1:],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue(database,'zcol'+str(num),ll[1:],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue(database,'z'+str(num),result[ll][0],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
                     agnkey.agnsqldef.updatevalue(database,'c'+str(num),result[ll][2],string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
@@ -606,7 +607,8 @@ def absphot(img,_field,_catalogue,_fix,_color,rejection,_interactive,_type='fit'
                         agnkey.agnsqldef.updatevalue(database,'zcat','X',string.split(re.sub('.sn2.fits','.fits',img),'/')[-1])
                         if os.path.isfile(string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1]):
                               agnkey.agnsqldef.updatevalue(database,'zcat','X',string.split(re.sub('.diff.sn2.fits','.fits',img),'/')[-1])
-                except: print 'module mysqldef not found'
+                except:
+                      print('module mysqldef not found')
                 
 #################################################################
 
@@ -669,8 +671,8 @@ def fitcol(col,dmag,band,color,fissa=''):
     plt.draw()
     raw_input('left-click mark bad, right-click unmark, <d> remove. Return to exit ...')
     plt.close()
-    print '####'
-    print sigmaa,sigmab, aa,bb
+    print('####')
+    print(sigmaa,sigmab, aa,bb)
     return aa,sigmaa,bb,sigmab
 
 #################################################################
@@ -678,7 +680,7 @@ def fitcol(col,dmag,band,color,fissa=''):
 def fitcol2(_col,_dmag,band,col,fixcol='',show=False,rejection=2):
     from numpy import polyfit,polyval,argmin,sqrt,mean,array,std,compress
     import agnkey
-    print '####'+str(rejection)
+    print('####'+str(rejection))
     sss=band
     f=col
     if len(_col)>1:
@@ -713,9 +715,9 @@ def fitcol2(_col,_dmag,band,col,fixcol='',show=False,rejection=2):
             draw()
             time.sleep(1)
     try:
-        print '##### ',mean0,sigmaa,slope,sigmab
+        print('##### ',mean0,sigmaa,slope,sigmab)
     except:
-        print '\n### zeropoint not computed'
+        print('\n### zeropoint not computed')
         mean0,sigmaa,slope,sigmab=9999,9999,9999,9999
     return mean0,sigmaa,slope,sigmab
 
@@ -784,9 +786,9 @@ def meanclip3(xx,yy,slope, clipsig=3.0, maxiter=5, converge_num=0.1, verbose=0):
 ######################################################################################################
 def finalmag(Z1,Z2,C1,C2,m1,m2):
     color=(Z1-Z2+m1-m2)/(1-(C1-C2))
-    print 'color ',color
-    print Z1,C1,m1
-    print Z2,C2,m2
+    print( 'color ',color)
+    print( Z1,C1,m1)
+    print( Z2,C2,m2)
     M1=Z1+C1*color+m1
     M2=Z2+C2*color+m2
     return M1,M2
@@ -839,13 +841,13 @@ def zeropoint(data,mag,maxiter=10,nn=2,show=False):
         z2=np.mean(data2)
         std2=np.std(data2)
         if show:
-            print 'rejected '+str(len(data1)-len(data2))+' point'
-            print z1,std1,len(data1)
-            print z2,std2,len(data2)
+            print( 'rejected '+str(len(data1)-len(data2))+' point')
+            print( z1,std1,len(data1))
+            print( z2,std2,len(data2))
 
         if np.abs(z2-z1)<std2/np.sqrt(len(data2)):
             if show:
-                print 'zero points are within std2 '
+                print( 'zero points are within std2 ')
                 pl.clf()
                 pl.plot(mag1,data1,'or')
                 pl.plot(mag2,data2,'xg')
@@ -861,9 +863,9 @@ def zeropoint(data,mag,maxiter=10,nn=2,show=False):
             std2=np.std(data2)
         iter += 1
         if show:
-            print 'iteration '+str(iter)
-            print z1,std1,len(data1)
-            print z2,std2,len(data2)
+            print( 'iteration '+str(iter))
+            print( z1,std1,len(data1))
+            print( z2,std2,len(data2))
             pl.clf()
             pl.plot(mag,data,'or')
             pl.plot(mag2,data2,'*g')
@@ -875,7 +877,7 @@ def zeropoint2(xx,mag,maxiter=10,nn=2,show=False,_cutmag=99):
    if len(xx):
       import numpy as np
       if float(_cutmag)!=99:
-         print 'cut mag '+str(_cutmag)
+         print( 'cut mag '+str(_cutmag))
          xx=np.compress(mag<_cutmag,xx)
          mag=np.compress(mag<_cutmag,mag)
       data=np.array(xx-mag)
@@ -889,7 +891,7 @@ def zeropoint2(xx,mag,maxiter=10,nn=2,show=False,_cutmag=99):
       std2=np.std(data2)
       iter=0; 
       if show:  
-            print len(data2)
+            print( len(data2))
             import pylab as pl
             pl.ion()
             pl.clf()
@@ -901,12 +903,12 @@ def zeropoint2(xx,mag,maxiter=10,nn=2,show=False,_cutmag=99):
           z2=np.mean(data2)
           std2=np.std(data2)
           if show:
-              print 'rejected '+str(len(data1)-len(data2))+' point'
-              print z1,std1,len(data1)
-              print z2,std2,len(data2)
+              print( 'rejected '+str(len(data1)-len(data2))+' point')
+              print( z1,std1,len(data1))
+              print( z2,std2,len(data2))
           if np.abs(z2-z1)<std2/np.sqrt(len(data2)):
               if show:
-                  print 'zero points are within std2 '
+                  print( 'zero points are within std2 ')
                   pl.clf()
                   pl.plot(mag1,data1,'or')
                   pl.plot(mag2,data2,'xg')
@@ -922,9 +924,9 @@ def zeropoint2(xx,mag,maxiter=10,nn=2,show=False,_cutmag=99):
               std2=np.std(data2)
           iter += 1
           if show:
-              print 'iteration '+str(iter)
-              print z1,std1,len(data1)
-              print z2,std2,len(data2)
+              print( 'iteration '+str(iter))
+              print( z1,std1,len(data1))
+              print( z2,std2,len(data2))
               pl.clf()
               pl.plot(mag,data,'or')
               pl.plot(mag2,data2,'*g')
@@ -954,12 +956,12 @@ def transform2natural(_instrument,_catalogue,_inputsystem='sloan'):
       _catalogue2['r']=_catalogue2['r']-colorefisso['rri']*np.array(col['ri'])#(_catalogue['r']-_catalogue['i'])
       _catalogue2['i']=_catalogue2['i']-colorefisso['iri']*np.array(col['ri'])#(_catalogue['r']-_catalogue['i'])
       _catalogue2['z']=_catalogue2['z']-colorefisso['ziz']*np.array(col['iz'])#(_catalogue['i']-_catalogue['z'])
-      print 'transform '+str(_inputsystem)+' to natural system'
-      print 'un = u - '+str(colorefisso['uug'])+' * (u-g)'
-      print 'gn = g - '+str(colorefisso['ggr'])+' * (g-r)'
-      print 'rn = r - '+str(colorefisso['rri'])+' * (r-i)'
-      print 'in = i - '+str(colorefisso['iri'])+' * (r-i)'
-      print 'zn = z - '+str(colorefisso['ziz'])+' * (i-z)'
+      print( 'transform '+str(_inputsystem)+' to natural system')
+      print( 'un = u - '+str(colorefisso['uug'])+' * (u-g)')
+      print( 'gn = g - '+str(colorefisso['ggr'])+' * (g-r)')
+      print( 'rn = r - '+str(colorefisso['rri'])+' * (r-i)')
+      print( 'in = i - '+str(colorefisso['iri'])+' * (r-i)')
+      print( 'zn = z - '+str(colorefisso['ziz'])+' * (i-z)')
    elif _inputsystem in ['landolt']:
       colorefisso=agnkey.sites.colfix(_instrument,_inputsystem)
       #colorefisso=lcogtcal.util.colorfix(_instrument,_inputsystem)
@@ -973,12 +975,12 @@ def transform2natural(_instrument,_catalogue,_inputsystem='sloan'):
       _catalogue2['V']=_catalogue2['V']-colorefisso['VVR']*np.array(col['VR'])#(_catalogue['V']-_catalogue['R'])
       _catalogue2['R']=_catalogue2['R']-colorefisso['RVR']*np.array(col['VR'])#(_catalogue['V']-_catalogue['R'])
       _catalogue2['I']=_catalogue2['I']-colorefisso['IRI']*np.array(col['RI'])#(_catalogue['R']-_catalogue['I'])
-      print 'transform '+str(_inputsystem)+' to natural system'
-      print "Un = U - "+str(colorefisso['UUB'])+" * (U-B)"
-      print "Bn = B - "+str(colorefisso['BBV'])+" * (B-V)"
-      print "Vn = V - "+str(colorefisso['VVR'])+" * (V-R)"
-      print "Rn = R - "+str(colorefisso['RVR'])+" * (V-R)"
-      print "In = I - "+str(colorefisso['IRI'])+" * (R-I)"
+      print( 'transform '+str(_inputsystem)+' to natural system')
+      print( "Un = U - "+str(colorefisso['UUB'])+" * (U-B)")
+      print( "Bn = B - "+str(colorefisso['BBV'])+" * (B-V)")
+      print( "Vn = V - "+str(colorefisso['VVR'])+" * (V-R)")
+      print( "Rn = R - "+str(colorefisso['RVR'])+" * (V-R)")
+      print( "In = I - "+str(colorefisso['IRI'])+" * (R-I)")
    elif _inputsystem in ['apass']:
       colorefisso=agnkey.sites.colfix(_instrument,_inputsystem)
       #colorefisso=lcogtcal.util.colorfix(_instrument,_inputsystem)
@@ -991,12 +993,12 @@ def transform2natural(_instrument,_catalogue,_inputsystem='sloan'):
       _catalogue2['g']=_catalogue2['g']-colorefisso['ggr']*np.array(col['gr']) #(_catalogue['g']-_catalogue['r'])
       _catalogue2['r']=_catalogue2['r']-colorefisso['rri']*np.array(col['ri']) #(_catalogue['r']-_catalogue['i'])
       _catalogue2['i']=_catalogue2['i']-colorefisso['iri']*np.array(col['ri']) #(_catalogue['r']-_catalogue['i'])
-      print 'transform '+str(_inputsystem)+' to natural system'
-      print "Bn = B - "+str(colorefisso['BBV'])+" * (B-V)"
-      print "Vn = V - "+str(colorefisso['BBV'])+" * (B-V)"
-      print "gn = g' - "+str(colorefisso['ggr'])+" * (g'-g')"
-      print "rn = r' - "+str(colorefisso['rri'])+" * (r'-i')"
-      print "in = i' - "+str(colorefisso['iri'])+" * (r'-i')"
+      print( 'transform '+str(_inputsystem)+' to natural system')
+      print( "Bn = B - "+str(colorefisso['BBV'])+" * (B-V)")
+      print( "Vn = V - "+str(colorefisso['BBV'])+" * (B-V)")
+      print( "gn = g' - "+str(colorefisso['ggr'])+" * (g'-g')")
+      print( "rn = r' - "+str(colorefisso['rri'])+" * (r'-i')")
+      print( "in = i' - "+str(colorefisso['iri'])+" * (r'-i')")
    return _catalogue2
 
 ##################################################################################
@@ -1016,10 +1018,10 @@ def zeronew(ZZ,maxiter=10,nn=5,verbose=False,show=False):
      while iter < maxiter and len(ZZcut)>5 and cut>0:
           iter+=1
           if verbose:
-               print 'reject  '+str(cut)+' objects'  
-               print 'number of object= '+str(len(ZZcut))
-               print 'median=  '+str(mediancut)
-               print 'sigma= '+str(sigmacut)
+               print( 'reject  '+str(cut)+' objects')
+               print( 'number of object= '+str(len(ZZcut)))
+               print( 'median=  '+str(mediancut))
+               print( 'sigma= '+str(sigmacut))
           # new cut around new median after rejection 
           ZZcut2=np.compress((ZZ < (mediancut+nn*sigmacut)) & (ZZ>(mediancut-nn*sigmacut)),ZZ)  
 
@@ -1030,7 +1032,8 @@ def zeronew(ZZ,maxiter=10,nn=5,verbose=False,show=False):
                ZZcut=ZZcut2
                sigmacut=sigma2
                mediancut=np.median(ZZcut2)
-          if verbose:   print len(ZZcut2),sigmacut,mediancut
+          if verbose:
+                print(len(ZZcut2),sigmacut,mediancut)
      if show:
           import pylab as pl
           pl.ion()
