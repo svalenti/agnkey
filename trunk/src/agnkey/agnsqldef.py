@@ -22,7 +22,7 @@ def dbConnect(lhost, luser, lpasswd, ldb):
                             passwd = lpasswd,
                                 db = ldb)
       conn.autocommit(True)
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return conn
@@ -76,7 +76,7 @@ def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -91,7 +91,7 @@ def getfromdataraw(conn, table, column, value,column2='*'):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -121,7 +121,7 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e: 
+   except (MySQLdb.Error, e): 
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -147,7 +147,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
 #      sys.exit (1)
 
@@ -178,7 +178,7 @@ def insert_values(conn,table,values):
         if cursor.rowcount == 0:
             pass
         cursor.close ()
-    except MySQLdb.Error, e:
+    except (MySQLdb.Error, e):
         print("Error %d: %s" % (e.args[0], e.args[1]))
 #        sys.exit (1)
 
@@ -440,7 +440,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
             if not os.path.isfile(dictionary['wdirectory']+img) or force=='yes': 
                print('cp '+_dir+img+' '+dictionary['wdirectory']+img)
                os.system('cp '+_dir+img+' '+dictionary['wdirectory']+img)
-               os.chmod(dictionary['wdirectory']+img,0664)
+               os.chmod(dictionary['wdirectory']+img, 664)
 
          elif _type=='2m': 
             import agnkey
@@ -507,7 +507,7 @@ def deleteredufromarchive(namefile,archive='dataredulco',column='namefile'):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -532,7 +532,7 @@ def getfromcoordinate(conn, table, ra0, dec0,distance):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -643,7 +643,7 @@ def getlike(conn, table, column, value,column2='*'):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except MySQLdb.Error, e:
+   except (MySQLdb.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -663,7 +663,7 @@ def query(command):
             if cursor.rowcount == 0:
                 pass
         cursor.close ()
-   except MySQLdb.Error, e: 
+   except (MySQLdb.Error, e): 
         print("Error %d: %s" % (e.args[0], e.args[1]))
    return lista
 
@@ -682,8 +682,8 @@ def JDnow(datenow='',verbose=False):
    _JD0=2455927.5
    if not datenow:
       datenow=datetime.datetime(time.gmtime().tm_year, time.gmtime().tm_mon, time.gmtime().tm_mday, time.gmtime().tm_hour, time.gmtime().tm_min, time.gmtime().tm_sec)
-   _JDtoday=_JD0+(datenow-datetime.datetime(2012, 01, 01,00,00,00)).seconds/(3600.*24)+\
-             (datenow-datetime.datetime(2012, 01, 01,00,00,00)).days
+   _JDtoday=_JD0+(datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).seconds/(3600.*24)+\
+             (datenow-datetime.datetime(2012,  1,  1, 0, 0, 0)).days
    if verbose:
       print('JD= '+str(_JDtoday))
    return _JDtoday

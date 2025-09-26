@@ -1104,7 +1104,7 @@ def sqlquery(db,command):
        if cursor.rowcount == 0:
            pass
        cursor.close()
-   except MySQLdb.Error, e: 
+   except (MySQLdb.Error, e): 
        lista = "Error %d: %s" % (e.args[0], e.args[1])
        print(lista)
    return lista
