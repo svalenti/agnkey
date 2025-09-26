@@ -1,14 +1,14 @@
-import util 
-import agnsqldef 
-import agnastrodef 
-import agnabsphotdef 
-import agnsnoopy 
-import sqlcl 
-import sites 
-import agnloopdef 
-import cosmics 
-import agndefin
-import zscale
+import agnkey.util 
+import agnkey.agnsqldef 
+import agnkey.agnastrodef 
+import agnkey.agnabsphotdef 
+import agnkey.agnsnoopy 
+import agnkey.sqlcl 
+import agnkey.sites 
+import agnkey.agnloopdef 
+import agnkey.cosmics 
+import agnkey.agndefin
+import agnkey.zscale
 
 __version__ = "unknown"
 try:
