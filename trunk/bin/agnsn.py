@@ -223,7 +223,7 @@ if __name__ == "__main__":
                             ff.write(str(x) + ' ' + str(y) + ' -1' + ' \n')
                             ff.close()
                             iraf.tvmark(1, 'tmplabel', autol='no', mark="cross", inter='no', label='no', txsize=4)
-                            repeat = raw_input('### repeat selection ? [y/n] ? [n] ')
+                            repeat = agnkey.util.rawinput('### repeat selection ? [y/n] ? [n] ')
                             if not repeat:
                                 repeat = 'n'
                             elif repeat == 'yes':
@@ -233,7 +233,7 @@ if __name__ == "__main__":
                         except:
                             x = y = value = 0
                             print '### WARNING: SN REGION NOT SELECTED !!!'
-                            repeat = raw_input('### repeat selection ? [y/n] ? [n] ')
+                            repeat = agnkey.util.rawinput('### repeat selection ? [y/n] ? [n] ')
                             if not repeat:
                                 repeat = 'n'
                             if repeat in ['Y', 'y', 'YES', 'yes', 'Yes']:
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                 else:
                     repeat = 'n'
                     while repeat == 'n':
-                        size = raw_input('Size of the cut frame (fwhm) [' + str(_size0) + '] ? ')
+                        size = agnkey.util.rawinput('Size of the cut frame (fwhm) [' + str(_size0) + '] ? ')
                         if not size:
                             size = _size0
                         else:
@@ -277,7 +277,7 @@ if __name__ == "__main__":
                         iraf.set(stdimage='imt512')
                         _tmp1, _tmp2, goon = agnkey.util.display_image('original.fits', 1, '', '', False, _xsize=.5,
                                                                        _ysize=.5)
-                        repeat = raw_input('### ok ? [y/n] ? [y] ')
+                        repeat = agnkey.util.rawinput('### ok ? [y/n] ? [y] ')
                         if not repeat:
                             repeat = 'y'
                         elif repeat == 'no':
@@ -288,14 +288,14 @@ if __name__ == "__main__":
                     z11, z22 = _z11, _z22
                 if _interactive:
                     answ = 'y'
-                    answ = raw_input(">>>>> Cuts OK [y/n] [y]?")
+                    answ = agnkey.util.rawinput(">>>>> Cuts OK [y/n] [y]?")
                     if not answ:
                         answ = 'y'
                     elif answ == 'no':
                         answ = 'n'
                     while answ == 'n':
-                        z11 = raw_input('>>> z1 = ? [' + str(_z11) + '] ? ')
-                        z22 = raw_input('>>> z2 = ? [' + str(_z22) + '] ? ')
+                        z11 = agnkey.util.rawinput('>>> z1 = ? [' + str(_z11) + '] ? ')
+                        z22 = agnkey.util.rawinput('>>> z2 = ? [' + str(_z22) + '] ? ')
                         if not z11:
                             z11 = _z11
                         else:
@@ -305,7 +305,7 @@ if __name__ == "__main__":
                         else:
                             z22 = float(z22)
                         _z11, _z22, goon = agnkey.util.display_image('original.fits', 1, z11, z22, False)
-                        answ = raw_input(">>>>> Cuts OK [y/n] [y]?")
+                        answ = agnkey.util.rawinput(">>>>> Cuts OK [y/n] [y]?")
                         if not answ:
                             answ = 'y'
                         elif answ == 'no':
@@ -352,7 +352,7 @@ if __name__ == "__main__":
                                         number='yes',
                                         pointsize=20, txsize=2, color=204)
                         os.system('cp tmplabel ' + img + '.sn.coo')
-                        answ0 = raw_input(">>>>> SN AND CO-STARS(S) IDENTIFICATIONS OK [y/n] [y]?")
+                        answ0 = agnkey.util.rawinput(">>>>> SN AND CO-STARS(S) IDENTIFICATIONS OK [y/n] [y]?")
                         if not answ0:
                             answ0 = 'y'
                         elif answ0 == 'no':
@@ -375,7 +375,7 @@ if __name__ == "__main__":
                                 else:
                                     leng0 = _fb0
                             else:
-                                leng0 = raw_input('>>> length of square for background in units of FWHM [3] ? ')
+                                leng0 = agnkey.util.rawinput('>>> length of square for background in units of FWHM [3] ? ')
                                 if not leng0: leng0 = 3
                             try:
                                 float(leng0)
@@ -410,12 +410,12 @@ if __name__ == "__main__":
                                     xbgord0 = _xbgord0
                                     ybgord0 = _ybgord0
                             else:
-                                xbgord0 = raw_input('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
+                                xbgord0 = agnkey.util.rawinput('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
                                 if not xbgord0:
                                     xbgord0 = _xbgord0
                                 else:
                                     _xbgord0 = xbgord0
-                                ybgord0 = raw_input(
+                                ybgord0 = agnkey.util.rawinput(
                                     '>>> Order of function in y for bg fit ? [' + str(_ybgord0) + '] ? ')
                                 if not ybgord0:
                                     ybgord0 = _ybgord0
@@ -471,12 +471,12 @@ if __name__ == "__main__":
                                     xbgord0 = _xbgord0
                                     ybgord0 = _ybgord0
                             else:
-                                xbgord0 = raw_input('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
+                                xbgord0 = agnkey.util.rawinput('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
                                 if not xbgord0:
                                     xbgord0 = _xbgord0
                                 else:
                                     _xbgord0 = xbgord0
-                                ybgord0 = raw_input('>>> Order of function in y for bg fit [' + str(_ybgord0) + '] ? ')
+                                ybgord0 = agnkey.util.rawinput('>>> Order of function in y for bg fit [' + str(_ybgord0) + '] ? ')
                                 if not ybgord0:
                                     ybgord0 = _ybgord0
                                 else:
@@ -528,7 +528,7 @@ if __name__ == "__main__":
                     if not _interactive:
                         answ0 = 'y'
                     else:
-                        answ0 = raw_input(">>> Background fit OK [y/n] [y] ?")
+                        answ0 = agnkey.util.rawinput(">>> Background fit OK [y/n] [y] ?")
                         if not answ0:
                             answ0 = 'y'
                         elif answ0 == 'no':
@@ -541,7 +541,7 @@ if __name__ == "__main__":
                 #################       Iterate Beckground    ###################################
                 if _interactive:
                     if not _numiter:
-                        answ0 = raw_input(">>> Iterate on background [y/n] [y] ?")
+                        answ0 = agnkey.util.rawinput(">>> Iterate on background [y/n] [y] ?")
                         if not answ0: answ0 = 'y'
                     elif _numiter >= 1:
                         answ0 = 'y'
@@ -571,12 +571,12 @@ if __name__ == "__main__":
                                 xbgord0 = _xbgord0
                                 ybgord0 = _ybgord0
                         else:
-                            xbgord0 = raw_input('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
+                            xbgord0 = agnkey.util.rawinput('>>> Order of function in x for bg fit [' + str(_xbgord0) + '] ? ')
                             if not xbgord0:
                                 xbgord0 = _xbgord0
                             else:
                                 _xbgord0 = xbgord0
-                            ybgord0 = raw_input('>>> Order of function in x for bg fit [' + str(_ybgord0) + '] ? ')
+                            ybgord0 = agnkey.util.rawinput('>>> Order of function in x for bg fit [' + str(_ybgord0) + '] ? ')
                             if not ybgord0:
                                 ybgord0 = _ybgord0
                             else:
@@ -599,7 +599,7 @@ if __name__ == "__main__":
                     print _numiter, _count
                     if _interactive:
                         if not _numiter:
-                            answ0 = raw_input(">>> Iterate on background [y/n] [y] ?")
+                            answ0 = agnkey.util.rawinput(">>> Iterate on background [y/n] [y] ?")
                             if not answ0: answ0 = 'y'
                         elif _count >= _numiter:
                             answ0 = 'n'
@@ -624,7 +624,7 @@ if __name__ == "__main__":
                 if not _interactive:
                     answ0 = 'n'
                 else:
-                    answ0 = raw_input(">>> Not yet happy ? Do you want to adjust manually stellar peak ? [y/n] [n] ")
+                    answ0 = agnkey.util.rawinput(">>> Not yet happy ? Do you want to adjust manually stellar peak ? [y/n] [n] ")
                     if not answ0:
                         answ0 = 'n'
                     elif answ0 == 'yes':
@@ -634,7 +634,7 @@ if __name__ == "__main__":
                     checkdm = 'yes'
                     while checkdm == 'yes':
                         if len(truemag) > 1: print "!!!! WARNING: all components scaled accordingly !!!!"
-                        _dmag0 = raw_input(">>> D(mag) adjustment (positive=fainter) [" + str(dmag0) + "]")
+                        _dmag0 = agnkey.util.rawinput(">>> D(mag) adjustment (positive=fainter) [" + str(dmag0) + "]")
                         if _dmag0: dmag0 = _dmag0
                         try:
                             float(dmag0)
@@ -649,7 +649,7 @@ if __name__ == "__main__":
                         dmag0 = newmag[0] - truemag[0]
                     except:
                         dmag0 = newmag[0]
-                    answ0 = raw_input(">>> again ? [y/n] [y] ")
+                    answ0 = agnkey.util.rawinput(">>> again ? [y/n] [y] ")
                     if not answ0:
                         answ0 = 'y'
                     elif answ0 == 'yes':
@@ -661,7 +661,7 @@ if __name__ == "__main__":
                 if not _interactive:
                     answ0 = 'n'
                 else:
-                    answ0 = raw_input(">>> Errors estimate (through artificial star experiment ?) [y/n] [y] ")
+                    answ0 = agnkey.util.rawinput(">>> Errors estimate (through artificial star experiment ?) [y/n] [y] ")
                     if not answ0:
                         answ0 = 'y'
                     elif answ0 == 'yes':
@@ -677,7 +677,7 @@ if __name__ == "__main__":
                         _arterr2, _arterr = 0.0, 0.0
 
                     if _interactive:
-                        arterr = raw_input("arterr ? [%6.6s] " % (str(_arterr)))
+                        arterr = agnkey.util.rawinput("arterr ? [%6.6s] " % (str(_arterr)))
                         if not arterr: arterr = _arterr
                     else:
                         arterr = _arterr

@@ -669,7 +669,7 @@ def fitcol(col,dmag,band,color,fissa=''):
     kid = fig.canvas.mpl_connect('key_press_event',onkeypress)
     cid = fig.canvas.mpl_connect('button_press_event',onclick)
     plt.draw()
-    raw_input('left-click mark bad, right-click unmark, <d> remove. Return to exit ...')
+    agnkey.util.rawinput('left-click mark bad, right-click unmark, <d> remove. Return to exit ...')
     plt.close()
     print('####')
     print(sigmaa,sigmab, aa,bb)

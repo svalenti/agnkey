@@ -420,7 +420,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
     if verbose:            display_image(img,1,'','',False)
     if verbose:
             iraf.tvmark(1,'STDIN',Stdin=list(apix1),mark="circle",number='no',label='no',radii=10,nxoffse=5,nyoffse=5,color=205,txsize=4)
-            raw_input('mark catalogue '+str(len(apix1)))
+            agnkey.util.rawinput('mark catalogue '+str(len(apix1)))
     else:  
 #        ss=datetime.datetime.now()
         time.sleep(.7)
@@ -451,7 +451,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
 #################################################################
     if verbose:
             iraf.tvmark(1,'STDIN',Stdin=list(apixcut),mark="circle",number='yes',label='no',radii=12,nxoffse=5,nyoffse=5,color=204,txsize=3)
-            raw_input('brightest '+str(number)+' objects')
+            agnkey.util.rawinput('brightest '+str(number)+' objects')
 
 ##############    sextractor   ##################
     if len(xpix)>=number:
@@ -466,7 +466,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
             for i in range(0,len(xpix)):
                 sexpix.append(str(xpix[i])+' '+str(ypix[i]))
             iraf.tvmark(1,'STDIN',Stdin=list(sexpix),mark="circle",number='no',label='no',radii=8,nxoffse=5,nyoffse=5,color=206,txsize=2)
-            raw_input('print sex '+str(len(sexpix)))
+            agnkey.util.rawinput('print sex '+str(len(sexpix)))
 
     xsex,ysex=array(xpix),array(ypix)
     fwsex=array(fw)
@@ -529,7 +529,7 @@ def agnastrometry2(lista,catalogue,_interactive,number,sexvec,catvec,guess=False
                 except:        rmsx,rmsy=array(string.split(string.split(_ccmap1[_ccmap1.index('Wcs mapping status')+1],':')[-1])[0:2])
                 if rmsx<2 and rmsy<2:
                     print('\n### update astrometry with non linear order') 
-#                    raw_input('go on ')
+#                    agnkey.util.rawinput('go on ')
                     _ccmap1=iraf.ccmap('STDIN','STDOUT',images=img,Stdin=vettoretran,fitgeome=fitgeo,xcolum=3, xxorder=2,\
                                        yyorder=2, ycolum=4,lngcolum=1,latcolumn=2,lngunit='degrees',update='Yes',interact='No',maxiter=3,Stdout=1)
                     xy = iraf.wcsctran('STDIN',output="STDOUT",Stdin=vettoretran,Stdout=1,image=img,inwcs='physical', outwcs='world',column="3 4",formats='%10.6f %10.6f',verbose='yes')[3:]

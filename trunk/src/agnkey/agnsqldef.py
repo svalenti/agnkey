@@ -319,7 +319,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
        tellist=[]
        for img in imglist0:
           img=os.getcwd()+'/'+img
-          answ=raw_input('do you want to ingest this files '+str(img)+' [[y]/n]?')
+          answ=agnkey.util.rawinput('do you want to ingest this files '+str(img)+' [[y]/n]?')
           if not answ: answ='y'
           if answ in ['yes','y','Y','YES','Yes']:
              hdr=readhdr(img)
@@ -385,7 +385,7 @@ def ingestdata(telescope,instrument,listepoch,_force):
                         if voce!='id' and voce!='namefile':
                            agnkey.agnsqldef.updatevalue(datarawtable,voce,dictionary[voce],string.split(img,'/')[-1])
          else:
-              raw_input('go on ? ')
+              agnkey.util.rawinput('go on ? ')
 #      else:
 #         print img+' already ingested'
 ###############################################################################################################################################

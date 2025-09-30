@@ -975,7 +975,7 @@ def getcoordfromref(img2, img1, _show, database='dataredulco'):  #img1.sn2  img2
     #    plot(ra02,dec02,'xb',markersize=10)
     #    plot(array(ra01)[pos1],array(dec01)[pos1],'3g',markersize=20)
     #    plot(array(ra02)[pos2],array(dec02)[pos2],'*m',markersize=10)
-    #    raw_input('ddd')
+    #    agnkey.util.rawinput('ddd')
     rra = ra01[pos1] - ra02[pos2]
     ddec = dec01[pos1] - dec02[pos2]
     rracut = compress((abs(array(ra02[pos2]) - float(rasn1)) < .05) & (abs(array(dec02[pos2]) - float(decsn1)) < .05),
@@ -1212,7 +1212,7 @@ def position(imglist, ra1, dec1, show=False):
                     #                        lll=str(ra00[pos1[argmin(distvec)]])+' '+str(dec00[pos1[argmin(distvec)]])
                     #                        aaa=iraf.wcsctran('STDIN','STDOUT',j,Stdin=[lll],inwcs='world',units='degrees degrees',outwcs='logical',columns='1 2',formats='%10.5f %10.5f',Stdout=1)[3]
                     #                        iraf.tvmark(1,'STDIN',Stdin=list([aaa]),mark="circle",number='yes',label='no',radii=20,nxoffse=5,nyoffse=5,color=205,txsize=2)
-                    #                        raw_input('ddd')
+                    #                        agnkey.util.rawinput('ddd')
     if show:
         from pylab import ion, plot, xlim, ylim, xlabel, ylabel, getp, setp, legend, gca
 
@@ -1247,7 +1247,7 @@ def checkcat(imglist, database='dataredulco'):
             _dir = ggg[0]['wdirectory']
             print(_dir, img)
             if os.path.isfile(_dir + re.sub('.fits', '.cat', img)):
-                aa = raw_input('>>>good catalogue [[y]/n] or [b] bad quality ? ')
+                aa = agnkey.util.rawinput('>>>good catalogue [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
                     print('updatestatus bad catalogue')
@@ -1291,7 +1291,7 @@ def checkpsf(imglist, database='dataredulco'):
                 agnkey.util.marksn2(_dir + img, _dir + re.sub('fits', 'sn2.fits', img), 1, '', True)
                 iraf.seepsf(_dir + re.sub('.fits', '.psf.fits', img), '_psf.psf')
                 iraf.surface('_psf.psf')
-                aa = raw_input('>>>good psf [[y]/n] or [b] bad quality ? ')
+                aa = agnkey.util.rawinput('>>>good psf [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
                     print('updatestatus bad')
@@ -1378,7 +1378,7 @@ def checkwcs(imglist, force=True, database='dataredulco', _z1='', _z2=''):
                 apix1 = catvec['pix']
                 iraf.tvmark(1, 'STDIN', Stdin=list(apix1), mark="circle", number='yes', label='no', radii=20, nxoffse=5,
                             nyoffse=5, color=205, txsize=2)
-            aa = raw_input('>>>good wcs [[y]/n] or [b] bad quality ? ')
+            aa = agnkey.util.rawinput('>>>good wcs [[y]/n] or [b] bad quality ? ')
             if not aa: aa = 'y'
             if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
                 print('updatestatus bad')
@@ -1535,7 +1535,7 @@ def checkclean(imglist, force=True, database='dataredulco'):
 #            iraf.display(_dir + img, 1, fill=True, Stdout=1)
 #            iraf.display(_dir + imgclean, 2, fill=True, Stdout=1)
             ###########################################
-            aa = raw_input('>>>good or bad quality [[g]/b]? ')
+            aa = agnkey.util.rawinput('>>>good or bad quality [[g]/b]? ')
             if not aa: aa = 'g'
             if aa in ['bad', 'b', 'B']:
                 agnkey.agnsqldef.updatevalue(database, 'wcs', 9999, string.split(img, '/')[-1])
@@ -1592,7 +1592,7 @@ def checkfast(imglist, force=True, database='dataredulco'):
             fig.canvas.draw()
             fig.canvas.flush_events()
             ###########################################
-            aa = raw_input('>>>good or bad quality [[g]/b]? ')
+            aa = agnkey.util.rawinput('>>>good or bad quality [[g]/b]? ')
             if not aa: aa = 'g'
             if aa in ['bad', 'b', 'B']:
                 agnkey.agnsqldef.updatevalue(database, 'wcs', 9999, string.split(img, '/')[-1])
@@ -1643,7 +1643,7 @@ def checkmag(imglist, database='dataredulco'):
                 aaa = iraf.display(_dir + re.sub('.fits', '.og.fits', img), 1, fill=True, Stdout=1)
                 print(aaa)
                 iraf.display(_dir + re.sub('.fits', '.rs.fits', img), 2, fill=True, Stdout=1)
-                aa = raw_input('>>>good mag [[y]/n] or [b] bad quality ? ')
+                aa = agnkey.util.rawinput('>>>good mag [[y]/n] or [b] bad quality ? ')
                 if not aa: aa = 'y'
                 if aa in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
                     print('updatestatus bad')
@@ -1710,7 +1710,7 @@ def checkquality(imglist, database='dataredulco'):
                 if os.path.isfile(_dir + img):
                     iraf.set(stdimage='imt8192')
                     iraf.display(_dir + img, 1, fill=True, Stdout=1)
-                    aa = raw_input('>>>good image [y/[n]] ? ')
+                    aa = agnkey.util.rawinput('>>>good image [y/[n]] ? ')
                     if not aa: aa = 'n'
                     if aa in ['n', 'N', 'No', 'NO']:
                         print('status bad')
@@ -1932,7 +1932,7 @@ def plotfast(setup, output='', database='dataredulco'):  #,band,color,fissa=''):
     kid = fig.canvas.mpl_connect('key_press_event', onkeypress2)
     if not output:
         plt.draw()
-        raw_input('press d to mark. Return to exit ...\n')
+        agnkey.util.rawinput('press d to mark. Return to exit ...\n')
         plt.close()
     else:
         plt.savefig(output + '.png', format='png')
@@ -2317,7 +2317,7 @@ def checkdiff(imglist, database='dataredulco'):
                 iraf.display(origimg, 1, fill=True, Stdout=1)
                 iraf.display(tempimg, 2, fill=True, Stdout=1)
                 iraf.display(diffimg, 3, fill=True, Stdout=1)
-                ans = raw_input('>>> good difference [[y]/n] or [b]ad quality (original image)? ')
+                ans = agnkey.util.rawinput('>>> good difference [[y]/n] or [b]ad quality (original image)? ')
                 if ans in ['n', 'N', 'No', 'NO', 'bad', 'b', 'B']:
                     print('updatestatus bad')
                     print('rm', diffimg.replace('.fits', '*'))
@@ -2350,7 +2350,7 @@ def run_remove(listfile, _filetype, _redo):
     import re
     if len(listfile)>=10:
         print(listfile)
-        answ = raw_input('are you sure you want to remove all this files ? [[y]/n] ')
+        answ = agnkey.util.rawinput('are you sure you want to remove all this files ? [[y]/n] ')
         if not answ: 
             answ = 'y'
     else:
