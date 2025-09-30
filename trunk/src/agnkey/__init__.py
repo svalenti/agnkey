@@ -1,9 +1,16 @@
-import agnkey.util 
-import agnkey.agnsqldef 
-import agnkey.agnastrodef 
-import agnkey.agnabsphotdef 
-import agnkey.agnsnoopy 
-import agnkey.sqlcl 
+print('0')
+import agnkey.util
+print('1')
+import agnkey.agnsqldef
+print('2')
+import agnkey.agnastrodef
+print('3')
+import agnkey.agnabsphotdef
+print('4')
+import agnkey.agnsnoopy
+print('5')
+import agnkey.sqlcl
+print('6')
 import agnkey.sites 
 import agnkey.agnloopdef 
 import agnkey.cosmics 

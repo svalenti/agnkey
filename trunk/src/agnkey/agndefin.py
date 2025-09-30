@@ -12,7 +12,12 @@ import numpy as np
 from matplotlib.dates import DateFormatter, MinuteLocator
 from matplotlib.font_manager import FontProperties
 import matplotlib.dates as mdates
-import StringIO
+try:
+    # this should be for python3 (not sure visibility works)
+    from io import StringIO
+except:
+    # this work in python2
+    import StringIO
 import base64
 import agnkey
 
@@ -1095,16 +1100,21 @@ def get_filtclr():
 ##############################################################################
 
 def sqlquery(db,command):
-   import MySQLdb,os,string
+   import os,string
+   try:
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
+       
    lista=''
    try:
-       cursor = db.cursor(MySQLdb.cursors.DictCursor)
+       cursor = db.cursor(sql.cursors.DictCursor)
        cursor.execute(command)
        lista = cursor.fetchall()
        if cursor.rowcount == 0:
            pass
        cursor.close()
-   except (MySQLdb.Error, e): 
+   except (sql.Error, e): 
        lista = "Error %d: %s" % (e.args[0], e.args[1])
        print(lista)
    return lista

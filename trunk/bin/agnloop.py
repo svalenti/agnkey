@@ -278,22 +278,22 @@ if __name__ == "__main__":
             ll0['ra'] = ll0['ra0'][:]
             ll0['dec'] = ll0['dec0'][:]
             ll = agnkey.agnloopdef.filtralist(ll0, _filter, _id, _name, _ra, _dec, _bad, _filetype)
-            print '##' * 50
-            print "# IMAGE                                  OBJECT           FILTER           WCS           PSF   " + \
-                  "        PSFMAG    APMAG       ZCAT          MAG      ABSCAT"
+            print('##' * 50)
+            print("# IMAGE                                  OBJECT           FILTER           WCS           PSF   " + \
+                  "        PSFMAG    APMAG       ZCAT          MAG      ABSCAT")
             for i in range(0, len(ll['namefile'])):
                 try:
-                    print '%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
+                    print('%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
                           (str(re.sub('.fits', '', ll['namefile'][i])), str(ll['objname'][i]), str(ll['filter'][i]),
                            str(ll['wcs'][i]), str(re.sub('.fits', '', ll['psf'][i])),
                            str(round(ll['psfmag'][i], 4)), str(ll['apmag'][i]), str(re.sub('.cat', '', ll['zcat'][i])),
-                           str(round(ll['mag'][i], 4)), str(re.sub('.cat', '', ll['abscat'][i])))
+                           str(round(ll['mag'][i], 4)), str(re.sub('.cat', '', ll['abscat'][i]))))
                 except:
-                    print '%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
+                    print('%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
                           (str(ll['namefile'][i]), str(ll['objname'][i]), str(ll['filter'][i]), str(ll['wcs'][i]),
                            str(ll['psf'][i]), str(ll['psfmag'][i]), str(ll['apmag'][i]), str(ll['zcat'][i]),
-                           str(ll['mag'][i]), str(ll['abscat'][i]))
-            print '\n###  total number = ' + str(len(ll['namefile']))
+                           str(ll['mag'][i]), str(ll['abscat'][i])))
+            print('\n###  total number = ' + str(len(ll['namefile'])))
             # ####################################
             if _stage == 'local':  # calibrate local sequence from .cat files
                 agnkey.agnloopdef.run_local(ll['namefile'], _field, _interactive)
@@ -480,11 +480,11 @@ if __name__ == "__main__":
 
 
         else:
-            print '\n### no data selected'
+            print('\n### no data selected')
     # ################################################
     else:
         for epo in listepoch:
-            print '\n#### ' + str(epo)
+            print('\n#### ' + str(epo))
             lista = agnkey.agnsqldef.getlistfromraw(agnkey.agnsqldef.conn, _table, 'dateobs', str(epo), '', '*',
                                                     _telescope)
             if lista:
@@ -503,13 +503,13 @@ if __name__ == "__main__":
                 ll = agnkey.agnloopdef.filtralist(ll0, _filter, _id, _name, _ra, _dec, _bad, _filetype)
                 if len(ll['namefile']) > 0:
                     for i in range(0, len(ll['namefile'])):
-                        print '%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
+                        print('%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
                               (str(ll['namefile'][i]), str(ll['objname'][i]), str(ll['filter'][i]), str(ll['wcs'][i]),
                                str(ll['psf'][i]), str(ll['psfmag'][i]), str(ll['zcat'][i]), str(ll['mag'][i]),
-                               str(ll['abscat'][i]))
-                    print '\n###  total number = ' + str(len(ll['namefile']))
+                               str(ll['abscat'][i])))
+                    print('\n###  total number = ' + str(len(ll['namefile'])))
                 if _stage and len(ll['namefile']) > 0:
-                    print '##' * 50
+                    print('##' * 50)
                     ll3 = {}
                     for ii in ll.keys():       
                         ll3[ii] = ll[ii]
@@ -566,22 +566,22 @@ if __name__ == "__main__":
                                                            _color, _interactive, _redo, _show, _cutmag, _table,
                                                            _calib)
                         else:
-                            print 'warning: field not defined, zeropoint not computed'
+                            print('warning: field not defined, zeropoint not computed')
 
                     elif _stage == 'abscat':  # compute magnitudes for sequence stars > img.cat
                         if _standard:
                             mm = agnkey.agnloopdef.filtralist(ll0, _filter, '', _standard, '', '', '', _filetype)
                             if len(mm['namefile']) > 0:
                                 for i in range(0, len(mm['namefile'])):
-                                    print '%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
+                                    print('%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
                                           (str(mm['namefile'][i]), str(mm['objname'][i]), str(mm['filter'][i]),
                                            str(mm['wcs'][i]), str(mm['psf'][i]),
                                            str(mm['psfmag'][i]), str(mm['zcat'][i]), str(mm['mag'][i]),
-                                           str(mm['abscat'][i]))
+                                           str(mm['abscat'][i])))
                                 agnkey.agnloopdef.run_cat(ll3['namefile'], mm['namefile'], _interactive, 1, _type, _fix,
                                                           _table, _field)
                             else:
-                                print '\n### warning : standard not found for this night ' + str(epo)
+                                print('\n### warning : standard not found for this night ' + str(epo))
                         else:
                             agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 1, _type, _fix, _table,
                                                       _field)
@@ -590,15 +590,15 @@ if __name__ == "__main__":
                             mm = agnkey.agnloopdef.filtralist(ll0, _filter, '', _standard, '', '', '', _filetype)
                             if len(mm['namefile']) > 0:
                                 for i in range(0, len(mm['namefile'])):
-                                    print '%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
+                                    print('%s\t%12s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s' % \
                                           (str(mm['namefile'][i]), str(mm['objname'][i]), str(mm['filter'][i]),
                                            str(mm['wcs'][i]), str(mm['psf'][i]),
                                            str(mm['psfmag'][i]), str(mm['zcat'][i]), str(mm['mag'][i]),
-                                           str(mm['abscat'][i]))
+                                           str(mm['abscat'][i])))
                                 agnkey.agnloopdef.run_cat(ll3['namefile'], mm['namefile'], _interactive, 2, _type,
                                                           False, _table, _field)
                             else:
-                                print '\n### error: standard not found for this night' + str(epo)
+                                print('\n### error: standard not found for this night' + str(epo))
                         else:
                             agnkey.agnloopdef.run_cat(ll3['namefile'], '', _interactive, 2, _type, False, _table,
                                                       _field)
@@ -611,6 +611,6 @@ if __name__ == "__main__":
                                                        _ra, _dec, _psf, _mag, _clean, _subtract_mag_from_header)
                         #agnkey.agnloopdef.run_template(array(listfile), _show, _redo)
                     else:
-                        print _stage + ' not defined'
+                        print(_stage + ' not defined')
             else:
-                print '\n### no data selected'
+                print('\n### no data selected')

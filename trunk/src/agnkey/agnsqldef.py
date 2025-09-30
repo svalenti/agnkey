@@ -1,4 +1,12 @@
 import numpy as np
+import sys
+
+pyversion = sys.version_info[0]
+
+if pyversion <3:
+    import htmCircle
+else:
+    import gkhtm._gkhtm as htmCircle
 
 ####################################################
 
@@ -15,14 +23,19 @@ def getconnection(site):
 
 def dbConnect(lhost, luser, lpasswd, ldb):
    import sys
-   import MySQLdb,os,string
+   import os,string
    try:
-      conn = MySQLdb.connect (host = lhost,
+      import MySQLdb as sql
+   except:
+      import pymysql as sql
+   
+   try:
+      conn = sql.connect (host = lhost,
                               user = luser,
                             passwd = lpasswd,
                                 db = ldb)
       conn.autocommit(True)
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return conn
@@ -30,18 +43,23 @@ def dbConnect(lhost, luser, lpasswd, ldb):
 try:
    hostname, username, passwd, database=getconnection('agnkey')
    conn = dbConnect(hostname, username, passwd, database)
-except:
+except Exception as e:
    conn=''
+   print(e)
    print('\### warning: problem with the database')
 
 ########################################################################
 
 def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
    import sys
-   import MySQLdb,os,string
-   print( epoch0, epoch2,telescope)
+   import os,string
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
+
+   try:
+      cursor = conn.cursor (sql.cursors.DictCursor)
       if telescope =='all':
          if epoch2:
             cursor.execute ("select raw.namefile from datarawlco raw where "+\
@@ -76,22 +94,26 @@ def getmissing(conn, epoch0, epoch2,telescope,datatable='dataredulco'):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
 
 def getfromdataraw(conn, table, column, value,column2='*'):
    import sys
-   import MySQLdb,os,string
+   import os,string
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
+   try:
+      cursor = conn.cursor (sql.cursors.DictCursor)
       cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"="+"'"+value+"'")
       resultSet = cursor.fetchall ()
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -99,9 +121,13 @@ def getfromdataraw(conn, table, column, value,column2='*'):
 
 def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all'):
    import sys
-   import MySQLdb,os,string
+   import os,string
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
+   try:
+      cursor = conn.cursor (sql.cursors.DictCursor)
       if telescope=='all':
          if value2:
             cursor.execute ("select "+column2+" from "+str(table)+" where "+column+"<="+"'"+value2+"' and "+column+">="+"'"+value1+"'")
@@ -121,7 +147,7 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e): 
+   except (sql.Error, e): 
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -130,7 +156,11 @@ def getlistfromraw(conn, table, column, value1,value2,column2='*',telescope='all
 
 def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namefile'):
    import sys
-   import MySQLdb,os,string
+   import os,string
+   try:
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
    import agnkey
 
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection(connection)
@@ -138,7 +168,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
    conn.autocommit(True)
 
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+      cursor = conn.cursor (sql.cursors.DictCursor)
       if value in [True,False,'NULL',None]:
          cursor.execute ("UPDATE "+str(table)+" set "+column+"="+str(value)+" where "+str(namefile0)+"= "+"'"+str(namefile)+"'"+"   ")
       else:
@@ -147,7 +177,7 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
 #      sys.exit (1)
 
@@ -155,30 +185,35 @@ def updatevalue(table,column,value,namefile,connection='agnkey',namefile0='namef
 
 def insert_values(conn,table,values):
     import sys,string,os,re
-    import MySQLdb,os,string
+    import os,string
+    try:
+       import MySQLdb as sql
+    except:
+       import pymysql as sql
+       
     def dictValuePad(key):
         return '%(' + str(key) + ')s'
 
     def insertFromDict(table, dict):
         """Take dictionary object dict and produce sql for 
         inserting it into the named table"""
-        sql = 'INSERT INTO ' + table
-        sql += ' ('
-        sql += ', '.join(dict)
-        sql += ') VALUES ('
-        sql += ', '.join(map(dictValuePad, dict))
-        sql += ');'
-        return sql
+        sql2 = 'INSERT INTO ' + table
+        sql2 += ' ('
+        sql2 += ', '.join(dict)
+        sql2 += ') VALUES ('
+        sql2 += ', '.join(map(dictValuePad, dict))
+        sql2 += ');'
+        return sql2
 
-    sql = insertFromDict(table, values)
+    sql2 = insertFromDict(table, values)
     try:
-        cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+        cursor = conn.cursor (sql.cursors.DictCursor)
         cursor.execute(sql, values)
         resultSet = cursor.fetchall ()
         if cursor.rowcount == 0:
             pass
         cursor.close ()
-    except (MySQLdb.Error, e):
+    except (sql.Error, e):
         print("Error %d: %s" % (e.args[0], e.args[1]))
 #        sys.exit (1)
 
@@ -479,7 +514,7 @@ def ingestredu(_telescope,_instrument,imglist,force='no',datatable='dataredulco'
 
 def getvaluefromarchive(table,column,value,column2):
    import sys
-   import MySQLdb,os,string
+   import os,string
    import agnkey
    #from mysqldef import dbConnect, getfromdataraw, getconnection
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
@@ -494,20 +529,24 @@ def getvaluefromarchive(table,column,value,column2):
 
 def deleteredufromarchive(namefile,archive='dataredulco',column='namefile'):
    import sys
-   import MySQLdb,os,string
+   import os,string
+   try:
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
    import agnkey
 #   from mysqldef import dbConnect, getfromdataraw, getconnection
    hostname, username, passwd, database=agnkey.agnsqldef.getconnection('agnkey')
    conn = agnkey.agnsqldef.dbConnect(hostname, username, passwd, database)
 #######
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+      cursor = conn.cursor (sql.cursors.DictCursor)
       cursor.execute ("delete  from "+str(archive)+" where "+str(column)+"="+"'"+namefile+"'")
       resultSet = cursor.fetchall ()
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -516,7 +555,11 @@ def deleteredufromarchive(namefile,archive='dataredulco',column='namefile'):
 
 def getfromcoordinate(conn, table, ra0, dec0,distance):
    import sys
-   import MySQLdb,os,string
+   import os,string
+   try:
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
    if table=='lsc_sn_pos':
       ra1='ra_sn'
       dec1='dec_sn'
@@ -524,7 +567,7 @@ def getfromcoordinate(conn, table, ra0, dec0,distance):
       ra1='ra0'
       dec1='dec0'
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+      cursor = conn.cursor (sql.cursors.DictCursor)
       command=["set @sc = pi()/180","set @ra = "+str(ra0), "set @dec = "+str(dec0),"set @distance = "+str(distance),"SELECT *,abs(2*asin( sqrt( sin((a.dec_sn-@dec)*@sc/2)*sin((a.dec_sn-@dec)*@sc/2) + cos(a.dec_sn*@sc)*cos(@dec*@sc)*sin((a.ra_sn-@ra)*@sc/2)*sin((a.ra_sn-@ra)*@sc/2.0) )))*180/pi() as hsine FROM "+str(table)+" as a HAVING hsine<@distance order by a.ra_sn desc"]
       for ccc in command:
          cursor.execute (ccc)
@@ -532,7 +575,7 @@ def getfromcoordinate(conn, table, ra0, dec0,distance):
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -635,15 +678,19 @@ def getsky(data):
 
 def getlike(conn, table, column, value,column2='*'):
    import sys
-   import MySQLdb,os,string
+   import os,string
    try:
-      cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
+   try:
+      cursor = conn.cursor (sql.cursors.DictCursor)
       cursor.execute ("select "+column2+" from "+str(table)+" where "+column+" like "+"'%"+value+"%'")
       resultSet = cursor.fetchall ()
       if cursor.rowcount == 0:
          pass
       cursor.close ()
-   except (MySQLdb.Error, e):
+   except (sql.Error, e):
       print("Error %d: %s" % (e.args[0], e.args[1]))
       sys.exit (1)
    return resultSet
@@ -651,19 +698,23 @@ def getlike(conn, table, column, value,column2='*'):
 ##################################################################
 
 def query(command):
-   import MySQLdb,os,string
+   import os,string
+   try:
+       import MySQLdb as sql
+   except:
+       import pymysql as sql
    lista=''
    import agnkey
    from agnkey.agnsqldef import conn
    try:
-        cursor = conn.cursor (MySQLdb.cursors.DictCursor)
+        cursor = conn.cursor (sql.cursors.DictCursor)
         for i in command:
             cursor.execute (i)
             lista = cursor.fetchall ()
             if cursor.rowcount == 0:
                 pass
         cursor.close ()
-   except (MySQLdb.Error, e): 
+   except (sql.Error, e): 
         print("Error %d: %s" % (e.args[0], e.args[1]))
    return lista
 
